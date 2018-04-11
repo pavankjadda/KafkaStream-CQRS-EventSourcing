@@ -15,11 +15,37 @@ spring:
               value:
                 serde:  org.apache.kafka.common.serialization.Serdes$StringSerde
       bindings:
+        customers-in:
+          destination: customer
+          contentType: application/json
+          group: greetings_group
+          consumer:
+            header-mode: raw
+        customers-out:
+          destination: customer
+          contentType: application/json
+          group: greetings_group
+          consumer:
+            header-mode: raw
+
+        orders-in:
+          destination: order
+          contentType: application/json
+          group: greetings_group
+          producer:
+            header-mode: raw
+        orders-out:
+          destination: order
+          contentType: application/json
+          group: greetings_group
+          producer:
+            header-mode: raw
+
         greetings-in:
           destination: greetings
           contentType: application/json
           group: greetings_group
-          consumer:
+          producer:
             header-mode: raw
         greetings-out:
           destination: greetings
@@ -27,5 +53,7 @@ spring:
           group: greetings_group
           producer:
             header-mode: raw
+
+
 server:
   port: ${PORT:8090}
