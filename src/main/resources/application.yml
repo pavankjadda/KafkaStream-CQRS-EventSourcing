@@ -18,26 +18,26 @@ spring:
         customers-in:
           destination: customer
           contentType: application/json
-          group: greetings_group
+          group: customers_group
           consumer:
             header-mode: raw
         customers-out:
           destination: customer
           contentType: application/json
-          group: greetings_group
+          group: customers_group
           consumer:
             header-mode: raw
 
         orders-in:
           destination: order
           contentType: application/json
-          group: greetings_group
+          group: orders_group
           producer:
             header-mode: raw
         orders-out:
           destination: order
           contentType: application/json
-          group: greetings_group
+          group: orders_group
           producer:
             header-mode: raw
 

@@ -27,7 +27,7 @@ public class EventsController
 
     @GetMapping("/greetings")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public Greetings send()
+    public Greetings sendGreetings()
     {
         Random  random=new Random();
         String message = "Message "+random.nextInt();
@@ -36,6 +36,35 @@ public class EventsController
         return greetings;
     }
 
+    @GetMapping("/customers")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public Customer sendCustomers()
+    {
+        //Send Customer Event
+        Customer customer=new Customer();
+        customer.setCustomerId("CU1001");
+        customer.setFirstName("John");
+        customer.setLastName("Doe");
+        customer.setEmail("john.doe@gmail.com");
+        customer.setPhone("993-332-9832");
+        eventsSender.sendCustomerEvent(customer);
+        return customer;
+    }
+
+    @GetMapping("/orders")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public Order sendOrders()
+    {
+        //Send Order Event
+        Order order=new Order();
+        order.setOrderId("ORD1001");
+        order.setCustomerId("CU1001");
+        order.setOrderItemName("Reebok Shoes");
+        order.setOrderPlace("NewYork,NY");
+        order.setOrderPurchaseTime(getCurrentTime());
+        eventsSender.sendOrderEvent(order);
+        return order;
+    }
 
     @GetMapping("/sendevents")
     @ResponseStatus(HttpStatus.ACCEPTED)
