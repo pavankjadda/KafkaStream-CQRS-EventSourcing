@@ -27,3 +27,5 @@ spring:
           group: greetings_group
           producer:
             header-mode: raw
+server:
+  port: ${PORT:8090}

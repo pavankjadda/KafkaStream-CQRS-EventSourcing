@@ -8,7 +8,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Calendar;
 import java.util.Random;
+import java.util.TimeZone;
 
 @RestController
 public class GreetingsController
@@ -22,8 +24,14 @@ public class GreetingsController
     {
         Random  random=new Random();
         String message = "Message "+random.nextInt();
-        Greetings greetings = new Greetings(message,System.currentTimeMillis());
+        Greetings greetings = new Greetings(message,getCurrentTime());
         greetingsSender.send(greetings);
         return greetings;
+    }
+
+    private String getCurrentTime()
+    {
+        Calendar calendar=Calendar.getInstance(TimeZone.getDefault());
+        return calendar.getTime().toString();
     }
 }

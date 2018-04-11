@@ -3,25 +3,25 @@ package com.kafkastream.model;
 
 public class Greetings
 {
-    private long timestamp;
+    private String timestamp;
     private String message;
 
     public Greetings()
     {
     }
 
-    public Greetings(String message,long timestamp)
+    public Greetings(String message,String timestamp)
     {
         this.timestamp = timestamp;
         this.message = message;
     }
 
-    public long getTimestamp()
+    public String getTimestamp()
     {
         return timestamp;
     }
 
-    public void setTimestamp(long timestamp)
+    public void setTimestamp(String timestamp)
     {
         this.timestamp = timestamp;
     }
