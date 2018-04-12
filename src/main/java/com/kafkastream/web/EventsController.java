@@ -19,6 +19,8 @@ public class EventsController
 {
     private EventsSender eventsSender;
 
+    Random  random=new Random(1);
+
     @Autowired
     public EventsController(EventsSender    eventsSender)
     {
@@ -29,7 +31,7 @@ public class EventsController
     @ResponseStatus(HttpStatus.ACCEPTED)
     public Greetings sendGreetings()
     {
-        Random  random=new Random();
+        Random  random=new Random(1);
         String message = "Message "+random.nextInt();
         Greetings greetings = new Greetings(message,getCurrentTime());
         eventsSender.sendGreetingsEvent(greetings);
@@ -57,7 +59,7 @@ public class EventsController
     {
         //Send Order Event
         Order order=new Order();
-        order.setOrderId("ORD1001");
+        order.setOrderId("ORD"+random.nextInt());
         order.setCustomerId("CU1001");
         order.setOrderItemName("Reebok Shoes");
         order.setOrderPlace("NewYork,NY");
@@ -71,7 +73,6 @@ public class EventsController
     public void sendAllEvents()
     {
         //Send Greetings event
-        Random random=new Random();
         String message = "Message "+random.nextInt();
         Greetings greetings = new Greetings(message,getCurrentTime());
         eventsSender.sendGreetingsEvent(greetings);
@@ -87,7 +88,7 @@ public class EventsController
 
         //Send Order Event
         Order order=new Order();
-        order.setOrderId("ORD1001");
+        order.setOrderId("ORD"+random.nextInt());
         order.setCustomerId("CU1001");
         order.setOrderItemName("Reebok Shoes");
         order.setOrderPlace("NewYork,NY");
@@ -100,4 +101,5 @@ public class EventsController
         Calendar calendar=Calendar.getInstance(TimeZone.getDefault());
         return calendar.getTime().toString();
     }
+
 }

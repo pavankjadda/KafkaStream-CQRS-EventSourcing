@@ -1,21 +1,16 @@
 package com.kafkastream.service;
 
 import com.kafkastream.model.Customer;
-import com.kafkastream.model.Greetings;
 import com.kafkastream.model.Order;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.common.serialization.Serdes;
-import org.apache.kafka.streams.KafkaStreams;
-import org.apache.kafka.streams.StreamsBuilder;
-import org.apache.kafka.streams.StreamsConfig;
-import org.apache.kafka.streams.Topology;
-import org.apache.kafka.streams.kstream.ForeachAction;
-import org.apache.kafka.streams.kstream.KStream;
-import org.apache.kafka.streams.kstream.KTable;
-import org.springframework.stereotype.Component;
+import org.apache.kafka.streams.*;
+import org.apache.kafka.streams.kstream.*;
+import org.apache.kafka.streams.state.QueryableStoreTypes;
+import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
 
 import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 
 public class EventsListener
@@ -28,47 +23,92 @@ public class EventsListener
 
     public static void main(String[] args)
     {
-        //SpringApplication.run(KafkaStreamApplication.class, args);
-        //Copied from GreetingsEventSink method
-        Properties properties=new Properties();
-        properties.put(StreamsConfig.APPLICATION_ID_CONFIG,"streams-greetings");
-        properties.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG,"localhost:9092");
-        properties.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG,Serdes.String().getClass());
-        properties.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG,Serdes.String().getClass());
+        Properties properties = new Properties();
+        properties.put(StreamsConfig.APPLICATION_ID_CONFIG, "streams-greetings");
+        properties.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+        properties.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass());
+        properties.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass());
 
-        StreamsBuilder streamsBuilder=new StreamsBuilder();
+        StreamsBuilder streamsBuilder = new StreamsBuilder();
 
+/*
+        KStream<String, String> customerKStream = streamsBuilder.stream("customer");
+        customerKStream.foreach(((key, value) -> System.out.println("Customer from Topic: " + value)));
 
-        KStream<String, String> customerKStream =streamsBuilder.stream("customer");
-        customerKStream.foreach(((key, value) -> System.out.println("Customer from Topic: "+value.toLowerCase())));
-
-        KStream<String, String> orderKStream =streamsBuilder.stream("order");
-        orderKStream.foreach(((key, value) -> System.out.println("Order from Topic: "+value.toLowerCase())));
-
-
-//        KTable<String,Customer> customerKTable=streamsBuilder.table("customer");
-//        customerKTable.foreach(((key, value) -> System.out.println("Customer from KTable: "+value)));
-//        KTable<String,Order>   orderKTable=streamsBuilder.table("order");
-//        orderKTable.foreach(((key, value) -> System.out.println("Order from KTable: "+value)));
-//
-//        KTable<String,Object>   customerOrdersKTable=orderKTable.leftJoin(customerKTable,(order,customer)-> order.getCustomerId()==customer.getCustomerId());
-//        customerOrdersKTable.foreach(((key, value) -> System.out.println("Join Table Value: "+value)));
+        KStream<String, String> orderKStream = streamsBuilder.stream("order");
+        orderKStream.foreach(((key, value) -> System.out.println("Order from Topic: " + value)));
+        long joinWindowSizeMs = 5L * 60L * 1000L; // 5 minutes
+        long windowRetentionTimeMs = 30L * 24L * 60L * 60L * 1000L; // 30 days
 
 
-        Topology topology=streamsBuilder.build();
+        // Java 8
+        KStream<String, String> customersOrders = customerKStream.leftJoin(orderKStream,(customer,order)->customer+" "+order,
+                JoinWindows.of(TimeUnit.MINUTES.toMillis(5)),
+                Joined.with(
+                        Serdes.String(),
+                        Serdes.String(),
+                        Serdes.String())
+        );*/
+
+
+        // Java 7 example
+/*        KStream<String, String> customersOrders = customerKStream.leftJoin(orderKStream,
+                new ValueJoiner<String, String, String>() {
+                    @Override
+                    public String apply(String leftValue, String rightValue) {
+                        return "left=" + leftValue + ", right=" + rightValue;
+                    }
+                },
+                JoinWindows.of(TimeUnit.MINUTES.toMillis(5)),
+                Joined.with(
+                        Serdes.String(), *//* key *//*
+                        Serdes.String(),   *//* left value *//*
+                        Serdes.String())  *//* right value *//*
+        );*/
+
+
+        //customersOrders.foreach(((key, value) -> System.out.println("Order from customersOrders: " + value)));
+
+
+        KTable<String,String>   customerKTable=streamsBuilder.table("customer",Consumed.with(Topology.AutoOffsetReset.EARLIEST),Materialized.as("customer-store"));
+        //System.out.println("Store Name: " + customerKTable.queryableStoreName());
+        customerKTable.foreach(((key, value) -> System.out.println("Customer from Topic: " + value)));
+
+
+
+        /* KTable<String,String> orderKTable=streamsBuilder.table("order");
+        orderKTable.foreach(((key, value) -> System.out.println("Order from KTable: "+value)));
+        orderKTable.filter(((key, value) -> value!=null));
+
+        KTable<String,String>   customerKTable=streamsBuilder.table("customer");
+        customerKTable.foreach(((key, value) -> System.out.println("Customer from KTable: "+value)));
+
+        KTable<String,String>   customerOrdersKTable=orderKTable.leftJoin(customerKTable,(order,customer)-> order+" and "+customer);
+        customerOrdersKTable.foreach(((key, value) -> System.out.println("customerOrders : "+value)));*/
+
+        Topology topology = streamsBuilder.build();
         KafkaStreams streams = new KafkaStreams(topology, properties);
         CountDownLatch latch = new CountDownLatch(1);
+        streams.start();
+
+        ReadOnlyKeyValueStore<String, Long> keyValueStore =streams.store("customer-store", QueryableStoreTypes.keyValueStore());
+        System.out.println("Customer from customer for hello:" + keyValueStore.get("customerId"));
+
+
 
         Runtime.getRuntime().addShutdownHook(new Thread("streams-shutdown-hook")
         {
             @Override
-            public void run() {
+            public void run()
+            {
                 streams.close();
                 latch.countDown();
             }
         });
 
-        try {
+        // This is not part of Runtime.getRuntime() block
+        try
+        {
             streams.start();
             latch.await();
         }
