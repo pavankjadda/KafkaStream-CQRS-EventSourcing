@@ -2,11 +2,16 @@ package com.kafkastream.service;
 
 import com.kafkastream.model.Customer;
 import com.kafkastream.model.Order;
+import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
+import org.apache.kafka.common.utils.Bytes;
 import org.apache.kafka.streams.*;
 import org.apache.kafka.streams.kstream.*;
+import org.apache.kafka.streams.processor.StateStoreSupplier;
+import org.apache.kafka.streams.state.KeyValueStore;
 import org.apache.kafka.streams.state.QueryableStoreTypes;
 import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
+import org.apache.kafka.streams.state.Stores;
 
 import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
@@ -70,31 +75,23 @@ public class EventsListener
         //customersOrders.foreach(((key, value) -> System.out.println("Order from customersOrders: " + value)));
 
 
-        KTable<String,String>   customerKTable=streamsBuilder.table("customer",Consumed.with(Topology.AutoOffsetReset.EARLIEST),Materialized.as("customer-store"));
+     /*   KTable<String,String>   customerKTable=streamsBuilder.table("customer",Consumed.with(Topology.AutoOffsetReset.EARLIEST),Materialized.as("customer-store"));
         //System.out.println("Store Name: " + customerKTable.queryableStoreName());
-        customerKTable.foreach(((key, value) -> System.out.println("Customer from Topic: " + value)));
+        customerKTable.foreach(((key, value) -> System.out.println("Customer from Topic: " + value)));*/
+
+        KTable<String,String> orderKTable=streamsBuilder.table("order");
+        orderKTable.foreach(((key, value) -> System.out.println("Order from Topic: "+value)));
+
+        KTable<String,String>   customerKTable = streamsBuilder.table("customer",Materialized.as("customer-store"));
+        customerKTable.foreach(((key, value) -> System.out.println("Retrieved Customer from Topic: " + value)));
 
 
-
-        /* KTable<String,String> orderKTable=streamsBuilder.table("order");
-        orderKTable.foreach(((key, value) -> System.out.println("Order from KTable: "+value)));
-        orderKTable.filter(((key, value) -> value!=null));
-
-        KTable<String,String>   customerKTable=streamsBuilder.table("customer");
-        customerKTable.foreach(((key, value) -> System.out.println("Customer from KTable: "+value)));
-
-        KTable<String,String>   customerOrdersKTable=orderKTable.leftJoin(customerKTable,(order,customer)-> order+" and "+customer);
-        customerOrdersKTable.foreach(((key, value) -> System.out.println("customerOrders : "+value)));*/
-
+        /*KTable<String,String>   customerOrdersKTable=orderKTable.leftJoin(customerKTable,(order,customer)-> order+" and "+customer);
+        customerOrdersKTable.foreach(((key, value) -> System.out.println("customerOrders : "+value)));
+*/
         Topology topology = streamsBuilder.build();
         KafkaStreams streams = new KafkaStreams(topology, properties);
         CountDownLatch latch = new CountDownLatch(1);
-        streams.start();
-
-        ReadOnlyKeyValueStore<String, Long> keyValueStore =streams.store("customer-store", QueryableStoreTypes.keyValueStore());
-        System.out.println("Customer from customer for hello:" + keyValueStore.get("customerId"));
-
-
 
         Runtime.getRuntime().addShutdownHook(new Thread("streams-shutdown-hook")
         {
