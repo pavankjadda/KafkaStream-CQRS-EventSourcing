@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Properties;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 
@@ -35,45 +36,41 @@ public class EventsSender
         properties.put("application.id", InetAddress.getLocalHost().getHostName());
         properties.put("bootstrap.servers", "localhost:9092");
         properties.put("acks", "all");
-        properties.put("retries", 0);
+        properties.put("retries", 5);
         properties.put("batch.size", 16384);
         properties.put("linger.ms", 1);
         properties.put("buffer.memory", 33554432);
+
         properties.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
         properties.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
 
         kafkaProducer = new KafkaProducer<String, String>(properties);
     }
 
-    public void sendGreetingsEvent(Greetings greetings)
+    public void sendGreetingsEvent(Greetings greetings) throws ExecutionException, InterruptedException
     {
         ProducerRecord<String, String> greetingsRecord = new ProducerRecord<>("greetings", greetings.getMessage(), greetings.toString());
         Future<RecordMetadata> future = kafkaProducer.send(greetingsRecord);
-/*
-        GreetingsEvent greetingsEvent = new GreetingsEvent(greetings, greetings.getMessage());
-        Message<Greetings> message = MessageBuilder.withPayload(greetings).setHeader(MessageHeaders.CONTENT_TYPE, MimeTypeUtils.APPLICATION_JSON).build();
-        genericStreams.outgoingGreetings().send(message);*/
+        System.out.println("Greetings record Sent. Greetings message: "+greetings.getMessage());
+        System.out.println("Greetings future.get(): "+future.get());
+
     }
 
 
-    public void sendCustomerEvent(Customer customer)
+    public void sendCustomerEvent(Customer customer) throws ExecutionException, InterruptedException
     {
         ProducerRecord<String, String> customerRecord = new ProducerRecord<>("customer", customer.getCustomerId(), customer.toString());
         Future<RecordMetadata> future = kafkaProducer.send(customerRecord);
-/*
-        CustomerEvent customerEvent = new CustomerEvent(customer, customer.getCustomerId());
-        Message<Customer> message = MessageBuilder.withPayload(customer).setHeader(MessageHeaders.CONTENT_TYPE, MimeTypeUtils.APPLICATION_JSON).build();
-        genericStreams.outgoingCustomers().send(message);*/
+        System.out.println("Customer record sent. Customer Id: "+customer.getCustomerId());
+        System.out.println("Customer future.get(): "+future.get());
     }
 
-    public void sendOrderEvent(Order order)
+    public void sendOrderEvent(Order order) throws ExecutionException, InterruptedException
     {
         ProducerRecord<String, String> orderRecord = new ProducerRecord<>("order", order.getOrderId(), order.toString());
         Future<RecordMetadata> future = kafkaProducer.send(orderRecord);
-
-/*        OrderEvent orderEvent = new OrderEvent(order, order.getOrderId());
-        Message<Order> message = MessageBuilder.withPayload(order).setHeader(MessageHeaders.CONTENT_TYPE, MimeTypeUtils.APPLICATION_JSON).build();
-        genericStreams.outgoingOrders().send(message);*/
+        System.out.println("Customer order sent. Order Id: "+order.getOrderId());
+        System.out.println("Order future.get(): "+future.get());
     }
 
 

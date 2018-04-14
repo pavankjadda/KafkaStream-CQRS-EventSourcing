@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Calendar;
 import java.util.Random;
 import java.util.TimeZone;
+import java.util.concurrent.ExecutionException;
 
 @RestController
 public class EventsController
@@ -29,7 +30,7 @@ public class EventsController
 
     @GetMapping("/greetings")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public Greetings sendGreetings()
+    public Greetings sendGreetings() throws ExecutionException, InterruptedException
     {
         Random  random=new Random(1);
         String message = "Message "+random.nextInt();
@@ -40,11 +41,11 @@ public class EventsController
 
     @GetMapping("/customers")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public Customer sendCustomers()
+    public Customer sendCustomers() throws ExecutionException, InterruptedException
     {
         //Send Customer Event
         Customer customer=new Customer();
-        customer.setCustomerId("CU1001");
+        customer.setCustomerId("CU"+random.nextInt());
         customer.setFirstName("John");
         customer.setLastName("Doe");
         customer.setEmail("john.doe@gmail.com");
@@ -55,7 +56,7 @@ public class EventsController
 
     @GetMapping("/orders")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public Order sendOrders()
+    public Order sendOrders() throws ExecutionException, InterruptedException
     {
         //Send Order Event
         Order order=new Order();
@@ -70,7 +71,7 @@ public class EventsController
 
     @GetMapping("/sendevents")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public void sendAllEvents()
+    public void sendAllEvents() throws ExecutionException, InterruptedException
     {
         //Send Greetings event
         String message = "Message "+random.nextInt();
