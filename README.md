@@ -1,6 +1,6 @@
 # CQRS with Event Sourcing with Kafka Streaming
 ## What's this?
-This repository demonstrates Kafka Streams implementation ([not Kafka messaging](https://github.com/pavankjadda/SpringCloudStream-Kafka))using Spring Cloud Stream. 
+This repository demonstrates Kafka Streams implementation ([not Kafka messaging](https://github.com/pavankjadda/SpringCloudStream-Kafka))
 
 ## How to Run?
 1. Run [Zookeeper and Kafka](https://www.tutorialspoint.com/apache_kafka/apache_kafka_installation_steps.htm) first
