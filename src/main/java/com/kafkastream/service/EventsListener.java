@@ -38,15 +38,14 @@ public class EventsListener
         properties.put(StreamsConfig.APPLICATION_ID_CONFIG, "streams-greetings");
         properties.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
         properties.put("auto.offset.reset", "earliest");
-        properties.put("group.id", "test");
+        properties.put("group.id", "customers_group");
         properties.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass());
         properties.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass());
 
         StreamsBuilder streamsBuilder = new StreamsBuilder();
 
 
-        KStream<String, String> customerKStream = streamsBuilder.stream("customer",Consumed.with(Topology.AutoOffsetReset.EARLIEST)
-                                                                                                    .with(Serdes.String(), Serdes.String()));
+        KStream<String, String> customerKStream = streamsBuilder.stream("customer",Consumed.with(Serdes.String(), Serdes.String()));
         customerKStream.foreach(((key, value) -> System.out.println("Customer from Topic: " + value)));
 
 
