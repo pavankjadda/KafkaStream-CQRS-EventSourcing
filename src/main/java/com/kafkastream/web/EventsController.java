@@ -45,7 +45,7 @@ public class EventsController
     {
         //Send Customer Event
         Customer customer=new Customer();
-        customer.setCustomerId("CU"+random.nextInt());
+        customer.setCustomerId("CU1001");
         customer.setFirstName("John");
         customer.setLastName("Doe");
         customer.setEmail("john.doe@gmail.com");
@@ -60,7 +60,8 @@ public class EventsController
     {
         //Send Order Event
         Order order=new Order();
-        order.setOrderId("ORD"+random.nextInt());
+        //order.setOrderId("ORD"+random.nextInt());
+        order.setOrderId("ORD1001");
         order.setCustomerId("CU1001");
         order.setOrderItemName("Reebok Shoes");
         order.setOrderPlace("NewYork,NY");
@@ -89,7 +90,7 @@ public class EventsController
 
         //Send Order Event
         Order order=new Order();
-        order.setOrderId("ORD"+random.nextInt());
+        order.setOrderId("ORD1001");
         order.setCustomerId("CU1001");
         order.setOrderItemName("Reebok Shoes");
         order.setOrderPlace("NewYork,NY");

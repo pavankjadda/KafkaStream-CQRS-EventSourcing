@@ -11,7 +11,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.UUID;
 
-public class TestEventsListner
+public class KafkaConsumerTestEventsListner
 {
     public static void main(String[] args)
     {
@@ -24,7 +24,6 @@ public class TestEventsListner
         props.put("session.timeout.ms", "30000");
         props.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
         props.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
-        //props.put(ConsumerConfig.GROUP_ID_CONFIG, UUID.randomUUID().toString());
         KafkaConsumer<String, String> consumer = new KafkaConsumer<>(props);
         consumer.subscribe(Arrays.asList("order"));
         consumer.poll(0);
@@ -36,8 +35,8 @@ public class TestEventsListner
             ConsumerRecords<String, String> records = consumer.poll(0);
             for (ConsumerRecord<String, String> record : records)
             {
-                //System.out.printf("offset = %d, key = %s, value = %s", record.offset(), record.key(), record.value());
-                System.out.println("Record: "+record.toString());
+                System.out.printf("customer offset = %d, key = %s, value = %s", record.offset(), record.key(), record.value());
+                System.out.println("");
             }
 
         }
