@@ -15,7 +15,7 @@ import java.util.concurrent.CountDownLatch;
 public class TestEventsListener
 {
 
-    public static void main(String[] args)
+    public static void main(String[] args) throws InterruptedException
     {
         Properties properties = new Properties();
         properties.put(StreamsConfig.APPLICATION_ID_CONFIG, "streams-greetings");
@@ -50,7 +50,7 @@ public class TestEventsListener
         );*/
 
 
-        // Java 7 example
+            // Java 7 example
         /*        KStream<String, String> customersOrders = customerKStream.leftJoin(orderKStream,
                 new ValueJoiner<String, String, String>() {
                     @Override
@@ -73,26 +73,32 @@ public class TestEventsListener
         customerKTable.foreach(((key, value) -> System.out.println("Customer from Topic: " + value)));
 
         */
-    }
+        }
 
-        KTable<String,String> orderKTable=streamsBuilder.table("order",Consumed.with(Serdes.String(),Serdes.String()),
-                                                                Materialized.<String, String, KeyValueStore<Bytes, byte[]>>as("OrderKeyValueStore"));
-        orderKTable.foreach(((key, value) -> System.out.println("Order from Topic: key-> "+key+" , value-> "+ value)));
+        KTable<String, String> orderKTable = streamsBuilder.table("order", Consumed.with(Serdes.String(), Serdes.String()), Materialized.<String, String, KeyValueStore<Bytes, byte[]>>as("OrderKeyValueStore"));
+        //orderKTable.foreach(((key, value) -> System.out.println("Order from Topic: key-> " + key + " , value-> " + value)));
 
 
-        KTable<String,String>   customerKTable = streamsBuilder.table("customer",Consumed.with(Serdes.String(),Serdes.String()),
-                Materialized.<String, String, KeyValueStore<Bytes, byte[]>>as("CustomerKeyValueStore"));
-        customerKTable.foreach(((key, value) -> System.out.println("Retrieved Customer from Topic: key-> "+key+" , value-> "+ value)));
+        KTable<String, String> customerKTable = streamsBuilder.table("customer", Consumed.with(Serdes.String(), Serdes.String()), Materialized.<String, String, KeyValueStore<Bytes, byte[]>>as("CustomerKeyValueStore"));
+        customerKTable.foreach(((key, value) -> System.out.println("Retrieved Customer from Topic: key-> " + key + " , value-> " + value)));
 
-        KTable<String,String>   customerOrdersKTable=orderKTable.leftJoin(customerKTable,(order,customer)-> order+" and "+customer);
-        customerOrdersKTable.foreach(((key, value) -> System.out.println("customerOrders from Topic: key-> "+key+" , value-> "+ value)));
+       KTable<String, String> customerOrdersKTable = customerKTable.leftJoin(orderKTable, (customer, order) -> order + " and " + customer);
+        customerOrdersKTable.foreach(((key, value) -> System.out.println("customerOrders from Topic: key-> " + key + " , value-> " + value+"; ")));
 
         Topology topology = streamsBuilder.build();
         KafkaStreams streams = new KafkaStreams(topology, properties);
-        CountDownLatch latch = new CountDownLatch(1);
+        //CountDownLatch latch = new CountDownLatch(1);
         streams.start();
+        Thread.sleep(10000);
+        System.out.println("queryableStoreName: "+orderKTable.queryableStoreName());
+        ReadOnlyKeyValueStore<String, String> keyValueStore =streams.store(orderKTable.queryableStoreName(), QueryableStoreTypes.keyValueStore());
+        System.out.println("keyValueStore.toString(): "+keyValueStore.toString());
+        System.out.println("keyValueStore.approximateNumEntries(): "+keyValueStore.approximateNumEntries());
+        // Get value by key
+        System.out.println("Order Value:" + keyValueStore.get("ORD1001"));
 
-
+        {
+        /*
         StoreBuilder orderKeyValueStore = Stores.keyValueStoreBuilder(Stores.persistentKeyValueStore("OrderKeyValueStore"),Serdes.String(), Serdes.String())
                                            .withLoggingEnabled(new HashMap<>());
         streamsBuilder.addStateStore(orderKeyValueStore);
@@ -102,7 +108,7 @@ public class TestEventsListener
         System.out.println("keyValueStore.approximateNumEntries(): "+keyValueStore.approximateNumEntries());
         System.out.println("Order Value:" + keyValueStore.get("ORD1001"));
 
-      /*  Runtime.getRuntime().addShutdownHook(new Thread("streams-shutdown-hook")
+      Runtime.getRuntime().addShutdownHook(new Thread("streams-shutdown-hook")
         {
             @Override
             public void run()
@@ -125,6 +131,7 @@ public class TestEventsListener
         }
 
         System.exit(0);*/
+        }
     }
 
 }
