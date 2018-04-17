@@ -22,8 +22,6 @@ import java.util.concurrent.Future;
 @EnableAutoConfiguration
 public class EventsSender
 {
-    private Producer<String, String> kafkaProducer;
-
     private Properties properties;
 
 
@@ -36,18 +34,18 @@ public class EventsSender
         properties.put("batch.size", 16384);
         properties.put("linger.ms", 1);
         properties.put("buffer.memory", 33554432);
+        properties.put("group.id","customers_group");
         properties.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
         properties.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
-        properties.put("value.serializer", "com.kafkastream.stream.GenericSerializer");
-        properties.put("value.deserializer", "com.kafkastream.stream.GenericDeserializer");
-
-        kafkaProducer = new KafkaProducer<String, String>(properties);
+        properties.put("value.serializer", "com.kafkastream.stream.KafkaJsonSerializer");
+        properties.put("value.deserializer", "com.kafkastream.stream.KafkaJsonDeserializer");
     }
 
     public void sendGreetingsEvent(Greetings greetings) throws ExecutionException, InterruptedException
     {
-        ProducerRecord<String, String> greetingsRecord = new ProducerRecord<>("greetings", greetings.getMessage(), greetings.toString());
-        Future<RecordMetadata> future = kafkaProducer.send(greetingsRecord);
+        Producer<String, Greetings> kafkaGreetingsProducer=new KafkaProducer<>(properties);
+        ProducerRecord<String, Greetings> greetingsRecord = new ProducerRecord<>("greetings", greetings.getMessage(), greetings);
+        Future<RecordMetadata> future = kafkaGreetingsProducer.send(greetingsRecord);
         System.out.println("Greetings record Sent. Greetings message: " + greetings.getMessage());
         System.out.println("Greetings future.get(): " + future.get());
 
@@ -65,8 +63,9 @@ public class EventsSender
 
     public void sendOrderEvent(Order order) throws ExecutionException, InterruptedException
     {
-        ProducerRecord<String, String> orderRecord = new ProducerRecord<>("order", order.getOrderId(), order.toString());
-        Future<RecordMetadata> future = kafkaProducer.send(orderRecord);
+        Producer<String, Order> kafkaOrderProducer=new KafkaProducer<>(properties);
+        ProducerRecord<String, Order> orderRecord = new ProducerRecord<>("order", order.getOrderId(), order);
+        Future<RecordMetadata> future = kafkaOrderProducer.send(orderRecord);
         System.out.println("Customer order sent. Order Id: " + order.getOrderId());
         System.out.println("Order future.get(): " + future.get());
     }
