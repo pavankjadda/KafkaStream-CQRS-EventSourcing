@@ -74,7 +74,10 @@ public class EventsController
     @ResponseStatus(HttpStatus.ACCEPTED)
     public void sendAllEvents() throws ExecutionException, InterruptedException
     {
-        //Send Greetings event
+        sendGreetings();
+        sendCustomers();
+        sendOrders();
+        /*//Send Greetings event
         String message = "Message "+random.nextInt();
         Greetings greetings = new Greetings(message,getCurrentTime());
         eventsSender.sendGreetingsEvent(greetings);
@@ -95,7 +98,7 @@ public class EventsController
         order.setOrderItemName("Reebok Shoes");
         order.setOrderPlace("NewYork,NY");
         order.setOrderPurchaseTime(getCurrentTime());
-        eventsSender.sendOrderEvent(order);
+        eventsSender.sendOrderEvent(order);*/
     }
 
     private String getCurrentTime()

@@ -1,8 +1,11 @@
 package com.kafkastream.model;
 
+import org.apache.avro.Schema;
+import org.apache.avro.specific.SpecificRecord;
+
 import java.util.Objects;
 
-public class Customer
+public class Customer implements SpecificRecord
 {
     public String   customerId;
 
@@ -98,5 +101,24 @@ public class Customer
     public String toString()
     {
         return "Customer{" + "customerId='" + customerId + '\'' + ", firstName='" + firstName + '\'' + ", lastName='" + lastName + '\'' + ", email='" + email + '\'' + ", phone='" + phone + '\'' + '}';
+    }
+
+
+    @Override
+    public void put(int i, Object o)
+    {
+
+    }
+
+    @Override
+    public Object get(int i)
+    {
+        return null;
+    }
+
+    @Override
+    public Schema getSchema()
+    {
+        return null;
     }
 }

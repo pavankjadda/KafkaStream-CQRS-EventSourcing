@@ -19,7 +19,7 @@ public class EventsListener
     public static void main(String[] args)
     {
         Properties properties = new Properties();
-        properties.put(StreamsConfig.APPLICATION_ID_CONFIG, "streams-greetings");
+        properties.put(StreamsConfig.APPLICATION_ID_CONFIG, "cqrs-streams");
         properties.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
         properties.put("auto.offset.reset", "earliest");
         properties.put("group.id", "customers_group");

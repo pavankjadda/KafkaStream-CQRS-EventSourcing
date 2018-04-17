@@ -1,31 +1,34 @@
 package com.kafkastream;
 
+import com.kafkastream.config.Schemas;
+import com.kafkastream.model.Customer;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
-import org.apache.kafka.common.utils.Bytes;
 import org.apache.kafka.streams.*;
 import org.apache.kafka.streams.kstream.KStream;
-import org.apache.kafka.streams.kstream.KTable;
-import org.apache.kafka.streams.kstream.Materialized;
-import org.apache.kafka.streams.state.*;
 
-import java.util.HashMap;
+import java.net.UnknownHostException;
 import java.util.Properties;
-import java.util.concurrent.CountDownLatch;
 
 public class TestEventsListener
 {
-
-    public static void main(String[] args) throws InterruptedException
+    public static void main(String[] args) throws InterruptedException, UnknownHostException
     {
         Properties properties = new Properties();
-        properties.put(StreamsConfig.APPLICATION_ID_CONFIG, "streams-greetings");
+        properties.put(StreamsConfig.APPLICATION_ID_CONFIG, "cqrs-streams");
         properties.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
-        properties.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass());
-        properties.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass());
-
+        properties.put("schema.registry.url", "http://localhost:8081");
+        properties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+        properties.put(StreamsConfig.COMMIT_INTERVAL_MS_CONFIG, 500);
+        properties.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+        properties.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
+        properties.put("value.serializer", "com.kafkastream.stream.GenericSerializer");
+        properties.put("value.deserializer", "com.kafkastream.stream.GenericDeserializer");
+        /*properties.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, SpecificAvroSerde.class);
+        properties.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, SpecificAvroSerde.class);
+*/
         StreamsBuilder streamsBuilder = new StreamsBuilder();
-
-
         {
         /*
         KStream<String, String> customerKStream = streamsBuilder.stream("customer", Consumed.with(Serdes.String(), Serdes.String()).withOffsetResetPolicy(Topology.AutoOffsetReset.EARLIEST));
@@ -75,27 +78,39 @@ public class TestEventsListener
         */
         }
 
-        KTable<String, String> orderKTable = streamsBuilder.table("order", Consumed.with(Serdes.String(), Serdes.String()), Materialized.<String, String, KeyValueStore<Bytes, byte[]>>as("OrderKeyValueStore"));
-        //orderKTable.foreach(((key, value) -> System.out.println("Order from Topic: key-> " + key + " , value-> " + value)));
 
+        KStream<String, Customer> customerKStream = streamsBuilder.stream("customer", Consumed.with(Serdes.String(), Schemas.Topics.CUSTOMERS.valueSerde()));
+        customerKStream.foreach(((key, value) -> System.out.println("Customer key from Topic:  " + key)));
 
-        KTable<String, String> customerKTable = streamsBuilder.table("customer", Consumed.with(Serdes.String(), Serdes.String()), Materialized.<String, String, KeyValueStore<Bytes, byte[]>>as("CustomerKeyValueStore"));
-        customerKTable.foreach(((key, value) -> System.out.println("Retrieved Customer from Topic: key-> " + key + " , value-> " + value)));
+        /*KTable<String, String> ordersKTable = streamsBuilder.table("order",Materialized.as("OrderKeyStore"));
+        ordersKTable.foreach(((key, value) -> System.out.println("Orders KTable from Topic: key-> " + key + " , value-> " + value)));
+*/
 
-       KTable<String, String> customerOrdersKTable = customerKTable.leftJoin(orderKTable, (customer, order) -> order + " and " + customer);
-        customerOrdersKTable.foreach(((key, value) -> System.out.println("customerOrders from Topic: key-> " + key + " , value-> " + value+"; ")));
+       /* KStream<String, Order> ordersKTable = streamsBuilder.stream("order");
+        ordersKTable=ordersKTable.selectKey((key,value)->value.getCustomerId());
+        ordersKTable.foreach(((key, value) -> System.out.println("Order key from Topic:  " + key)));
+*/
+      /*  Topic<String, Customer> CUSTOMERS=new Topic<>(Serdes.String(),new SpecificAvroSerde<Customer>());
+        Topic<String, Order> ORDERS=new Topic<>(Serdes.String(),new SpecificAvroSerde<Order>());
+        KStream<String, String> customerOrders=customerKStream.join(ordersKTable,(customer,order)->customer+" created "+ order,JoinWindows.of(TimeUnit.MINUTES.toMillis(5)));
+
+        *//*KStream<String, String> customerOrders = customerKStream.leftJoin(ordersKTable,(customer,order)->customer+" created "+ order,JoinWindows.of(TimeUnit.MINUTES.toMillis(5)),
+                                                                Joined.with(Serdes.String(),CUSTOMERS.keySerde(),ORDERS.valueSerde()));*//*
+        customerOrders.foreach(((key, value) -> System.out.println("customerOrders-> Key: "+key+" and Value: "+value)));*/
+
 
         Topology topology = streamsBuilder.build();
         KafkaStreams streams = new KafkaStreams(topology, properties);
-        //CountDownLatch latch = new CountDownLatch(1);
         streams.start();
-        Thread.sleep(10000);
-        System.out.println("queryableStoreName: "+orderKTable.queryableStoreName());
-        ReadOnlyKeyValueStore<String, String> keyValueStore =streams.store(orderKTable.queryableStoreName(), QueryableStoreTypes.keyValueStore());
-        System.out.println("keyValueStore.toString(): "+keyValueStore.toString());
-        System.out.println("keyValueStore.approximateNumEntries(): "+keyValueStore.approximateNumEntries());
-        // Get value by key
-        System.out.println("Order Value:" + keyValueStore.get("ORD1001"));
+
+        Runtime.getRuntime().addShutdownHook(new Thread("streams-shutdown-hook")
+        {
+            @Override
+            public void run()
+            {
+                streams.close();
+            }
+        });
 
         {
         /*
@@ -131,6 +146,29 @@ public class TestEventsListener
         }
 
         System.exit(0);*/
+        }
+    }
+
+    public static class Topic<K, V>
+    {
+
+        private Serde<K> keySerde;
+        private Serde<V> valueSerde;
+
+        Topic(Serde<K> keySerde, Serde<V> valueSerde)
+        {
+            this.keySerde = keySerde;
+            this.valueSerde = valueSerde;
+        }
+
+        public Serde<K> keySerde()
+        {
+            return keySerde;
+        }
+
+        public Serde<V> valueSerde()
+        {
+            return valueSerde;
         }
     }
 
