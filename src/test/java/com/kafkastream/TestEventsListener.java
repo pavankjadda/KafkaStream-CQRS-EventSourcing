@@ -1,8 +1,13 @@
 package com.kafkastream;
 
 import com.kafkastream.model.Customer;
+import com.kafkastream.stream.*;
+import io.confluent.kafka.serializers.KafkaAvroDeserializer;
+import io.confluent.kafka.serializers.KafkaAvroSerializer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.Serde;
+import org.apache.kafka.common.serialization.Serdes;
+import org.apache.kafka.common.serialization.StringSerializer;
 import org.apache.kafka.streams.*;
 import org.apache.kafka.streams.kstream.ForeachAction;
 import org.apache.kafka.streams.kstream.KStream;
@@ -15,18 +20,16 @@ public class TestEventsListener
     public static void main(String[] args) throws InterruptedException, UnknownHostException
     {
         Properties properties = new Properties();
-        properties.put("application.id", "cqrs-streams");
-        properties.put("bootstrap.servers", "localhost:9092");
+        properties.put(StreamsConfig.APPLICATION_ID_CONFIG,"cqrs-streams");
+        properties.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+        properties.put("schema.registry.url", "http://localhost:8081");
         properties.put("acks", "all");
-        properties.put("batch.size", 16384);
-        properties.put("linger.ms", 1);
-        properties.put("buffer.memory", 33554432);
-        properties.put("group.id","customers_group");
-        properties.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
-        properties.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
-        properties.put("value.serializer", "com.kafkastream.stream.KafkaJsonSerializer");
-        properties.put("value.deserializer", "com.kafkastream.stream.KafkaJsonDeserializer");
-
+ /*     properties.put("key.serializer", "com.kafkastream.stream.SpecificAvroSerde");
+        properties.put("key.deserializer", "com.kafkastream.stream.SpecificAvroSerde");
+        properties.put("value.serializer", "com.kafkastream.stream.SpecificAvroSerde");
+        properties.put("value.deserializer", "com.kafkastream.stream.SpecificAvroSerde");*/
+/*        properties.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, SpecificAvroSerde.class);
+        properties.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, SpecificAvroSerde.class);*/
         StreamsBuilder streamsBuilder = new StreamsBuilder();
         {
         /*
@@ -77,9 +80,9 @@ public class TestEventsListener
         */
         }
 
-
-        KStream<String, Customer> customerKStream = streamsBuilder.stream("customer");
-        customerKStream.foreach(((key, value) -> System.out.println("Customer value from Topic:  " + value.getCustomerId())));
+        KafkaAvroSerializer kafkaAvroSerializer=new KafkaAvroSerializer();
+        KStream<String, Customer> customerKStream = streamsBuilder.stream("customer",Consumed.with(Schemas.Topics.CUSTOMERS.keySerde(), Schemas.Topics.CUSTOMERS.valueSerde()));
+        customerKStream.foreach(((key, value) -> System.out.println("Customer value from Topic:  " + value.toString())));
 
         /*KTable<String, String> ordersKTable = streamsBuilder.table("order",Materialized.as("OrderKeyStore"));
         ordersKTable.foreach(((key, value) -> System.out.println("Orders KTable from Topic: key-> " + key + " , value-> " + value)));
