@@ -2,8 +2,13 @@ package com.kafkastream;
 
 import com.kafkastream.model.Customer;
 import com.kafkastream.stream.*;
+import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
 import io.confluent.kafka.serializers.KafkaAvroDeserializer;
 import io.confluent.kafka.serializers.KafkaAvroSerializer;
+import io.confluent.kafka.streams.serdes.avro.SpecificAvroDeserializer;
+import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde;
+import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerializer;
+import org.apache.avro.specific.SpecificRecord;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
@@ -13,6 +18,8 @@ import org.apache.kafka.streams.kstream.ForeachAction;
 import org.apache.kafka.streams.kstream.KStream;
 
 import java.net.UnknownHostException;
+import java.util.Collections;
+import java.util.Map;
 import java.util.Properties;
 
 public class TestEventsListener
@@ -24,12 +31,8 @@ public class TestEventsListener
         properties.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
         properties.put("schema.registry.url", "http://localhost:8081");
         properties.put("acks", "all");
- /*     properties.put("key.serializer", "com.kafkastream.stream.SpecificAvroSerde");
-        properties.put("key.deserializer", "com.kafkastream.stream.SpecificAvroSerde");
-        properties.put("value.serializer", "com.kafkastream.stream.SpecificAvroSerde");
-        properties.put("value.deserializer", "com.kafkastream.stream.SpecificAvroSerde");*/
-/*        properties.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, SpecificAvroSerde.class);
-        properties.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, SpecificAvroSerde.class);*/
+        properties.put("key.deserializer", SpecificAvroDeserializer.class);
+        properties.put("value.deserializer", SpecificAvroDeserializer.class);
         StreamsBuilder streamsBuilder = new StreamsBuilder();
         {
         /*
@@ -79,9 +82,12 @@ public class TestEventsListener
 
         */
         }
+        final Map<String, String> serdeConfig = Collections.singletonMap(AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, "http://localhost:8081");
+        final Serde<Customer> valueSpecificAvroSerde = new SpecificAvroSerde<>();
+        valueSpecificAvroSerde.configure(serdeConfig, true);
 
-        KafkaAvroSerializer kafkaAvroSerializer=new KafkaAvroSerializer();
-        KStream<String, Customer> customerKStream = streamsBuilder.stream("customer",Consumed.with(Schemas.Topics.CUSTOMERS.keySerde(), Schemas.Topics.CUSTOMERS.valueSerde()));
+        //SpecificAvroSerde<Customer> customerSerde = createSerde("http://localhost:8081/");
+        KStream<String, Customer> customerKStream = streamsBuilder.stream("customer",Consumed.with(Serdes.String(), valueSpecificAvroSerde));
         customerKStream.foreach(((key, value) -> System.out.println("Customer value from Topic:  " + value.toString())));
 
         /*KTable<String, String> ordersKTable = streamsBuilder.table("order",Materialized.as("OrderKeyStore"));
@@ -172,6 +178,15 @@ public class TestEventsListener
         {
             return valueSerde;
         }
+    }
+
+    private static <VT extends SpecificRecord> SpecificAvroSerde<VT> createSerde(final String schemaRegistryUrl)
+    {
+
+        final SpecificAvroSerde<VT> serde = new SpecificAvroSerde<>();
+        final Map<String, String> serdeConfig = Collections.singletonMap(AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, schemaRegistryUrl);
+        serde.configure(serdeConfig, false);
+        return serde;
     }
 
 }

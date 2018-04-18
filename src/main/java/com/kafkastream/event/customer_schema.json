@@ -1,0 +1,7 @@
+
+curl -X POST -H "Content-Type:application/vnd.schemaregistry.v1+json" --data   '{"schema":"{\"namespace\":\"com.kafkastream.model\",\"type\":\"record\",\"name\":\"Customer\",\"doc\":\"Represents an Employee at a company\",\"fields\":[{\"name\":\"customerId\",\"type\":\"string\",\"doc\":\"The persons given name\"},{\"name\":\"firstName\",\"type\":\"string\",\"doc\":\"The persons given name\"},{\"name\":\"lastName\",\"type\":\"string\",\"doc\":\"The persons given name\"},{\"name\":\"email\",\"type\":\"string\",\"doc\":\"The persons given name\"},{\"name\":\"phone\",\"type\":\"string\",\"doc\":\"The persons given name\"}]}"}' http://localhost:8081/subjects/customer-value/versions
+
+
+curl -X POST -H "Content-Type:application/vnd.schemaregistry.v1+json" --data  '{   "schema":     "{       \"namespace\": \"com.kafkastream.model\",        \"type\": \"record\",        \"name\": \"customer-value\",        \"fields\":          [            {              \"type\": \"string\",              \"name\": \"customerId\"            },            {              \"type\": \"int\",              \"name\": \"firstName\"            },            {              \"type\": \"string\",              \"name\": \"lastName\"            },            {              \"type\": \"string\",              \"name\": \"email\"            },            {              \"type\": \"string\",              \"name\": \"phone\"            }          ]      }" }'  http://localhost:8081/subjects/customer-value/versions
+
+curl -X DELETE http://localhost:8081/subjects/customer-value/versions/1

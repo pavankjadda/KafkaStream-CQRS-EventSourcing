@@ -1,0 +1,103 @@
+//JSON Schema
+
+'{
+  "schema":
+    {
+       "namespace": "com.kafkastream.model",
+        "type": "record",
+        "name": "Customer",
+        "fields":
+          [
+            {
+              "type": "string",
+              "name": "customerId"
+            },
+            {
+              "type": "int",
+              "name": "firstName"
+            },
+            {
+              "type": "string",
+              "name": "lastName"
+            },
+            {
+              "type": "string",
+              "name": "email"
+            },
+            {
+              "type": "string",
+              "name": "phone"
+            }
+          ]
+      }
+}'
+
+
+
+//AVRO Schema
+
+{
+  "type" : "record",
+  "name" : "customer-value",
+  "namespace" : "com.kafkastream.model",
+  "fields" : [ {
+    "name" : "schema",
+    "type" : {
+      "type" : "record",
+      "name" : "schema",
+      "fields" : [ {
+        "name" : "customerId",
+        "type" : "string"
+      }, {
+        "name" : "firstName",
+        "type" : "string"
+      }, {
+        "name" : "lastName",
+        "type" : "string"
+      },
+      {
+        "name" : "email",
+        "type" : "string"
+      }, {
+        "name" : "phone",
+        "type" : "string"
+      }
+       ]
+    }
+  } ]
+}
+
+
+{
+  "schema":
+    "{\"namespace\": \"com.kafkastream.model\",
+      \"type\": \"record\",
+      \"name\": \"customer-value\",
+      \"doc\" : \"Represents an Employee at a company\",
+      \"fields\": [
+        {\"name\": \"customerId\", \"type\": \"string\"},
+        {\"name\": \"firstName\", \"type\": \"string\"},
+        {\"name\": \"lastName\", \"type\": \"string\"},
+        {\"name\": \"email\", \"type\": \"string\"},
+        {\"name\": \"phone\", \"type\": \"string\"}
+      ]
+    }"
+}
+
+
+
+
+{
+  "schema":
+    "{\"namespace\": \"com.kafkastream.model\",
+      \"type\": \"record\",
+      \"name\": \"Order\",
+      \"fields\": [
+        {\"name\": \"orderId\", \"type\": \"string\"},
+        {\"name\": \"customerId\", \"type\": \"string\"},
+        {\"name\": \"orderItemName\", \"type\": \"string\"},
+        {\"name\": \"orderPlace\", \"type\": \"string\"},
+        {\"name\": \"orderPurchaseTime\", \"type\": \"string\"}
+      ]
+    }"
+}
