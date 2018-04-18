@@ -9,11 +9,7 @@ spring:
             commit:
               interval:
                 mms: 1000
-            default:
-              key:
-                serde:  org.apache.kafka.common.serialization.Serdes$StringSerde
-              value:
-                serde:  org.apache.kafka.common.serialization.Serdes$StringSerde
+
       bindings:
         customers-in:
           destination: customer

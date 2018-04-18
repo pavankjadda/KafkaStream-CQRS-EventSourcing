@@ -3,16 +3,18 @@ package com.kafkastream.service;
 import com.kafkastream.model.Customer;
 import com.kafkastream.model.Greetings;
 import com.kafkastream.model.Order;
-import com.kafkastream.stream.SpecificAvroSerde;
-import org.apache.kafka.clients.producer.KafkaProducer;
-import org.apache.kafka.clients.producer.Producer;
-import org.apache.kafka.clients.producer.ProducerRecord;
-import org.apache.kafka.clients.producer.RecordMetadata;
-import org.apache.kafka.streams.StreamsConfig;
+import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
+import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde;
+import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerializer;
+import org.apache.avro.specific.SpecificRecord;
+import org.apache.kafka.clients.producer.*;
+import org.apache.kafka.common.serialization.Serdes;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.stereotype.Service;
 
 import java.net.UnknownHostException;
+import java.util.Collections;
+import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -28,15 +30,12 @@ public class EventsSender
     {
         this.properties = new Properties();
         properties.put("application.id", "cqrs-streams");
-        properties.put("bootstrap.servers", "localhost:9092");
+        properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
         properties.put("schema.registry.url", "http://localhost:8081");
         properties.put("acks", "all");
-        properties.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
-        properties.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
-        properties.put("value.serializer", "com.kafkastream.stream.SpecificAvroSerializer");
-        properties.put("value.deserializer", "com.kafkastream.stream.SpecificAvroDeserializer");
-        /*properties.put("value.serializer", "com.kafkastream.stream.KafkaJsonSerializer");
-        properties.put("value.deserializer", "com.kafkastream.stream.KafkaJsonDeserializer");*/
+        properties.put("key.serializer", Serdes.String().serializer().getClass());
+        //properties.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
+        properties.put("value.serializer", SpecificAvroSerializer.class);
     }
 
     public void sendGreetingsEvent(Greetings greetings) throws ExecutionException, InterruptedException
@@ -66,6 +65,15 @@ public class EventsSender
         Future<RecordMetadata> future = kafkaOrderProducer.send(orderRecord);
         System.out.println("Customer order sent. Order Id: " + order.getOrderId());
         System.out.println("Order future.get(): " + future.get());
+    }
+    private static <VT extends SpecificRecord> SpecificAvroSerde<VT> createSerde(final String schemaRegistryUrl)
+    {
+
+        final SpecificAvroSerde<VT> serde = new SpecificAvroSerde<>();
+        final Map<String, String> serdeConfig = Collections.singletonMap(
+                AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, schemaRegistryUrl);
+        serde.configure(serdeConfig, false);
+        return serde;
     }
 
 

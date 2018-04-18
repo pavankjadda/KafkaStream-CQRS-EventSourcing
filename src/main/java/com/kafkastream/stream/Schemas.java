@@ -4,6 +4,7 @@ import static io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig.SCHEMA
 
 import com.kafkastream.model.Customer;
 import com.kafkastream.model.Order;
+import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
 
@@ -18,7 +19,7 @@ import java.util.Map;
 public class Schemas
 {
 
-    public static String schemaRegistryUrl = "";
+    public static String schemaRegistryUrl = "http://localhost:8081";
 
     public static void configureSerdesWithSchemaRegistryUrl(String url)
     {
@@ -31,6 +32,7 @@ public class Schemas
         //configure(ORDER_VALUE_SERDE, url);
         schemaRegistryUrl = url;
     }
+
 
     private static void configure(Serde serde, String url)
     {
