@@ -1,9 +1,16 @@
 package com.kafkastream.service;
 
+import com.kafkastream.model.Customer;
+import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
+import io.confluent.kafka.streams.serdes.avro.SpecificAvroDeserializer;
+import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde;
+import org.apache.avro.specific.SpecificRecord;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.*;
 import org.apache.kafka.streams.kstream.KStream;
 
+import java.util.Collections;
+import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
 
@@ -19,18 +26,18 @@ public class EventsListener
     public static void main(String[] args)
     {
         Properties properties = new Properties();
-        properties.put(StreamsConfig.APPLICATION_ID_CONFIG, "cqrs-streams");
+        properties.put(StreamsConfig.APPLICATION_ID_CONFIG,"cqrs-streams");
         properties.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
-        properties.put("auto.offset.reset", "earliest");
-        properties.put("group.id", "customers_group");
-        properties.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass());
-        properties.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass());
+        properties.put("schema.registry.url", "http://localhost:8081");
+        properties.put("acks", "all");
+        properties.put("key.deserializer", SpecificAvroDeserializer.class);
+        properties.put("value.deserializer", SpecificAvroDeserializer.class);
 
         StreamsBuilder streamsBuilder = new StreamsBuilder();
+        SpecificAvroSerde<Customer> customerSerde = createSerde("http://localhost:8081");
 
-
-        KStream<String, String> customerKStream = streamsBuilder.stream("customer", Consumed.with(Serdes.String(), Serdes.String()));
-        customerKStream.foreach(((key, value) -> System.out.println("Customer from Topic: " + value)));
+        KStream<String, Customer> customerKStream = streamsBuilder.stream("customer",Consumed.with(Serdes.String(), customerSerde));
+        customerKStream.foreach(((key, value) -> System.out.println("Customer value from Topic:  " + value.toString())));
 
 
 /*
@@ -113,6 +120,13 @@ public class EventsListener
 
         System.exit(0);
     }
+    private static <VT extends SpecificRecord> SpecificAvroSerde<VT> createSerde(final String schemaRegistryUrl)
+    {
 
+        final SpecificAvroSerde<VT> serde = new SpecificAvroSerde<>();
+        final Map<String, String> serdeConfig = Collections.singletonMap(AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, schemaRegistryUrl);
+        serde.configure(serdeConfig, false);
+        return serde;
+    }
 
 }
