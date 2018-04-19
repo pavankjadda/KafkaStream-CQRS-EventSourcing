@@ -34,7 +34,6 @@ public class EventsSender
         properties.put("schema.registry.url", "http://localhost:8081");
         properties.put("acks", "all");
         properties.put("key.serializer", Serdes.String().serializer().getClass());
-        //properties.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
         properties.put("value.serializer", SpecificAvroSerializer.class);
     }
 
