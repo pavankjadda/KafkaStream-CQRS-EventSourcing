@@ -82,12 +82,10 @@ public class TestEventsListener
 
         */
         }
-        final Map<String, String> serdeConfig = Collections.singletonMap(AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, "http://localhost:8081");
-        final Serde<Customer> valueSpecificAvroSerde = new SpecificAvroSerde<>();
-        valueSpecificAvroSerde.configure(serdeConfig, true);
+        SpecificAvroSerde<Customer> customerSerde = createSerde("http://localhost:8081");
 
         //SpecificAvroSerde<Customer> customerSerde = createSerde("http://localhost:8081/");
-        KStream<String, Customer> customerKStream = streamsBuilder.stream("customer",Consumed.with(Serdes.String(), valueSpecificAvroSerde));
+        KStream<String, Customer> customerKStream = streamsBuilder.stream("customer",Consumed.with(Serdes.String(), customerSerde));
         customerKStream.foreach(((key, value) -> System.out.println("Customer value from Topic:  " + value.toString())));
 
         /*KTable<String, String> ordersKTable = streamsBuilder.table("order",Materialized.as("OrderKeyStore"));

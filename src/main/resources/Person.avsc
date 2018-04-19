@@ -1,0 +1,11 @@
+{"namespace": "com.kafkastream.model",
+  "type": "record",
+  "name": "Person",
+  "fields": [
+    {"name": "customerId", "type": "string"},
+    {"name": "firstName", "type": "string"},
+    {"name": "lastName", "type": "string"},
+    {"name": "email", "type": "string"},
+    {"name": "phone", "type": "string"}
+  ]
+}

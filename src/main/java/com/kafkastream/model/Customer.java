@@ -1,11 +1,14 @@
 package com.kafkastream.model;
 
 import org.apache.avro.Schema;
+import org.apache.avro.io.DatumReader;
+import org.apache.avro.io.DatumWriter;
 import org.apache.avro.specific.SpecificRecord;
+
 
 import java.util.Objects;
 
-public class Customer implements SpecificRecord
+public class Customer  extends org.apache.avro.specific.SpecificRecordBase implements SpecificRecord
 {
     public String   customerId;
 
@@ -16,6 +19,9 @@ public class Customer implements SpecificRecord
     public String   email;
 
     public String   phone;
+
+    private static final long serialVersionUID = -6112285611684054927L;
+    public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\n" + "      \"type\": \"record\",\n" + "      \"name\": \"Customer\",\n" + "      \"namespace\": \"com.kafkastream.model\",\n" + "      \"fields\": [\n" + "        {\"name\": \"customerId\", \"type\": \"string\"},\n" + "        {\"name\": \"firstName\", \"type\": \"string\"},\n" + "        {\"name\": \"lastName\", \"type\": \"string\"},\n" + "        {\"name\": \"email\", \"type\": \"string\"},\n" + "        {\"name\": \"phone\", \"type\": \"string\"}\n" + "      ]\n" + "}\n");
 
 
     public Customer()
@@ -104,21 +110,40 @@ public class Customer implements SpecificRecord
     }
 
 
+    /**
+     * Set the value of a field given its position in the schema.
+     * <p>This method is not meant to be called by user code, but only by {@link
+     * DatumReader} implementations.
+     *
+     * @param i
+     * @param v
+     */
     @Override
-    public void put(int i, Object o)
+    public void put(int i, Object v)
     {
-
+        this.put(i,v);
     }
 
+    /**
+     * Return the value of a field given its position in the schema.
+     * <p>This method is not meant to be called by user code, but only by {@link
+     * DatumWriter} implementations.
+     *
+     * @param i
+     */
     @Override
     public Object get(int i)
     {
-        return null;
+        return this.toString();
     }
 
+    /**
+     * The schema of this instance.
+     */
     @Override
     public Schema getSchema()
     {
-        return null;
+
+        return SCHEMA$;
     }
 }
