@@ -2,7 +2,6 @@ package com.kafkastream;
 
 import com.kafkastream.model.Customer;
 import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
-import io.confluent.kafka.serializers.KafkaAvroSerializer;
 import io.confluent.kafka.serializers.KafkaAvroSerializerConfig;
 import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde;
 import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerializer;
@@ -41,7 +40,7 @@ public class TestProducer
             customer.setEmail("john.doe@gmail.com");
             customer.setPhone("993-332-9832");
 
-            ProducerRecord<String, Customer> customerRecord = new ProducerRecord<>("customer",customer.getCustomerId(), customer);
+            ProducerRecord<String, Customer> customerRecord = new ProducerRecord<>("customer",customer.getCustomerId().toString(), customer);
             Future<RecordMetadata> future = producer.send(customerRecord);
             System.out.println("Customer record sent. Customer Id: " + customer.getCustomerId());
             System.out.println("Customer future.get(): " + future.get());

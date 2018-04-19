@@ -52,7 +52,7 @@ public class EventsSender
     public void sendCustomerEvent(Customer customer) throws ExecutionException, InterruptedException
     {
         Producer<String, Customer> kafkaProducerCustomer = new KafkaProducer<>(properties);
-        ProducerRecord<String, Customer> customerRecord = new ProducerRecord<>("customer", customer.getCustomerId(), customer);
+        ProducerRecord<String, Customer> customerRecord = new ProducerRecord<String, Customer>("customer", (String) customer.getCustomerId(), customer);
         Future<RecordMetadata> future = kafkaProducerCustomer.send(customerRecord);
         System.out.println("Customer record sent. Customer Id: " + customer.getCustomerId());
         System.out.println("Customer future.get(): " + future.get());
