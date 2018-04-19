@@ -41,7 +41,7 @@ public class EventsSender
     public void sendGreetingsEvent(Greetings greetings) throws ExecutionException, InterruptedException
     {
         Producer<String, Greetings> kafkaGreetingsProducer = new KafkaProducer<>(properties);
-        ProducerRecord<String, Greetings> greetingsRecord = new ProducerRecord<>("greetings", greetings.getMessage(), greetings);
+        ProducerRecord<String, Greetings> greetingsRecord = new ProducerRecord<>("greetings", greetings.getMessage().toString(), greetings);
         Future<RecordMetadata> future = kafkaGreetingsProducer.send(greetingsRecord);
         System.out.println("Greetings record Sent. Greetings message: " + greetings.getMessage());
         System.out.println("Greetings future.get(): " + future.get());
@@ -61,7 +61,7 @@ public class EventsSender
     public void sendOrderEvent(Order order) throws ExecutionException, InterruptedException
     {
         Producer<String, Order> kafkaOrderProducer = new KafkaProducer<>(properties);
-        ProducerRecord<String, Order> orderRecord = new ProducerRecord<>("order", order.getOrderId(), order);
+        ProducerRecord<String, Order> orderRecord = new ProducerRecord<>("order", order.getOrderId().toString(), order);
         Future<RecordMetadata> future = kafkaOrderProducer.send(orderRecord);
         System.out.println("Customer order sent. Order Id: " + order.getOrderId());
         System.out.println("Order future.get(): " + future.get());

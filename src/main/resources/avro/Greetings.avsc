@@ -1,0 +1,8 @@
+{"namespace": "com.kafkastream.model",
+  "type": "record",
+  "name": "Greetings",
+  "fields": [
+    {"name": "timestamp", "type": "string"},
+    {"name": "message", "type": "string"}
+  ]
+}

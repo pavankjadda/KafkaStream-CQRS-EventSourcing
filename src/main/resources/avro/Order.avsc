@@ -1,0 +1,11 @@
+{"namespace": "com.kafkastream.model",
+  "type": "record",
+  "name": "Order",
+  "fields": [
+    {"name": "orderId", "type": "string"},
+    {"name": "customerId", "type": "string"},
+    {"name": "orderItemName", "type": "string"},
+    {"name": "orderPlace", "type": "string"},
+    {"name": "orderPurchaseTime", "type": "string"}
+  ]
+}

@@ -1,4 +1,4 @@
-package com.kafkastream.service;
+package com.kafkastream;
 
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
