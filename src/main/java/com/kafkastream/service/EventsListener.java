@@ -1,6 +1,7 @@
 package com.kafkastream.service;
 
 import com.kafkastream.model.Customer;
+import com.kafkastream.model.CustomerOrder;
 import com.kafkastream.model.Greetings;
 import com.kafkastream.model.Order;
 import com.sun.tools.corba.se.idl.constExpr.Or;
@@ -54,15 +55,35 @@ public class EventsListener
         KStream<String, Order> modifiedOrderKStream=orderKStream.selectKey((key, value) -> value.getCustomerId().toString());
         modifiedOrderKStream.foreach(((key, value) -> System.out.println("Modified Key message from Order:  " + key)));
 
-        KStream<String, String> customersOrders = customerKStream.leftJoin(modifiedOrderKStream, new ValueJoiner<Customer, Order, String>()
+        KStream<String, CustomerOrder> customersOrders = customerKStream.leftJoin(modifiedOrderKStream, new ValueJoiner<Customer, Order, CustomerOrder>()
         {
             @Override
-            public String apply(Customer customer, Order order)
+            public CustomerOrder apply(Customer customer, Order order)
             {
-                return customer+" created "+ order;
+                if(customer!=null && order!=null)
+                {
+                    CustomerOrder   customerOrder=new CustomerOrder();
+                    customerOrder.setCustomerId(customer.getCustomerId());
+                    customerOrder.setFirstName(customer.getFirstName());
+                    customerOrder.setLastName(customer.getLastName());
+                    customerOrder.setEmail(customer.getEmail());
+                    customerOrder.setPhone(customer.getPhone());
+                    customerOrder.setOrderId(order.getOrderId());
+                    customerOrder.setOrderItemName(order.getOrderItemName());
+                    customerOrder.setOrderPlace(order.getOrderPlace());
+                    customerOrder.setOrderPurchaseTime(order.getOrderPurchaseTime());
+
+                    return customerOrder;
+                }
+                return null;
             }
         }, JoinWindows.of(TimeUnit.MINUTES.toMillis(5)), Joined.with(Serdes.String(), customerSerde, orderSerde));
+
         customersOrders.foreach(((key, value) -> System.out.println("customer orders:  " + value)));
+
+
+
+
 
         /*
         KTable<String,String> orderKTable=streamsBuilder.table("order");
