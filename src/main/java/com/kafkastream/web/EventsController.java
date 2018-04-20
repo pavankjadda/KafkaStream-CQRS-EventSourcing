@@ -45,7 +45,7 @@ public class EventsController
     {
         //Send Customer Event
         Customer customer=new Customer();
-        customer.setCustomerId("CU1001");
+        customer.setCustomerId("CU"+random.nextInt());
         customer.setFirstName("John");
         customer.setLastName("Doe");
         customer.setEmail("john.doe@gmail.com");
@@ -56,13 +56,19 @@ public class EventsController
 
     @GetMapping("/orders")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public Order sendOrders() throws ExecutionException, InterruptedException
+    public Order sendOrders(String customerId) throws ExecutionException, InterruptedException
     {
         //Send Order Event
         Order order=new Order();
-        //order.setOrderId("ORD"+random.nextInt());
-        order.setOrderId("ORD1001");
-        order.setCustomerId("CU1001");
+        order.setOrderId("ORD"+random.nextInt());
+        if ((customerId != null))
+        {
+            order.setCustomerId(customerId);
+        }
+        else
+        {
+            order.setCustomerId("CU1001");
+        }
         order.setOrderItemName("Reebok Shoes");
         order.setOrderPlace("NewYork,NY");
         order.setOrderPurchaseTime(getCurrentTime());
@@ -75,8 +81,8 @@ public class EventsController
     public void sendAllEvents() throws ExecutionException, InterruptedException
     {
         sendGreetings();
-        sendCustomers();
-        sendOrders();
+        Customer customer=sendCustomers();
+        sendOrders(customer.getCustomerId().toString());
         /*//Send Greetings event
         String message = "Message "+random.nextInt();
         Greetings greetings = new Greetings(message,getCurrentTime());

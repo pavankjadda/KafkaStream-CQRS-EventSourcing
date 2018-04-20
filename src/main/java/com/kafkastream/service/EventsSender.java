@@ -62,7 +62,7 @@ public class EventsSender
         Producer<String, Order> kafkaOrderProducer = new KafkaProducer<>(properties);
         ProducerRecord<String, Order> orderRecord = new ProducerRecord<>("order", order.getOrderId().toString(), order);
         Future<RecordMetadata> future = kafkaOrderProducer.send(orderRecord);
-        System.out.println("Customer order sent. Order Id: " + order.getOrderId());
+        System.out.println("Order sent. Order Id: " + order.getOrderId());
         System.out.println("Order future.get(): " + future.get());
     }
     private static <VT extends SpecificRecord> SpecificAvroSerde<VT> createSerde(final String schemaRegistryUrl)
