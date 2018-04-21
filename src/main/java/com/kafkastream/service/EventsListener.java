@@ -55,6 +55,8 @@ public class EventsListener
         KStream<String, Order> modifiedOrderKStream=orderKStream.selectKey((key, value) -> value.getCustomerId().toString());
         modifiedOrderKStream.foreach(((key, value) -> System.out.println("Modified Key message from Order:  " + key)));
 
+
+
         KStream<String, CustomerOrder> customersOrders = customerKStream.leftJoin(modifiedOrderKStream, new ValueJoiner<Customer, Order, CustomerOrder>()
         {
             @Override
