@@ -80,7 +80,7 @@ public class EventsController
     @ResponseStatus(HttpStatus.ACCEPTED)
     public void sendAllEvents() throws ExecutionException, InterruptedException
     {
-        sendGreetings();
+        //sendGreetings();
         Customer customer=sendCustomers();
         sendOrders(customer.getCustomerId().toString());
         /*//Send Greetings event

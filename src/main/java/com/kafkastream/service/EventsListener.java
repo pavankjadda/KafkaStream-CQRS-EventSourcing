@@ -49,9 +49,6 @@ public class EventsListener
         KStream<String, Order> orderKStream = streamsBuilder.stream("order",Consumed.with(Serdes.String(), orderSerde));
         orderKStream.foreach(((key, value) -> System.out.println("Order value from Topic:  " + value.toString())));
 
-        KStream<String, Greetings> greetingsKStream = streamsBuilder.stream("greetings",Consumed.with(Serdes.String(), greetingsSerde));
-        greetingsKStream.foreach(((key, value) -> System.out.println("Greeting message from Topic:  " + value.toString())));
-
         KStream<String, Order> modifiedOrderKStream=orderKStream.selectKey((key, value) -> value.getCustomerId().toString());
         modifiedOrderKStream.foreach(((key, value) -> System.out.println("Modified Key message from Order:  " + key)));
 
