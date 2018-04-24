@@ -12,6 +12,7 @@ import org.apache.avro.specific.SpecificRecord;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.common.utils.Bytes;
 import org.apache.kafka.streams.*;
+import org.apache.kafka.streams.errors.TopologyBuilderException;
 import org.apache.kafka.streams.kstream.*;
 import org.apache.kafka.streams.state.KeyValueIterator;
 import org.apache.kafka.streams.state.QueryableStoreTypes;
@@ -49,7 +50,41 @@ public class EventsListener
         SpecificAvroSerde<Greetings> greetingsSerde = createSerde("http://localhost:8081");
         SpecificAvroSerde<CustomerOrder> customerOrderSerde = createSerde("http://localhost:8081");
 
-        KStream<String, Customer> customerKStream = streamsBuilder.stream("customer",Consumed.with(Serdes.String(), customerSerde));
+
+        KTable<String,Customer> customerKTable=streamsBuilder.table("customer",Consumed.with(Serdes.String(),customerSerde),Materialized.as("customer"));
+        customerKTable.foreach(((key, value) -> System.out.println("Customer from Topic: "+value)));
+
+        KStream<String, Order> orderKStream = streamsBuilder.stream("order",Consumed.with(Serdes.String(), orderSerde))
+                                                            .selectKey((key, value) -> value.getCustomerId().toString());
+        orderKStream.to("order-to-ktable-topic",Produced.with(Serdes.String(),orderSerde));
+        KTable<String,Order> orderKTable=streamsBuilder.table("order-to-ktable-topic",Consumed.with(Serdes.String(),orderSerde),Materialized.as("order"));
+        orderKTable.foreach(((key, value) -> System.out.println("Order from Topic: "+value)));
+
+        KTable<String,CustomerOrder>    customerOrderKTable=customerKTable.leftJoin(orderKTable,(customer,order)->
+        {
+            if(customer!=null && order!=null)
+            {
+                CustomerOrder   customerOrder=new CustomerOrder();
+                customerOrder.setCustomerId(customer.getCustomerId());
+                customerOrder.setFirstName(customer.getFirstName());
+                customerOrder.setLastName(customer.getLastName());
+                customerOrder.setEmail(customer.getEmail());
+                customerOrder.setPhone(customer.getPhone());
+                customerOrder.setOrderId(order.getOrderId());
+                customerOrder.setOrderItemName(order.getOrderItemName());
+                customerOrder.setOrderPlace(order.getOrderPlace());
+                customerOrder.setOrderPurchaseTime(order.getOrderPurchaseTime());
+
+                return customerOrder;
+            }
+            return null;
+        });
+        customerOrderKTable.foreach(((key, value) -> System.out.println("Customer Orders from Topic: "+value)));
+
+        /*KTable<String,CustomerOrder> customerOrdersKTable=streamsBuilder.table("customer-orders",Consumed.with(Serdes.String(),customerOrderSerde),Materialized.as("customer-orders"));
+        customerOrdersKTable.foreach(((key, value) -> System.out.println("Customer Orders from Topic: "+value)));*/
+
+      /*  KStream<String, Customer> customerKStream = streamsBuilder.stream("customer",Consumed.with(Serdes.String(), customerSerde));
         customerKStream.foreach(((key, value) -> System.out.println("Customer value from Topic:  " + value.toString())));
 
         KStream<String, Order> orderKStream = streamsBuilder.stream("order",Consumed.with(Serdes.String(), orderSerde));
@@ -57,6 +92,7 @@ public class EventsListener
 
         KStream<String, Order> modifiedOrderKStream=orderKStream.selectKey((key, value) -> value.getCustomerId().toString());
         modifiedOrderKStream.foreach(((key, value) -> System.out.println("Modified Key message from Order:  " + key)));
+
 
         KStream<String, CustomerOrder> customersOrders = customerKStream.leftJoin(modifiedOrderKStream, (customer, order) ->
         {
@@ -77,11 +113,10 @@ public class EventsListener
             }
             return null;
         }, JoinWindows.of(TimeUnit.MINUTES.toMillis(5)), Joined.with(Serdes.String(), customerSerde, orderSerde));
-        customersOrders.to("customer-orders",Produced.with(Serdes.String(),customerOrderSerde));
+        customersOrders.to("customer-orders",Produced.with(Serdes.String(),customerOrderSerde));*/
 
         //KTable<String,CustomerOrder> customerOrdersKTable=streamsBuilder.table("customer-orders",Materialized.with(Serdes.String(),customerOrderSerde),);
-        KTable<String,CustomerOrder> customerOrdersKTable=streamsBuilder.table("customer-orders",Consumed.with(Serdes.String(),customerOrderSerde),Materialized.as("customer-orders"));
-        customerOrdersKTable.foreach(((key, value) -> System.out.println("Customer Orders from Topic: "+value)));
+
 
 
         /*
