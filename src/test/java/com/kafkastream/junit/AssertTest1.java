@@ -36,15 +36,14 @@ public class AssertTest1 extends TestResult
         List<String> list = Arrays.asList("1", "2", "3");
         assertNotNull(list);
 
-        assertEquals(fValue1,3);
+        assertEquals(fValue1,2);
     }
 
-    @Test
+    @Test(expected = ArithmeticException.class)
     public void Test2()
     {
-        List<String> list = Arrays.asList("1", "2", "3");
-
-        assertThat(list).contains("1");
+        int a=10;
+        int b=1/0;
     }
 
     public synchronized void addError(Test test,Throwable throwable)
