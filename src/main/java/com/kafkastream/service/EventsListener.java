@@ -46,7 +46,7 @@ public class EventsListener
         SpecificAvroSerde<Greetings> greetingsSerde = createSerde("http://localhost:8081");
         SpecificAvroSerde<CustomerOrder> customerOrderSerde = createSerde("http://localhost:8081");
 
-        StoreBuilder customerStateStore = Stores.keyValueStoreBuilder(Stores.persistentKeyValueStore("customer"),Serdes.String(), customerSerde)
+        StoreBuilder customerStateStore = Stores.keyValueStoreBuilder(Stores.persistentKeyValueStore("customer-store"),Serdes.String(), customerSerde)
                                            .withLoggingEnabled(new HashMap<>());
         streamsBuilder.addStateStore(customerStateStore);
         KTable<String,Customer> customerKTable=streamsBuilder.table("customer",Consumed.with(Serdes.String(),customerSerde));
@@ -91,15 +91,15 @@ public class EventsListener
         try
         {
             streams.start();
-            ReadOnlyKeyValueStore<String, Customer> customerStore = streams.store("customer", QueryableStoreTypes.keyValueStore());
-            //Customer foundCustomer = customerStore.get("CU559242116");
+            ReadOnlyKeyValueStore<String, Customer> customerStore = streams.store("customer-store", QueryableStoreTypes.keyValueStore());
+            Customer foundCustomer = customerStore.get("CU559242116");
             System.out.println("customerStore.approximateNumEntries()-> " + customerStore.approximateNumEntries());
 
 
             //latch.await();
         }
 
-        catch (Throwable e)
+        catch (Exception e)
         {
             e.printStackTrace();
         }
