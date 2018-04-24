@@ -11,6 +11,12 @@ import org.apache.avro.specific.SpecificRecord;
 import org.apache.kafka.clients.producer.*;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.common.serialization.StringSerializer;
+import org.apache.kafka.streams.KafkaStreams;
+import org.apache.kafka.streams.StreamsBuilder;
+import org.apache.kafka.streams.StreamsConfig;
+import org.apache.kafka.streams.Topology;
+import org.apache.kafka.streams.state.QueryableStoreTypes;
+import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +32,7 @@ public class TestProducer
 
     private Properties properties;
 
+    private StreamsBuilder streamsBuilder;
 
     @Before
     public void setUp()
@@ -33,11 +40,14 @@ public class TestProducer
         //When configuring the default serdes of StreamConfig
         properties = new Properties();
         properties.put(ProducerConfig.CLIENT_ID_CONFIG, "cqrs-streams");
+        properties.put(StreamsConfig.APPLICATION_ID_CONFIG, "cqrs-streams");
         properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+        properties.put("commit.interval.ms", "1000");
         properties.put(KafkaAvroSerializerConfig.SCHEMA_REGISTRY_URL_CONFIG, "http://localhost:8081");
         properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
         properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, SpecificAvroSerializer.class.getName());
 
+        streamsBuilder = new StreamsBuilder();
     }
 
     @Test
@@ -63,11 +73,11 @@ public class TestProducer
     @Test
     public void sendOrder() throws ExecutionException, InterruptedException
     {
-        Random random=new Random(1);
+        Random random = new Random(1);
 
         //Send Order Event
-        Order order=new Order();
-        order.setOrderId("ORD"+random.nextInt());
+        Order order = new Order();
+        order.setOrderId("ORD" + random.nextInt(10000));
         order.setCustomerId("CU1001");
         order.setOrderItemName("Reebok Shoes");
         order.setOrderPlace("NewYork,NY");
@@ -86,11 +96,11 @@ public class TestProducer
     @Test
     public void sendOrderToKTable() throws ExecutionException, InterruptedException
     {
-        Random random=new Random(1);
+        Random random = new Random(1);
 
         //Send Order Event
-        Order order=new Order();
-        order.setOrderId("ORD"+random.nextInt());
+        Order order = new Order();
+        order.setOrderId("ORD" + random.nextInt());
         order.setCustomerId("CU1001");
         order.setOrderItemName("Reebok Shoes");
         order.setOrderPlace("NewYork,NY");
@@ -106,6 +116,18 @@ public class TestProducer
         System.out.println("Order future.get(): " + future.get());
     }
 
+    @Test
+    public void queryCustomerStore()
+    {
+        SpecificAvroSerde<Customer> customerSerde = createSerde("http://localhost:8081");
+        Topology topology = streamsBuilder.build();
+        KafkaStreams streams = new KafkaStreams(topology, properties);
+        streams.start();
+
+        ReadOnlyKeyValueStore<String, Customer> customerStore = streams.store("customer", QueryableStoreTypes.keyValueStore());
+        Customer foundCustomer = customerStore.get("CU1001");
+        System.out.println("Found Customer: " + foundCustomer.toString());
+    }
 
     private <VT extends SpecificRecord> SpecificAvroSerde<VT> createSerde(final String schemaRegistryUrl)
     {
@@ -117,7 +139,7 @@ public class TestProducer
 
     private String getCurrentTime()
     {
-        Calendar calendar=Calendar.getInstance(TimeZone.getDefault());
+        Calendar calendar = Calendar.getInstance(TimeZone.getDefault());
         return calendar.getTime().toString();
     }
 

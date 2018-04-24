@@ -32,6 +32,7 @@ public class EventsSender
         properties.put("application.id", "cqrs-streams");
         properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
         properties.put("schema.registry.url", "http://localhost:8081");
+        properties.put("commit.interval.ms","100");
         properties.put("acks", "all");
         properties.put("key.serializer", Serdes.String().serializer().getClass());
         properties.put("value.serializer", SpecificAvroSerializer.class);
