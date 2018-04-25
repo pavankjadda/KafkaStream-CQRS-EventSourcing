@@ -48,8 +48,9 @@ public class EventsListener
 
         StoreBuilder customerStateStore = Stores.keyValueStoreBuilder(Stores.persistentKeyValueStore("customer-store"),Serdes.String(), customerSerde)
                                            .withLoggingEnabled(new HashMap<>());
-        streamsBuilder.addStateStore(customerStateStore);
-        KTable<String,Customer> customerKTable=streamsBuilder.table("customer",Consumed.with(Serdes.String(),customerSerde));
+        //streamsBuilder.addStateStore(customerStateStore);
+
+        KTable<String,Customer> customerKTable=streamsBuilder.table("customer",Consumed.with(Serdes.String(),customerSerde),Materialized.as(customerStateStore.name()));
         customerKTable.foreach(((key, value) -> System.out.println("Customer from Topic: "+value)));
 
 
@@ -91,9 +92,16 @@ public class EventsListener
         try
         {
             streams.start();
-            ReadOnlyKeyValueStore<String, Customer> customerStore = streams.store("customer-store", QueryableStoreTypes.keyValueStore());
-            Customer foundCustomer = customerStore.get("CU559242116");
-            System.out.println("customerStore.approximateNumEntries()-> " + customerStore.approximateNumEntries());
+
+            while(!streams.state().isRunning())
+            {
+                Thread.sleep(10000);
+                ReadOnlyKeyValueStore<String, Customer> customerStore = streams.store("customer-store", QueryableStoreTypes.keyValueStore());
+                Customer foundCustomer = customerStore.get("CU559242116");
+                System.out.println("customerStore.approximateNumEntries()-> " + customerStore.approximateNumEntries());
+
+            }
+
 
 
             //latch.await();

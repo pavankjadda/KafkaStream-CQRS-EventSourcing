@@ -39,14 +39,13 @@ public class TestProducer
     {
         //When configuring the default serdes of StreamConfig
         properties = new Properties();
-        properties.put(ProducerConfig.CLIENT_ID_CONFIG, "cqrs-streams");
-        properties.put(StreamsConfig.APPLICATION_ID_CONFIG, "cqrs-streams");
+        properties.put("application.id", "cqrs-streams");
         properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
-        properties.put("commit.interval.ms", "1000");
-        properties.put(KafkaAvroSerializerConfig.SCHEMA_REGISTRY_URL_CONFIG, "http://localhost:8081");
-        properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
-        properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, SpecificAvroSerializer.class.getName());
-
+        properties.put("schema.registry.url", "http://localhost:8081");
+        properties.put("commit.interval.ms","100");
+        properties.put("acks", "all");
+        properties.put("key.serializer", Serdes.String().serializer().getClass());
+        properties.put("value.serializer", SpecificAvroSerializer.class);
         streamsBuilder = new StreamsBuilder();
     }
 
@@ -124,9 +123,9 @@ public class TestProducer
         KafkaStreams streams = new KafkaStreams(topology, properties);
         streams.start();
 
-        ReadOnlyKeyValueStore<String, Customer> customerStore = streams.store("customer", QueryableStoreTypes.keyValueStore());
+        ReadOnlyKeyValueStore<String, Customer> customerStore = streams.store("customer-store", QueryableStoreTypes.keyValueStore());
         Customer foundCustomer = customerStore.get("CU1001");
-        System.out.println("Found Customer: " + foundCustomer.toString());
+        System.out.println("customerStore.approximateNumEntries()-> " + customerStore.approximateNumEntries());
     }
 
     private <VT extends SpecificRecord> SpecificAvroSerde<VT> createSerde(final String schemaRegistryUrl)
