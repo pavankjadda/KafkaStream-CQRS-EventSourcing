@@ -33,7 +33,7 @@ public class EventsController
     public Greetings sendGreetings() throws ExecutionException, InterruptedException
     {
         Random  random=new Random(1);
-        String message = "Message "+random.nextInt();
+        String message = "Message "+random.nextInt(10000);
         Greetings greetings = new Greetings(message,getCurrentTime());
         eventsSender.sendGreetingsEvent(greetings);
         return greetings;
@@ -45,7 +45,7 @@ public class EventsController
     {
         //Send Customer Event
         Customer customer=new Customer();
-        customer.setCustomerId("CU"+random.nextInt());
+        customer.setCustomerId("CU"+random.nextInt(10000));
         customer.setFirstName("John");
         customer.setLastName("Doe");
         customer.setEmail("john.doe@gmail.com");

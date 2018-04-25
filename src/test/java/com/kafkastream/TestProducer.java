@@ -4,17 +4,16 @@ import com.kafkastream.model.Customer;
 import com.kafkastream.model.Order;
 import com.kafkastream.service.EventsSender;
 import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
-import io.confluent.kafka.serializers.KafkaAvroSerializerConfig;
 import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde;
 import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerializer;
 import org.apache.avro.specific.SpecificRecord;
 import org.apache.kafka.clients.producer.*;
 import org.apache.kafka.common.serialization.Serdes;
-import org.apache.kafka.common.serialization.StringSerializer;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StreamsBuilder;
-import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.Topology;
+import org.apache.kafka.streams.errors.InvalidStateStoreException;
+import org.apache.kafka.streams.state.QueryableStoreType;
 import org.apache.kafka.streams.state.QueryableStoreTypes;
 import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
 import org.junit.Before;
@@ -22,6 +21,7 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.*;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
@@ -60,7 +60,7 @@ public class TestProducer
         customer.setCustomerId("CU1001");
         customer.setFirstName("John");
         customer.setLastName("Doe");
-        customer.setEmail("john.doe@gmail.com");
+        customer.setEmail("john.doe@mail.com");
         customer.setPhone("993-332-9832");
 
         ProducerRecord<String, Customer> customerRecord = new ProducerRecord<>("customer", customer.getCustomerId().toString(), customer);
@@ -115,18 +115,6 @@ public class TestProducer
         System.out.println("Order future.get(): " + future.get());
     }
 
-    @Test
-    public void queryCustomerStore()
-    {
-        SpecificAvroSerde<Customer> customerSerde = createSerde("http://localhost:8081");
-        Topology topology = streamsBuilder.build();
-        KafkaStreams streams = new KafkaStreams(topology, properties);
-        streams.start();
-
-        ReadOnlyKeyValueStore<String, Customer> customerStore = streams.store("customer-store", QueryableStoreTypes.keyValueStore());
-        Customer foundCustomer = customerStore.get("CU1001");
-        System.out.println("customerStore.approximateNumEntries()-> " + customerStore.approximateNumEntries());
-    }
 
     private <VT extends SpecificRecord> SpecificAvroSerde<VT> createSerde(final String schemaRegistryUrl)
     {
