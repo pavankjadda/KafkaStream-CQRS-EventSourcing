@@ -92,19 +92,15 @@ public class EventsListener
         try
         {
             streams.start();
-
-            while(!streams.state().isRunning())
+          /*  while(!streams.state().isRunning())
             {
                 Thread.sleep(10000);
                 ReadOnlyKeyValueStore<String, Customer> customerStore = streams.store("customer-store", QueryableStoreTypes.keyValueStore());
                 Customer foundCustomer = customerStore.get("CU559242116");
                 System.out.println("customerStore.approximateNumEntries()-> " + customerStore.approximateNumEntries());
 
-            }
-
-
-
-            //latch.await();
+            }*/
+            latch.await();
         }
 
         catch (Exception e)
@@ -119,7 +115,7 @@ public class EventsListener
             public void run()
             {
                 streams.close();
-                //latch.countDown();
+                latch.countDown();
             }
         });
 

@@ -99,7 +99,7 @@ public class TestProducer
 
         //Send Order Event
         Order order = new Order();
-        order.setOrderId("ORD" + random.nextInt());
+        order.setOrderId("ORD" + random.nextInt(10000));
         order.setCustomerId("CU1001");
         order.setOrderItemName("Reebok Shoes");
         order.setOrderPlace("NewYork,NY");
