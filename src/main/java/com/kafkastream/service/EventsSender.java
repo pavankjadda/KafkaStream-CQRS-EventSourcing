@@ -51,8 +51,9 @@ public class EventsSender
 
     public void sendCustomerEvent(Customer customer) throws ExecutionException, InterruptedException
     {
-        Producer<String, Customer> kafkaProducerCustomer = new KafkaProducer<>(properties);
-        ProducerRecord<String, Customer> customerRecord = new ProducerRecord<String, Customer>("customer", (String) customer.getCustomerId(), customer);
+        SpecificAvroSerde<Customer> customerSerde = createSerde("http://localhost:8081");
+        Producer<String, Customer> kafkaProducerCustomer = new KafkaProducer<>(properties,Serdes.String().serializer(),customerSerde.serializer());
+        ProducerRecord<String, Customer> customerRecord = new ProducerRecord<>("customer", customer.getCustomerId().toString(), customer);
         Future<RecordMetadata> future = kafkaProducerCustomer.send(customerRecord);
         System.out.println("Customer record sent. Customer Id: " + customer.getCustomerId());
         System.out.println("Customer future.get(): " + future.get());
@@ -60,7 +61,8 @@ public class EventsSender
 
     public void sendOrderEvent(Order order) throws ExecutionException, InterruptedException
     {
-        Producer<String, Order> kafkaOrderProducer = new KafkaProducer<>(properties);
+        SpecificAvroSerde<Order> orderSerde = createSerde("http://localhost:8081");
+        Producer<String, Order> kafkaOrderProducer = new KafkaProducer<>(properties,Serdes.String().serializer(),orderSerde.serializer());
         ProducerRecord<String, Order> orderRecord = new ProducerRecord<>("order", order.getOrderId().toString(), order);
         Future<RecordMetadata> future = kafkaOrderProducer.send(orderRecord);
         System.out.println("Order sent. Order Id: " + order.getOrderId());

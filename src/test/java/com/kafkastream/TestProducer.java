@@ -67,6 +67,7 @@ public class TestProducer
         Future<RecordMetadata> future = producer.send(customerRecord);
         System.out.println("Customer record sent. Customer Id: " + customer.getCustomerId());
         System.out.println("Customer future.get(): " + future.get());
+
     }
 
     @Test
@@ -77,7 +78,7 @@ public class TestProducer
         //Send Order Event
         Order order = new Order();
         order.setOrderId("ORD" + random.nextInt(10000));
-        order.setCustomerId("CU1001");
+        order.setCustomerId("CU8985");
         order.setOrderItemName("Reebok Shoes");
         order.setOrderPlace("NewYork,NY");
         order.setOrderPurchaseTime(getCurrentTime());
