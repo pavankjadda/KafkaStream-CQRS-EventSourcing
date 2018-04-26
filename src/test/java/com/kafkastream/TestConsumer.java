@@ -17,6 +17,7 @@ import org.apache.kafka.streams.kstream.Materialized;
 import org.apache.kafka.streams.kstream.Produced;
 import org.apache.kafka.streams.state.*;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.Collections;
@@ -132,7 +133,7 @@ public class TestConsumer
 
 
     @Test
-    public void allCustomerAndOrderEvents()
+    public void consumeAllCustomerAndOrderEvents()
     {
         SpecificAvroSerde<Customer> customerSerde = createSerde("http://localhost:8081");
         SpecificAvroSerde<Order> orderSerde = createSerde("http://localhost:8081");
@@ -180,10 +181,10 @@ public class TestConsumer
         try
         {
             streams.start();
-            latch.await();
-            /*ReadOnlyKeyValueStore<String, Customer> customerStore = streams.store("customer-store", QueryableStoreTypes.keyValueStore());
+            ReadOnlyKeyValueStore<String, Customer> customerStore = waitUntilStoreIsQueryable("customer-store", QueryableStoreTypes.keyValueStore(),streams);
             System.out.println("customerStore.approximateNumEntries() -> " + customerStore.approximateNumEntries());
-        */}
+            latch.await();
+        }
         catch (Exception e)
         {
             e.printStackTrace();
@@ -203,6 +204,28 @@ public class TestConsumer
     }
 
     @Test
+    public void cleanStateStore()
+    {
+        Topology topology = streamsBuilder.build();
+        KafkaStreams streams = new KafkaStreams(topology, properties);
+        CountDownLatch latch = new CountDownLatch(1);
+        // This is not part of Runtime.getRuntime() block
+        try
+        {
+            streams.start();
+            streams.close();
+            streams.cleanUp();
+            latch.await();
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    //Not using this test case
+    @Test
+    @Ignore
     public void queryCustomerStore() throws InterruptedException
     {
         SpecificAvroSerde<Customer> customerSerde = createSerde("http://localhost:8081");
@@ -239,6 +262,8 @@ public class TestConsumer
         });
 
     }
+
+
 
 
     public static <T> T waitUntilStoreIsQueryable(final String storeName, final QueryableStoreType<T> queryableStoreType, final KafkaStreams streams) throws InterruptedException
