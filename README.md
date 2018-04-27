@@ -1,4 +1,4 @@
-# CQRS Event Sourcing with Kafka Streaming
+# CQRS Event Sourcing and Materialized views with Kafka Streams
 ## What's this?
 This repository demonstrates [CQRS](https://www.confluent.io/blog/event-sourcing-cqrs-stream-processing-apache-kafka-whats-connection/) Event Sourcing (Materialized views) with Kafka Streaming ([not Kafka messaging](https://github.com/pavankjadda/SpringCloudStream-Kafka))
 
