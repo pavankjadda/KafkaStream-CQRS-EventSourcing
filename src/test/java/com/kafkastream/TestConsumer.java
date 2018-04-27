@@ -45,6 +45,7 @@ public class TestConsumer
         this.streamsBuilder = new StreamsBuilder();
     }
 
+
     @Test
     public void consumeCustomerEvent() throws InterruptedException
     {
@@ -86,6 +87,46 @@ public class TestConsumer
         System.exit(0);
     }
 
+    @Test
+    public void consumeCustomerEvent_withKTable() throws InterruptedException
+    {
+        SpecificAvroSerde<Customer> customerSerde = createSerde("http://localhost:8081");
+        StoreBuilder customerStateStore = Stores.keyValueStoreBuilder(Stores.persistentKeyValueStore("customer-store"),Serdes.String(), customerSerde)
+                                                .withLoggingEnabled(new HashMap<>());
+        KTable<String, Customer> customerKTable = streamsBuilder.table("customer",Materialized.<String, Customer, KeyValueStore<Bytes, byte[]>>as(customerStateStore.name())
+                                                                .withKeySerde(Serdes.String())
+                                                                .withValueSerde(customerSerde));
+        customerKTable.foreach(((key, value) -> System.out.println("Customer from Topic: " + value)));
+
+        Topology topology = streamsBuilder.build();
+        KafkaStreams streams = new KafkaStreams(topology, properties);
+        CountDownLatch latch = new CountDownLatch(1);
+        // This is not part of Runtime.getRuntime() block
+        try
+        {
+            streams.start();
+            ReadOnlyKeyValueStore<String, Customer> customerStore = waitUntilStoreIsQueryable("customer-store", QueryableStoreTypes.keyValueStore(),streams);
+            System.out.println("customerStore.approximateNumEntries() -> " + customerStore.approximateNumEntries());
+            latch.await();
+        }
+
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        //Close Runtime
+        Runtime.getRuntime().addShutdownHook(new Thread("streams-shutdown-hook")
+        {
+            @Override
+            public void run()
+            {
+                streams.close();
+                latch.countDown();
+            }
+        });
+        System.exit(0);
+    }
 
     @Test
     public void consumeOrderEvent() throws InterruptedException
