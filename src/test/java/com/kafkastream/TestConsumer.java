@@ -171,89 +171,9 @@ public class TestConsumer
     }
 
 
-    @Test
-    public void consumeAllCustomerAndOrderEvents()
-    {
-        SpecificAvroSerde<Customer> customerSerde = createSerde("http://localhost:8081");
-        SpecificAvroSerde<Order> orderSerde = createSerde("http://localhost:8081");
-        SpecificAvroSerde<CustomerOrder> customerOrderSerde = createSerde("http://localhost:8081");
-
-        StoreBuilder customerStateStore = Stores.keyValueStoreBuilder(Stores.persistentKeyValueStore("customer-store"),Serdes.String(), customerSerde)
-                .withLoggingEnabled(new HashMap<>());
-        streamsBuilder.stream("customer", Consumed.with(Serdes.String(), customerSerde)).to("customer-to-ktable-topic",Produced.with(Serdes.String(), customerSerde));
-        KTable<String, Customer> customerKTable = streamsBuilder.table("customer-to-ktable-topic", Consumed.with(Serdes.String(), customerSerde), Materialized.<String, Customer, KeyValueStore<Bytes, byte[]>>as(customerStateStore.name()).withKeySerde(Serdes.String()).withValueSerde(customerSerde));
-        customerKTable.foreach(((key, value) -> System.out.println("Customer from Topic: " + value)));
-
-
-        KStream<String, Order> orderKStream = streamsBuilder.stream("order",Consumed.with(Serdes.String(), orderSerde))
-                .selectKey((key, value) -> value.getCustomerId().toString());
-        orderKStream.to("order-to-ktable-topic",Produced.with(Serdes.String(),orderSerde));
-        KTable<String,Order> orderKTable=streamsBuilder.table("order-to-ktable-topic",Consumed.with(Serdes.String(),orderSerde));
-
-        Topology topology = streamsBuilder.build();
-        KafkaStreams streams = new KafkaStreams(topology, properties);
-        CountDownLatch latch = new CountDownLatch(1);
-        // This is not part of Runtime.getRuntime() block
-        try
-        {
-            streams.cleanUp();
-            streams.start();
-            ReadOnlyKeyValueStore<String, Customer> customerStore = waitUntilStoreIsQueryable("customer-store", QueryableStoreTypes.keyValueStore(),streams);
-            System.out.println("customerStore.approximateNumEntries() -> " + customerStore.approximateNumEntries());
-            StoreBuilder customerOrdersStateStore = Stores.keyValueStoreBuilder(Stores.persistentKeyValueStore("customer-orders-store"),Serdes.String(), customerOrderSerde)
-                    .withLoggingEnabled(new HashMap<>());
-            KTable<String,CustomerOrder> customerOrderKTable=customerKTable.join(orderKTable,(customer, order)->
-            {
-                if(customer!=null && order!=null)
-                {
-                    CustomerOrder   customerOrder=new CustomerOrder();
-                    customerOrder.setCustomerId(customer.getCustomerId());
-                    customerOrder.setFirstName(customer.getFirstName());
-                    customerOrder.setLastName(customer.getLastName());
-                    customerOrder.setEmail(customer.getEmail());
-                    customerOrder.setPhone(customer.getPhone());
-                    customerOrder.setOrderId(order.getOrderId());
-                    customerOrder.setOrderItemName(order.getOrderItemName());
-                    customerOrder.setOrderPlace(order.getOrderPlace());
-                    customerOrder.setOrderPurchaseTime(order.getOrderPurchaseTime());
-
-                    return customerOrder;
-                }
-                return null;
-            });
-            customerOrderKTable.foreach(((key, value) -> System.out.println("Customer Order -> "+value.toString())));
-
-            ReadOnlyKeyValueStore<String, CustomerOrder> customerOrdersStore = waitUntilStoreIsQueryable("customer-orders-store", QueryableStoreTypes.keyValueStore(),streams);
-            KeyValueIterator<String,CustomerOrder> keyValueIterator=customerOrdersStore.all();
-            while(keyValueIterator.hasNext())
-            {
-                System.out.println("keyValueIterator.peekNextKey() ->"+keyValueIterator.peekNextKey());
-            }
-            System.out.println("customerOrdersStore.approximateNumEntries() -> " + customerOrdersStore.approximateNumEntries());
-
-            latch.await();
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
-
-        //Close Runtime
-        Runtime.getRuntime().addShutdownHook(new Thread("streams-shutdown-hook")
-        {
-            @Override
-            public void run()
-            {
-                streams.close();
-                latch.countDown();
-            }
-        });
-        System.exit(0);
-    }
-
 
     @Test
-    public void consumeAllEvents_Basic()
+    public void consumeCustomerAndOrderEvents()
     {
         SpecificAvroSerde<Customer> customerSerde = createSerde("http://localhost:8081");
         SpecificAvroSerde<Order> orderSerde = createSerde("http://localhost:8081");
@@ -263,12 +183,18 @@ public class TestConsumer
                 .withLoggingEnabled(new HashMap<>());
         StoreBuilder orderStateStore = Stores.keyValueStoreBuilder(Stores.persistentKeyValueStore("order-store"),Serdes.String(), customerSerde)
                 .withLoggingEnabled(new HashMap<>());
-        KTable<String, Customer> customerKTable = streamsBuilder.table("customer", Consumed.with(Serdes.String(), customerSerde), Materialized.<String, Customer, KeyValueStore<Bytes, byte[]>>as(customerStateStore.name()).withKeySerde(Serdes.String()).withValueSerde(customerSerde));
+        StoreBuilder customerOrderStateStore = Stores.keyValueStoreBuilder(Stores.persistentKeyValueStore("customer-orders-store"),Serdes.String(), customerSerde)
+                .withLoggingEnabled(new HashMap<>());
+        KTable<String, Customer> customerKTable = streamsBuilder.table("customer",Materialized.<String, Customer, KeyValueStore<Bytes, byte[]>>as(customerStateStore.name())
+                                                                .withKeySerde(Serdes.String())
+                                                                .withValueSerde(customerSerde));
         customerKTable.foreach(((key, value) -> System.out.println("Customer from Topic: " + value)));
 
         streamsBuilder.stream("order",Consumed.with(Serdes.String(), orderSerde))
-                      .selectKey((key, value) -> value.getCustomerId().toString()).to("order-to-ktable-topic",Produced.with(Serdes.String(),orderSerde));
-        KTable<String,Order> orderKTable=streamsBuilder.table("order-to-ktable-topic",Consumed.with(Serdes.String(),orderSerde));
+                      .selectKey((key, value) -> value.getCustomerId().toString()).to("order-to-ktable",Produced.with(Serdes.String(),orderSerde));
+        KTable<String,Order> orderKTable=streamsBuilder.table("order-to-ktable",Materialized.<String, Order, KeyValueStore<Bytes, byte[]>>as(orderStateStore.name())
+                                                        .withKeySerde(Serdes.String())
+                                                        .withValueSerde(orderSerde));
         orderKTable.foreach(((key, value) -> System.out.println("Order from Topic: " + value)));
 
         KTable<String,CustomerOrder> customerOrderKTable=customerKTable.join(orderKTable,(customer, order)->
@@ -289,7 +215,7 @@ public class TestConsumer
                 return customerOrder;
             }
             return  null;
-        });
+        },Materialized.<String, CustomerOrder, KeyValueStore<Bytes, byte[]>>as(customerOrderStateStore.name()).withKeySerde(Serdes.String()).withValueSerde(customerOrderSerde));
         customerOrderKTable.foreach(((key, value) -> System.out.println("Customer Order -> "+value.toString())));
 
 
@@ -300,6 +226,14 @@ public class TestConsumer
         try
         {
             streams.start();
+            ReadOnlyKeyValueStore<String, CustomerOrder> customerOrdersStore = waitUntilStoreIsQueryable("customer-orders-store", QueryableStoreTypes.keyValueStore(),streams);
+            KeyValueIterator<String,CustomerOrder> keyValueIterator=customerOrdersStore.all();
+            while(keyValueIterator.hasNext())
+            {
+                System.out.println("keyValueIterator.peekNextKey() ->"+keyValueIterator.peekNextKey());
+                keyValueIterator.next();
+            }
+            System.out.println("customerOrdersStore.approximateNumEntries() -> " + customerOrdersStore.approximateNumEntries());
             latch.await();
         }
         catch (Exception e)
@@ -435,9 +369,9 @@ public class TestConsumer
         {
             streams.start();
             //Thread.sleep(1000);
-            ReadOnlyKeyValueStore<String, Customer> customerStore = waitUntilStoreIsQueryable("customer-store", QueryableStoreTypes.keyValueStore(),streams);
+            ReadOnlyKeyValueStore<String, CustomerOrder> customerOrdersStore = waitUntilStoreIsQueryable("customer-orders-store", QueryableStoreTypes.keyValueStore(),streams);
             //Customer foundCustomer = customerStore.get("CU1001");
-            System.out.println("customerStore.approximateNumEntries()-> " + customerStore.approximateNumEntries());
+            System.out.println("customerStore.approximateNumEntries()-> " + customerOrdersStore.approximateNumEntries());
             //latch.await();
             /*ReadOnlyKeyValueStore<String, Customer> customerStore = streams.store("customer-store", QueryableStoreTypes.keyValueStore());
             System.out.println("customerStore.approximateNumEntries() -> " + customerStore.approximateNumEntries());
