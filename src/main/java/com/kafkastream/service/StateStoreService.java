@@ -30,10 +30,8 @@ public class StateStoreService
     public StateStoreService()
     {
         this.properties = new Properties();
-        properties.put("application.id", "cqrs-streams");
-        properties.put("application.server", "localhost:8095");
+        properties.put("application.id", "cqrs-streams2");
         properties.put("bootstrap.servers", "localhost:9092");
-        properties.put("group.id", "cqrs");
         properties.put("schema.registry.url", "http://localhost:8081");
         properties.put("auto.offset.reset", "earliest");
         properties.put("topic.metadata.refresh.interval.ms","100");
