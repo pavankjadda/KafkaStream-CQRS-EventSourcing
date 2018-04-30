@@ -9,6 +9,7 @@ import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerializer;
 import org.apache.avro.specific.SpecificRecord;
 import org.apache.kafka.clients.producer.*;
 import org.apache.kafka.common.serialization.Serdes;
+import org.apache.kafka.streams.StreamsBuilder;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.stereotype.Service;
 
@@ -26,6 +27,9 @@ public class EventsSender
 {
     private Properties properties;
 
+    private StreamsBuilder streamsBuilder;
+
+
     public EventsSender() throws UnknownHostException
     {
         this.properties = new Properties();
@@ -33,9 +37,12 @@ public class EventsSender
         properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
         properties.put("schema.registry.url", "http://localhost:8081");
         properties.put("commit.interval.ms","100");
+        properties.put("topic.metadata.refresh.interval.ms","100");
         properties.put("acks", "all");
         properties.put("key.serializer", Serdes.String().serializer().getClass());
         properties.put("value.serializer", SpecificAvroSerializer.class);
+
+        this.streamsBuilder=new StreamsBuilder();
     }
 
     public void sendGreetingsEvent(Greetings greetings) throws ExecutionException, InterruptedException

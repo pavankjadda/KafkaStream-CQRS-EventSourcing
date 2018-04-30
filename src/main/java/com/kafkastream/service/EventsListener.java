@@ -12,59 +12,72 @@ import org.apache.avro.specific.SpecificRecord;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.common.utils.Bytes;
 import org.apache.kafka.streams.*;
+import org.apache.kafka.streams.errors.InvalidStateStoreException;
 import org.apache.kafka.streams.errors.TopologyBuilderException;
 import org.apache.kafka.streams.kstream.*;
 import org.apache.kafka.streams.processor.ProcessorContext;
 import org.apache.kafka.streams.state.*;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 
 public class EventsListener
 {
+    private static KafkaStreams streams;
+
+    private static List<CustomerOrder>  customerOrders=new ArrayList<>();
+
+    private static StreamsBuilder  streamsBuilder;
+
+    private static Properties properties;
+
+    private static void setUp()
+    {
+        properties = new Properties();
+        properties.put("application.id", "cqrs-streams");
+        properties.put("application.server", "localhost:8096");
+        properties.put("bootstrap.servers", "localhost:9092");
+        properties.put("commit.interval.ms", "2000");
+        properties.put("auto.offset.reset", "earliest");
+        properties.put("schema.registry.url", "http://localhost:8081");
+        properties.put("acks", "all");
+        properties.put("key.deserializer", Serdes.String().deserializer().getClass());
+        properties.put("value.deserializer", SpecificAvroDeserializer.class);
+        streamsBuilder = new StreamsBuilder();
+    }
 
     public static void main(String[] args)
     {
-        Properties properties = new Properties();
-        properties.put(StreamsConfig.APPLICATION_ID_CONFIG,"cqrs-streams");
-        properties.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
-        properties.put("commit.interval.ms","1000");
-        properties.put("schema.registry.url", "http://localhost:8081");
-        properties.put("acks", "all");
-        properties.put("key.deserializer", SpecificAvroDeserializer.class);
-        properties.put("value.deserializer", SpecificAvroDeserializer.class);
-
-        StreamsBuilder streamsBuilder = new StreamsBuilder();
-
+        setUp();
         SpecificAvroSerde<Customer> customerSerde = createSerde("http://localhost:8081");
         SpecificAvroSerde<Order> orderSerde = createSerde("http://localhost:8081");
-        SpecificAvroSerde<Greetings> greetingsSerde = createSerde("http://localhost:8081");
         SpecificAvroSerde<CustomerOrder> customerOrderSerde = createSerde("http://localhost:8081");
 
         StoreBuilder customerStateStore = Stores.keyValueStoreBuilder(Stores.persistentKeyValueStore("customer-store"),Serdes.String(), customerSerde)
-                                           .withLoggingEnabled(new HashMap<>());
-        //streamsBuilder.addStateStore(customerStateStore);
+                .withLoggingEnabled(new HashMap<>());
+        StoreBuilder orderStateStore = Stores.keyValueStoreBuilder(Stores.persistentKeyValueStore("order-store"),Serdes.String(), customerSerde)
+                .withLoggingEnabled(new HashMap<>());
+        StoreBuilder customerOrderStateStore = Stores.keyValueStoreBuilder(Stores.persistentKeyValueStore("customer-orders-store"),Serdes.String(), customerSerde)
+                .withLoggingEnabled(new HashMap<>()).withCachingEnabled();
+        KTable<String, Customer> customerKTable = streamsBuilder.table("customer",Materialized.<String, Customer, KeyValueStore<Bytes, byte[]>>as(customerStateStore.name())
+                .withKeySerde(Serdes.String())
+                .withValueSerde(customerSerde));
+        customerKTable.foreach(((key, value) -> System.out.println("Customer from Topic: " + value)));
 
-        KTable<String,Customer> customerKTable=streamsBuilder.table("customer",Consumed.with(Serdes.String(),customerSerde),Materialized.as(customerStateStore.name()));
-        customerKTable.foreach(((key, value) -> System.out.println("Customer from Topic: "+value)));
+        streamsBuilder.stream("order",Consumed.with(Serdes.String(), orderSerde))
+                .selectKey((key, value) -> value.getCustomerId().toString()).to("order-to-ktable",Produced.with(Serdes.String(),orderSerde));
+        KTable<String,Order> orderKTable=streamsBuilder.table("order-to-ktable",Materialized.<String, Order, KeyValueStore<Bytes, byte[]>>as(orderStateStore.name())
+                .withKeySerde(Serdes.String())
+                .withValueSerde(orderSerde));
+        orderKTable.foreach(((key, value) -> System.out.println("Order from Topic: " + value)));
 
-
-        /*KStream<String, Order> orderKStream = streamsBuilder.stream("order",Consumed.with(Serdes.String(), orderSerde))
-                                                            .selectKey((key, value) -> value.getCustomerId().toString());
-        orderKStream.to("order-to-ktable-topic",Produced.with(Serdes.String(),orderSerde));
-        KTable<String,Order> orderKTable=streamsBuilder.table("order-to-ktable-topic",Consumed.with(Serdes.String(),orderSerde),Materialized.as("order"));
-        orderKTable.foreach(((key, value) -> System.out.println("Order from Topic: "+value)));
-
-        KTable<String,CustomerOrder>    customerOrderKTable=customerKTable.leftJoin(orderKTable,(customer,order)->
+        KTable<String,CustomerOrder> customerOrderKTable=customerKTable.join(orderKTable,(customer, order)->
         {
             if(customer!=null && order!=null)
             {
-                CustomerOrder   customerOrder=new CustomerOrder();
+                CustomerOrder customerOrder=new CustomerOrder();
                 customerOrder.setCustomerId(customer.getCustomerId());
                 customerOrder.setFirstName(customer.getFirstName());
                 customerOrder.setLastName(customer.getLastName());
@@ -74,41 +87,35 @@ public class EventsListener
                 customerOrder.setOrderItemName(order.getOrderItemName());
                 customerOrder.setOrderPlace(order.getOrderPlace());
                 customerOrder.setOrderPurchaseTime(order.getOrderPurchaseTime());
-
                 return customerOrder;
             }
-            return null;
-        });
-
-        //},Materialized.<String, CustomerOrder, KeyValueStore<Bytes, byte[]>>as("customer-orders"));
-        customerOrderKTable.foreach(((key, value) -> System.out.println("Customer Orders from Topic: "+value)));*/
+            return  null;
+        },Materialized.<String, CustomerOrder, KeyValueStore<Bytes, byte[]>>as(customerOrderStateStore.name()).withKeySerde(Serdes.String()).withValueSerde(customerOrderSerde));
+        customerOrderKTable.foreach(((key, value) -> System.out.println("Customer Order -> "+value.toString())));
 
         Topology topology = streamsBuilder.build();
-        KafkaStreams streams = new KafkaStreams(topology, properties);
+        streams = new KafkaStreams(topology, properties);
         CountDownLatch latch = new CountDownLatch(1);
-        //streams.start();
-
         // This is not part of Runtime.getRuntime() block
         try
         {
             streams.start();
-          /*  while(!streams.state().isRunning())
+            ReadOnlyKeyValueStore<String, CustomerOrder> customerOrdersStore = waitUntilStoreIsQueryable("customer-orders-store", QueryableStoreTypes.keyValueStore(),streams);
+            KeyValueIterator<String,CustomerOrder> keyValueIterator=customerOrdersStore.all();
+            while(keyValueIterator.hasNext())
             {
-                Thread.sleep(10000);
-                ReadOnlyKeyValueStore<String, Customer> customerStore = streams.store("customer-store", QueryableStoreTypes.keyValueStore());
-                Customer foundCustomer = customerStore.get("CU559242116");
-                System.out.println("customerStore.approximateNumEntries()-> " + customerStore.approximateNumEntries());
-
-            }*/
+                KeyValue<String,CustomerOrder>  customerOrderKeyValue=keyValueIterator.next();
+                customerOrders.add(customerOrderKeyValue.value);
+                System.out.println("customerOrderKeyValue.value.toString() ->"+customerOrderKeyValue.value.toString());
+            }
             latch.await();
         }
-
         catch (Exception e)
         {
             e.printStackTrace();
         }
 
-
+        //Close Runtime
         Runtime.getRuntime().addShutdownHook(new Thread("streams-shutdown-hook")
         {
             @Override
@@ -118,10 +125,11 @@ public class EventsListener
                 latch.countDown();
             }
         });
-
-
-        //System.exit(0);
+        System.exit(0);
     }
+
+
+
     private static <VT extends SpecificRecord> SpecificAvroSerde<VT> createSerde(final String schemaRegistryUrl)
     {
 
@@ -129,6 +137,24 @@ public class EventsListener
         final Map<String, String> serdeConfig = Collections.singletonMap(AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, schemaRegistryUrl);
         serde.configure(serdeConfig, false);
         return serde;
+    }
+
+
+    public static <T> T waitUntilStoreIsQueryable(final String storeName, final QueryableStoreType<T> queryableStoreType, final KafkaStreams streams) throws InterruptedException
+    {
+        while (true)
+        {
+            try
+            {
+                return streams.store(storeName, queryableStoreType);
+            }
+
+            catch (InvalidStateStoreException ignored)
+            {
+                // store not yet ready for querying
+                Thread.sleep(100);
+            }
+        }
     }
 
 }
