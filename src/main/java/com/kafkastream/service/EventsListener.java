@@ -39,6 +39,7 @@ public class EventsListener
         properties.put("application.id", "cqrs-streams");
         properties.put("application.server", "localhost:8096");
         properties.put("bootstrap.servers", "localhost:9092");
+        properties.put("group.id", "cqrs");
         properties.put("commit.interval.ms", "2000");
         properties.put("auto.offset.reset", "earliest");
         properties.put("schema.registry.url", "http://localhost:8081");

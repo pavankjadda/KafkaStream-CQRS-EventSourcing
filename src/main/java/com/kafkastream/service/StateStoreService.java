@@ -33,6 +33,7 @@ public class StateStoreService
         properties.put("application.id", "cqrs-streams");
         properties.put("application.server", "localhost:8095");
         properties.put("bootstrap.servers", "localhost:9092");
+        properties.put("group.id", "cqrs");
         properties.put("schema.registry.url", "http://localhost:8081");
         properties.put("auto.offset.reset", "earliest");
         properties.put("topic.metadata.refresh.interval.ms","100");
@@ -102,9 +103,6 @@ public class StateStoreService
         {
             try
             {
-                Collection<StreamsMetadata> streamsMetadataList=streams.allMetadata();
-                //Collection<StreamsMetadata> streamsMetadataList=streams.allMetadataForStore(storeName);
-                System.out.println("streamsMetadataList.size(): -> "+streamsMetadataList.size());
                 return streams.store(storeName, queryableStoreType);
             } catch (InvalidStateStoreException ignored)
             {
