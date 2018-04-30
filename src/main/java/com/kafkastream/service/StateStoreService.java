@@ -56,7 +56,7 @@ public class StateStoreService
         try
         {
             streams.start();
-            ReadOnlyKeyValueStore<String, CustomerOrder> customerOrdersStore = waitUntilStoreIsQueryable("customer-orders-store", QueryableStoreTypes.keyValueStore(),streams);
+            ReadOnlyKeyValueStore<String, CustomerOrder> customerOrdersStore = waitUntilStoreIsQueryable("customerordersstore", QueryableStoreTypes.keyValueStore(),streams);
             KeyValueIterator<String,CustomerOrder> keyValueIterator=customerOrdersStore.all();
             while(keyValueIterator.hasNext())
             {

@@ -59,7 +59,7 @@ public class EventsListener
                 .withLoggingEnabled(new HashMap<>());
         StoreBuilder orderStateStore = Stores.keyValueStoreBuilder(Stores.persistentKeyValueStore("order-store"),Serdes.String(), customerSerde)
                 .withLoggingEnabled(new HashMap<>());
-        StoreBuilder customerOrderStateStore = Stores.keyValueStoreBuilder(Stores.persistentKeyValueStore("customer-orders-store"),Serdes.String(), customerSerde)
+        StoreBuilder customerOrderStateStore = Stores.keyValueStoreBuilder(Stores.persistentKeyValueStore("customerordersstore"),Serdes.String(), customerSerde)
                 .withLoggingEnabled(new HashMap<>()).withCachingEnabled();
         KTable<String, Customer> customerKTable = streamsBuilder.table("customer",Materialized.<String, Customer, KeyValueStore<Bytes, byte[]>>as(customerStateStore.name())
                 .withKeySerde(Serdes.String())
@@ -100,7 +100,7 @@ public class EventsListener
         try
         {
             streams.start();
-            ReadOnlyKeyValueStore<String, CustomerOrder> customerOrdersStore = waitUntilStoreIsQueryable("customer-orders-store", QueryableStoreTypes.keyValueStore(),streams);
+            ReadOnlyKeyValueStore<String, CustomerOrder> customerOrdersStore = waitUntilStoreIsQueryable("customerordersstore", QueryableStoreTypes.keyValueStore(),streams);
             KeyValueIterator<String,CustomerOrder> keyValueIterator=customerOrdersStore.all();
             while(keyValueIterator.hasNext())
             {
