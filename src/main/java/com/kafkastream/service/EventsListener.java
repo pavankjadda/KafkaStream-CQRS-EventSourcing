@@ -1,10 +1,9 @@
 package com.kafkastream.service;
 
+import com.kafkastream.config.StreamsBuilderConfig;
 import com.kafkastream.model.Customer;
 import com.kafkastream.model.CustomerOrder;
-import com.kafkastream.model.Greetings;
 import com.kafkastream.model.Order;
-import com.sun.tools.corba.se.idl.constExpr.Or;
 import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
 import io.confluent.kafka.streams.serdes.avro.SpecificAvroDeserializer;
 import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde;
@@ -13,21 +12,16 @@ import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.common.utils.Bytes;
 import org.apache.kafka.streams.*;
 import org.apache.kafka.streams.errors.InvalidStateStoreException;
-import org.apache.kafka.streams.errors.TopologyBuilderException;
 import org.apache.kafka.streams.kstream.*;
-import org.apache.kafka.streams.processor.ProcessorContext;
 import org.apache.kafka.streams.state.*;
 
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
 
 public class EventsListener
 {
     private static KafkaStreams streams;
-
-    private static List<CustomerOrder>  customerOrders=new ArrayList<>();
 
     private static StreamsBuilder  streamsBuilder;
 
@@ -38,12 +32,15 @@ public class EventsListener
         properties = new Properties();
         properties.put("application.id", "cqrs-streams");
         properties.put("bootstrap.servers", "localhost:9092");
+        properties.put("application.server","localhost:8095");
         properties.put("commit.interval.ms", "2000");
         properties.put("auto.offset.reset", "earliest");
         properties.put("schema.registry.url", "http://localhost:8081");
         properties.put("acks", "all");
         properties.put("key.deserializer", Serdes.String().deserializer().getClass());
         properties.put("value.deserializer", SpecificAvroDeserializer.class);
+
+        //streamsBuilder = StreamsBuilderConfig.getInstance();
         streamsBuilder = new StreamsBuilder();
     }
 
@@ -104,7 +101,6 @@ public class EventsListener
             while(keyValueIterator.hasNext())
             {
                 KeyValue<String,CustomerOrder>  customerOrderKeyValue=keyValueIterator.next();
-                customerOrders.add(customerOrderKeyValue.value);
                 System.out.println("customerOrderKeyValue.value.toString() ->"+customerOrderKeyValue.value.toString());
             }
             latch.await();
@@ -155,5 +151,7 @@ public class EventsListener
             }
         }
     }
+
+
 
 }

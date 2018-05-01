@@ -1,19 +1,18 @@
 package com.kafkastream.service;
 
-import com.kafkastream.model.Customer;
+import com.kafkastream.config.StreamsBuilderConfig;
 import com.kafkastream.model.CustomerOrder;
-import com.kafkastream.model.Order;
+import com.kafkastream.web.kafkarest.StateStoreRestService;
 import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
 import io.confluent.kafka.streams.serdes.avro.SpecificAvroDeserializer;
 import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde;
 import org.apache.avro.specific.SpecificRecord;
 import org.apache.kafka.common.serialization.Serdes;
-import org.apache.kafka.common.utils.Bytes;
-import org.apache.kafka.streams.*;
+import org.apache.kafka.streams.KafkaStreams;
+import org.apache.kafka.streams.KeyValue;
+import org.apache.kafka.streams.StreamsBuilder;
+import org.apache.kafka.streams.Topology;
 import org.apache.kafka.streams.errors.InvalidStateStoreException;
-import org.apache.kafka.streams.kstream.KTable;
-import org.apache.kafka.streams.kstream.Materialized;
-import org.apache.kafka.streams.kstream.Produced;
 import org.apache.kafka.streams.state.*;
 import org.springframework.stereotype.Service;
 
@@ -30,17 +29,17 @@ public class StateStoreService
     public StateStoreService()
     {
         this.properties = new Properties();
-        properties.put("application.id", "cqrs-streams2");
+        properties.put("application.id", "cqrs-streams");
         properties.put("bootstrap.servers", "localhost:9092");
-        properties.put("schema.registry.url", "http://localhost:8081");
+        properties.put("application.server","localhost:8096");
+        properties.put("commit.interval.ms", "2000");
         properties.put("auto.offset.reset", "earliest");
-        properties.put("topic.metadata.refresh.interval.ms","100");
-        properties.put("commit.interval.ms", "100");
+        properties.put("schema.registry.url", "http://localhost:8081");
         properties.put("acks", "all");
         properties.put("key.deserializer", Serdes.String().deserializer().getClass());
         properties.put("value.deserializer", SpecificAvroDeserializer.class);
 
-        this.streamsBuilder = new StreamsBuilder();
+        this.streamsBuilder = StreamsBuilderConfig.getInstance();
     }
 
     public List<CustomerOrder> getCustomerOrders(String customerId) throws InterruptedException
@@ -49,20 +48,23 @@ public class StateStoreService
         List<CustomerOrder> customerOrderList = new ArrayList<>();
 
         Topology topology = streamsBuilder.build();
-        KafkaStreams streams = new KafkaStreams(topology, properties);
+        KafkaStreams streams=new KafkaStreams(topology, properties);
         CountDownLatch latch = new CountDownLatch(1);
         // This is not part of Runtime.getRuntime() block
         try
         {
             streams.start();
-            ReadOnlyKeyValueStore<String, CustomerOrder> customerOrdersStore = waitUntilStoreIsQueryable("customerordersstore", QueryableStoreTypes.keyValueStore(),streams);
+            final HostInfo restEndpoint = new HostInfo("localhost", 8096);
+            final StateStoreRestService restService = startRestProxy(streams, restEndpoint);
+            customerOrderList=restService.getCustomerOrders();
+         /*   ReadOnlyKeyValueStore<String, CustomerOrder> customerOrdersStore = waitUntilStoreIsQueryable("customerordersstore", QueryableStoreTypes.keyValueStore(),streams);
             KeyValueIterator<String,CustomerOrder> keyValueIterator=customerOrdersStore.all();
             while(keyValueIterator.hasNext())
             {
                 KeyValue<String,CustomerOrder>  customerOrderKeyValue=keyValueIterator.next();
                 customerOrderList.add(customerOrderKeyValue.value);
                 System.out.println("customerOrderKeyValue.value.toString() ->"+customerOrderKeyValue.value.toString());
-            }
+            }*/
             latch.await();
             //System.out.println("customerOrdersStore.approximateNumEntries() -> " + customerOrdersStore.approximateNumEntries());
         }
@@ -86,6 +88,12 @@ public class StateStoreService
         return customerOrderList;
     }
 
+    static StateStoreRestService startRestProxy(final KafkaStreams streams, final HostInfo hostInfo) throws Exception
+    {
+        final StateStoreRestService interactiveQueriesRestService = new StateStoreRestService(streams, hostInfo);
+        interactiveQueriesRestService.start();
+        return interactiveQueriesRestService;
+    }
     private static <VT extends SpecificRecord> SpecificAvroSerde<VT> createSerde(final String schemaRegistryUrl)
     {
 
@@ -101,6 +109,12 @@ public class StateStoreService
         {
             try
             {
+                Collection<StreamsMetadata> streamsMetadataCollection=streams.allMetadata();
+                Iterator<StreamsMetadata> streamsMetadataIterator=streamsMetadataCollection.iterator();
+                while (streamsMetadataIterator.hasNext())
+                {
+                    System.out.println("streamsMetadataIterator.next() -> "+streamsMetadataIterator.next());
+                }
                 return streams.store(storeName, queryableStoreType);
             } catch (InvalidStateStoreException ignored)
             {
@@ -109,7 +123,5 @@ public class StateStoreService
             }
         }
     }
-
-
 
 }
