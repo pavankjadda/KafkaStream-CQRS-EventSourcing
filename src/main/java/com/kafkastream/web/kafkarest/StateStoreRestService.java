@@ -70,8 +70,8 @@ public class StateStoreRestService
     @Produces(MediaType.APPLICATION_JSON)
     public List<CustomerOrder> getCustomerOrders() throws InterruptedException
     {
-        final HostStoreInfo host =metadataService.streamsMetadataForStoreAndKey("","all", new StringSerializer());
-        // top-five is hosted on another instance
+        final HostStoreInfo host =metadataService.streamsMetadataForStoreAndKey("customerordersstore","all", new StringSerializer());
+        // Customer Orders view is hosted on another instance
         if (!thisHost(host))
         {
             return client.target(String.format("http://%s:%d/%s", host.getHost(), host.getPort(), "/customer-orders/all"))

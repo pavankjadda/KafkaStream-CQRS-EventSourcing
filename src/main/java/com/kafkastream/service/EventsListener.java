@@ -8,6 +8,7 @@ import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
 import io.confluent.kafka.streams.serdes.avro.SpecificAvroDeserializer;
 import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde;
 import org.apache.avro.specific.SpecificRecord;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.common.utils.Bytes;
 import org.apache.kafka.streams.*;
@@ -30,11 +31,11 @@ public class EventsListener
     private static void setUp()
     {
         properties = new Properties();
-        properties.put("application.id", "cqrs-streams");
-        properties.put("bootstrap.servers", "localhost:9092");
-        properties.put("application.server","localhost:8095");
-        properties.put("commit.interval.ms", "2000");
-        properties.put("auto.offset.reset", "earliest");
+        properties.put(StreamsConfig.APPLICATION_ID_CONFIG, "cqrs-streams");
+        properties.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+        properties.put(StreamsConfig.APPLICATION_SERVER_CONFIG,"localhost:8095");
+        properties.put(StreamsConfig.COMMIT_INTERVAL_MS_CONFIG, "2000");
+        properties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
         properties.put("schema.registry.url", "http://localhost:8081");
         properties.put("acks", "all");
         properties.put("key.deserializer", Serdes.String().deserializer().getClass());
