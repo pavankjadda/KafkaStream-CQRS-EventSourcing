@@ -44,40 +44,46 @@ public class StateStoreRestService
         this.hostInfo = hostInfo;
     }
 
-    private static <T> T waitUntilStoreIsQueryable(final String storeName, final QueryableStoreType<T> queryableStoreType, final KafkaStreams streams) throws InterruptedException
+
+    @GET
+    @Path("/{customerId}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public List<CustomerOrder> getCustomerOrders(@PathParam("customerId") String store) throws InterruptedException
     {
-        while (true)
+        final HostStoreInfo host =metadataService.streamsMetadataForStoreAndKey("customerordersstore","all", new StringSerializer());
+        // Customer Orders view is hosted on another instance
+     /*   if (!thisHost(host))
         {
-            try
-            {
-                Collection<StreamsMetadata> streamsMetadataCollection = streams.allMetadata();
-                Iterator<StreamsMetadata> streamsMetadataIterator = streamsMetadataCollection.iterator();
-                while (streamsMetadataIterator.hasNext())
-                {
-                    System.out.println("streamsMetadataIterator.next() -> " + streamsMetadataIterator.next());
-                }
-                return streams.store(storeName, queryableStoreType);
-            } catch (InvalidStateStoreException ignored)
-            {
-                // store not yet ready for querying
-                Thread.sleep(100);
-            }
+            return client.target(String.format("http://%s:%d/%s", host.getHost(), host.getPort(), "/customer-orders/all"))
+                    .request(MediaType.APPLICATION_JSON_TYPE)
+                    .get(new GenericType<List<CustomerOrder>>(){});
+        }*/
+
+        List<CustomerOrder> customerOrderList = new ArrayList<>();
+        ReadOnlyKeyValueStore<String, CustomerOrder> customerOrdersStore = waitUntilStoreIsQueryable("customerordersstore", QueryableStoreTypes.keyValueStore(), streams);
+        KeyValueIterator<String, CustomerOrder> keyValueIterator = customerOrdersStore.all();
+        while (keyValueIterator.hasNext())
+        {
+            KeyValue<String, CustomerOrder> customerOrderKeyValue = keyValueIterator.next();
+            customerOrderList.add(customerOrderKeyValue.value);
+            System.out.println("customerOrderKeyValue.value.toString() ->" + customerOrderKeyValue.value.toString());
         }
+        return customerOrderList;
     }
 
     @GET
     @Path("/all")
     @Produces(MediaType.APPLICATION_JSON)
-    public List<CustomerOrder> getCustomerOrders() throws InterruptedException
+    public List<CustomerOrder> getAllOrders() throws InterruptedException
     {
         final HostStoreInfo host =metadataService.streamsMetadataForStoreAndKey("customerordersstore","all", new StringSerializer());
         // Customer Orders view is hosted on another instance
-        if (!thisHost(host))
+     /*   if (!thisHost(host))
         {
             return client.target(String.format("http://%s:%d/%s", host.getHost(), host.getPort(), "/customer-orders/all"))
                     .request(MediaType.APPLICATION_JSON_TYPE)
                     .get(new GenericType<List<CustomerOrder>>(){});
-        }
+        }*/
 
         List<CustomerOrder> customerOrderList = new ArrayList<>();
         ReadOnlyKeyValueStore<String, CustomerOrder> customerOrdersStore = waitUntilStoreIsQueryable("customerordersstore", QueryableStoreTypes.keyValueStore(), streams);
@@ -141,4 +147,26 @@ public class StateStoreRestService
             jettyServer.stop();
         }
     }
+
+    private static <T> T waitUntilStoreIsQueryable(final String storeName, final QueryableStoreType<T> queryableStoreType, final KafkaStreams streams) throws InterruptedException
+    {
+        while (true)
+        {
+            try
+            {
+                Collection<StreamsMetadata> streamsMetadataCollection = streams.allMetadata();
+                Iterator<StreamsMetadata> streamsMetadataIterator = streamsMetadataCollection.iterator();
+                while (streamsMetadataIterator.hasNext())
+                {
+                    System.out.println("streamsMetadataIterator.next() -> " + streamsMetadataIterator.next());
+                }
+                return streams.store(storeName, queryableStoreType);
+            } catch (InvalidStateStoreException ignored)
+            {
+                // store not yet ready for querying
+                Thread.sleep(100);
+            }
+        }
+    }
+
 }

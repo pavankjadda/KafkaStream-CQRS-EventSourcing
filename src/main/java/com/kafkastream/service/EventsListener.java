@@ -103,13 +103,6 @@ public class EventsListener
             final StateStoreRestService restService = startRestProxy(streams, restEndpoint);
             customerOrderList=restService.getCustomerOrders();
             printList(customerOrderList);
-           /* ReadOnlyKeyValueStore<String, CustomerOrder> customerOrdersStore = waitUntilStoreIsQueryable("customerordersstore", QueryableStoreTypes.keyValueStore(),streams);
-            KeyValueIterator<String,CustomerOrder> keyValueIterator=customerOrdersStore.all();
-            while(keyValueIterator.hasNext())
-            {
-                KeyValue<String,CustomerOrder>  customerOrderKeyValue=keyValueIterator.next();
-                System.out.println("customerOrderKeyValue.value.toString() ->"+customerOrderKeyValue.value.toString());
-            }*/
             latch.await();
         }
         catch (Exception e)

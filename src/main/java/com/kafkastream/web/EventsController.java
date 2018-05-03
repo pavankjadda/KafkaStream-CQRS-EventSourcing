@@ -95,6 +95,14 @@ public class EventsController
 
     @GetMapping("/customerOrders/{customerId}")
     @ResponseStatus(HttpStatus.ACCEPTED)
+    public List<CustomerOrder> getCustomerOrderById(@PathVariable   String  customerId) throws ExecutionException, InterruptedException
+    {
+        //Get CustomerOrders
+        return stateStoreService.getCustomerOrders(customerId);
+    }
+
+    @GetMapping("/customerOrders/{customerId}")
+    @ResponseStatus(HttpStatus.ACCEPTED)
     public List<CustomerOrder> getCustomerOrders(@PathVariable   String  customerId) throws ExecutionException, InterruptedException
     {
         //Get CustomerOrders
