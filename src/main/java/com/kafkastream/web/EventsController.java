@@ -1,5 +1,6 @@
 package com.kafkastream.web;
 
+import com.kafkastream.dto.CustomerOrderDTO;
 import com.kafkastream.model.Customer;
 import com.kafkastream.model.CustomerOrder;
 import com.kafkastream.model.Greetings;
@@ -95,7 +96,7 @@ public class EventsController
 
     @GetMapping("/customerOrders/{customerId}")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public List<CustomerOrder> getCustomerOrderById(@PathVariable   String  customerId) throws ExecutionException, InterruptedException
+    public List<CustomerOrderDTO> getCustomerOrderById(@PathVariable   String  customerId) throws ExecutionException, InterruptedException
     {
         //Get CustomerOrders
         return stateStoreService.getCustomerOrders(customerId);
@@ -103,7 +104,7 @@ public class EventsController
 
     @GetMapping("/customerOrders/{customerId}")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public List<CustomerOrder> getCustomerOrders(@PathVariable   String  customerId) throws ExecutionException, InterruptedException
+    public List<CustomerOrderDTO> getCustomerOrders(@PathVariable   String  customerId) throws ExecutionException, InterruptedException
     {
         //Get CustomerOrders
         return stateStoreService.getCustomerOrders(customerId);

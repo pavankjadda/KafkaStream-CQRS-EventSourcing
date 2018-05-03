@@ -1,6 +1,8 @@
 package com.kafkastream.service;
 
+import com.kafkastream.dto.CustomerOrderDTO;
 import com.kafkastream.config.StreamsBuilderConfig;
+import com.kafkastream.dto.CustomerOrderDTO;
 import com.kafkastream.model.Customer;
 import com.kafkastream.model.CustomerOrder;
 import com.kafkastream.model.Order;
@@ -49,7 +51,7 @@ public class EventsListener
     public static void main(String[] args)
     {
         setUp();
-        List<CustomerOrder> customerOrderList=null;
+        List<CustomerOrderDTO> customerOrderList=null;
         SpecificAvroSerde<Customer> customerSerde = createSerde("http://localhost:8081");
         SpecificAvroSerde<Order> orderSerde = createSerde("http://localhost:8081");
         SpecificAvroSerde<CustomerOrder> customerOrderSerde = createSerde("http://localhost:8081");
@@ -101,7 +103,7 @@ public class EventsListener
             streams.start();
             final HostInfo restEndpoint = new HostInfo("localhost", 8095);
             final StateStoreRestService restService = startRestProxy(streams, restEndpoint);
-            customerOrderList=restService.getCustomerOrders();
+            customerOrderList=restService.getAllCustomersOrders();
             printList(customerOrderList);
             latch.await();
         }
@@ -123,11 +125,11 @@ public class EventsListener
         System.exit(0);
     }
 
-    private static void printList(List<CustomerOrder> customerOrderList)
+    private static void printList(List<CustomerOrderDTO> customerOrderList)
     {
-        for (CustomerOrder customerOrder : customerOrderList)
+        for (CustomerOrderDTO customerOrderdto : customerOrderList)
         {
-            System.out.println("customerOrder-> " + customerOrder);
+            System.out.println("Customer Order DTO-> " + customerOrderdto);
         }
     }
 

@@ -1,6 +1,7 @@
 package com.kafkastream.service;
 
 import com.kafkastream.config.StreamsBuilderConfig;
+import com.kafkastream.dto.CustomerOrderDTO;
 import com.kafkastream.model.CustomerOrder;
 import com.kafkastream.web.kafkarest.StateStoreRestService;
 import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
@@ -42,10 +43,10 @@ public class StateStoreService
         this.streamsBuilder = StreamsBuilderConfig.getInstance();
     }
 
-    public List<CustomerOrder> getCustomerOrders(String customerId) throws InterruptedException
+    public List<CustomerOrderDTO> getCustomerOrders(String customerId) throws InterruptedException
     {
 
-        List<CustomerOrder> customerOrderList = new ArrayList<>();
+        List<CustomerOrderDTO> customerOrderList = new ArrayList<>();
 
         Topology topology = streamsBuilder.build();
         KafkaStreams streams=new KafkaStreams(topology, properties);
@@ -56,7 +57,7 @@ public class StateStoreService
             streams.start();
             final HostInfo restEndpoint = new HostInfo("localhost", 8095);
             final StateStoreRestService restService = startRestProxy(streams, restEndpoint);
-            customerOrderList=restService.getCustomerOrders();
+            customerOrderList=restService.getAllCustomersOrders();
             latch.await();
         }
 
