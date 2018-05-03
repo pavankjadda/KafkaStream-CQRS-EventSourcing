@@ -2,6 +2,8 @@ package com.kafkastream.web.kafkarest;
 
 import com.kafkastream.dto.CustomerOrderDTO;
 import com.kafkastream.model.CustomerOrder;
+import com.kafkastream.util.HostStoreInfo;
+import com.kafkastream.util.MetadataService;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.KeyValue;
@@ -43,6 +45,26 @@ public class StateStoreRestService
         this.hostInfo = hostInfo;
     }
 
+    private static <T> T waitUntilStoreIsQueryable(final String storeName, final QueryableStoreType<T> queryableStoreType, final KafkaStreams streams) throws InterruptedException
+    {
+        while (true)
+        {
+            try
+            {
+                Collection<StreamsMetadata> streamsMetadataCollection = streams.allMetadata();
+                Iterator<StreamsMetadata> streamsMetadataIterator = streamsMetadataCollection.iterator();
+                while (streamsMetadataIterator.hasNext())
+                {
+                    System.out.println("streamsMetadataIterator.next() -> " + streamsMetadataIterator.next());
+                }
+                return streams.store(storeName, queryableStoreType);
+            } catch (InvalidStateStoreException ignored)
+            {
+                // store not yet ready for querying
+                Thread.sleep(100);
+            }
+        }
+    }
 
     @GET
     @Path("/{customerId}")
@@ -50,14 +72,14 @@ public class StateStoreRestService
     public List<CustomerOrderDTO> getCustomerOrders(@PathParam("customerId") String customerId) throws InterruptedException
     {
         System.out.println("Inside getCustomerOrders()");
-        final HostStoreInfo host =metadataService.streamsMetadataForStoreAndKey("customerordersstore","all", new StringSerializer());
+        final HostStoreInfo host = metadataService.streamsMetadataForStoreAndKey("customerordersstore", "all", new StringSerializer());
         List<CustomerOrderDTO> customerOrderList = new ArrayList<>();
         ReadOnlyKeyValueStore<String, CustomerOrder> customerOrdersStore = waitUntilStoreIsQueryable("customerordersstore", QueryableStoreTypes.keyValueStore(), streams);
         KeyValueIterator<String, CustomerOrder> keyValueIterator = customerOrdersStore.all();
         while (keyValueIterator.hasNext())
         {
             KeyValue<String, CustomerOrder> customerOrderKeyValue = keyValueIterator.next();
-            if(customerOrderKeyValue.value.getCustomerId().toString().equals(customerId))
+            if (customerOrderKeyValue.value.getCustomerId().toString().equals(customerId))
             {
                 customerOrderList.add(getCustomerOrderDTOFromCustomerOrder(customerOrderKeyValue.value));
             }
@@ -66,15 +88,13 @@ public class StateStoreRestService
         return customerOrderList;
     }
 
-
-
     @GET
     @Path("/all")
     @Produces(MediaType.APPLICATION_JSON)
     public List<CustomerOrderDTO> getAllCustomersOrders() throws InterruptedException
     {
         System.out.println("Inside getAllCustomersOrders()");
-        final HostStoreInfo host =metadataService.streamsMetadataForStoreAndKey("customerordersstore","all", new StringSerializer());
+        final HostStoreInfo host = metadataService.streamsMetadataForStoreAndKey("customerordersstore", "all", new StringSerializer());
         // Customer Orders view is hosted on another instance
      /*   if (!thisHost(host))
         {
@@ -112,15 +132,12 @@ public class StateStoreRestService
 
     private CustomerOrderDTO getCustomerOrderDTOFromCustomerOrder(CustomerOrder customerOrder)
     {
-        return new CustomerOrderDTO(customerOrder.getCustomerId().toString(), customerOrder.getFirstName().toString(),
-                customerOrder.getLastName().toString(), customerOrder.getEmail().toString(), customerOrder.getPhone().toString(), customerOrder.getOrderId().toString(), customerOrder.getOrderItemName().toString(),
-                customerOrder.getOrderPlace().toString(), customerOrder.getOrderPurchaseTime().toString());
+        return new CustomerOrderDTO(customerOrder.getCustomerId().toString(), customerOrder.getFirstName().toString(), customerOrder.getLastName().toString(), customerOrder.getEmail().toString(), customerOrder.getPhone().toString(), customerOrder.getOrderId().toString(), customerOrder.getOrderItemName().toString(), customerOrder.getOrderPlace().toString(), customerOrder.getOrderPurchaseTime().toString());
     }
 
     private boolean thisHost(final HostStoreInfo host)
     {
-        return host.getHost().equals(hostInfo.host()) &&
-                host.getPort() == hostInfo.port();
+        return host.getHost().equals(hostInfo.host()) && host.getPort() == hostInfo.port();
     }
 
     public void start() throws Exception
@@ -142,33 +159,11 @@ public class StateStoreRestService
         jettyServer.start();
     }
 
-
     void stop() throws Exception
     {
         if (jettyServer != null)
         {
             jettyServer.stop();
-        }
-    }
-
-    private static <T> T waitUntilStoreIsQueryable(final String storeName, final QueryableStoreType<T> queryableStoreType, final KafkaStreams streams) throws InterruptedException
-    {
-        while (true)
-        {
-            try
-            {
-                Collection<StreamsMetadata> streamsMetadataCollection = streams.allMetadata();
-                Iterator<StreamsMetadata> streamsMetadataIterator = streamsMetadataCollection.iterator();
-                while (streamsMetadataIterator.hasNext())
-                {
-                    System.out.println("streamsMetadataIterator.next() -> " + streamsMetadataIterator.next());
-                }
-                return streams.store(storeName, queryableStoreType);
-            } catch (InvalidStateStoreException ignored)
-            {
-                // store not yet ready for querying
-                Thread.sleep(100);
-            }
         }
     }
 

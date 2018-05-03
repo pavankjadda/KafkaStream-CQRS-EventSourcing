@@ -1,5 +1,6 @@
-package com.kafkastream.web.kafkarest;
+package com.kafkastream.util;
 
+import com.kafkastream.util.HostStoreInfo;
 import org.apache.kafka.common.serialization.Serializer;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.state.StreamsMetadata;

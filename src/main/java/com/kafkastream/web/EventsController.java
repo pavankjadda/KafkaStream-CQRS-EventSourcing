@@ -96,19 +96,12 @@ public class EventsController
 
     @GetMapping("/customerOrders/{customerId}")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public List<CustomerOrderDTO> getCustomerOrderById(@PathVariable   String  customerId) throws ExecutionException, InterruptedException
+    public List<CustomerOrderDTO> getCustomerOrderById(@PathVariable   String  customerId) throws Exception
     {
-        //Get CustomerOrders
+        //Get CustomerOrdersById
         return stateStoreService.getCustomerOrders(customerId);
     }
 
-    @GetMapping("/customerOrders/{customerId}")
-    @ResponseStatus(HttpStatus.ACCEPTED)
-    public List<CustomerOrderDTO> getCustomerOrders(@PathVariable   String  customerId) throws ExecutionException, InterruptedException
-    {
-        //Get CustomerOrders
-        return stateStoreService.getCustomerOrders(customerId);
-    }
 
     private String getCurrentTime()
     {

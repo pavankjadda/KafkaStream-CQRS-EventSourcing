@@ -1,4 +1,4 @@
-package com.kafkastream.web.kafkarest;
+package com.kafkastream.util;
 
 import java.util.Objects;
 import java.util.Set;
