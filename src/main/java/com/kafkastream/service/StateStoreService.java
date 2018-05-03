@@ -54,19 +54,10 @@ public class StateStoreService
         try
         {
             streams.start();
-            final HostInfo restEndpoint = new HostInfo("localhost", 8096);
+            final HostInfo restEndpoint = new HostInfo("localhost", 8095);
             final StateStoreRestService restService = startRestProxy(streams, restEndpoint);
             customerOrderList=restService.getCustomerOrders();
-         /*   ReadOnlyKeyValueStore<String, CustomerOrder> customerOrdersStore = waitUntilStoreIsQueryable("customerordersstore", QueryableStoreTypes.keyValueStore(),streams);
-            KeyValueIterator<String,CustomerOrder> keyValueIterator=customerOrdersStore.all();
-            while(keyValueIterator.hasNext())
-            {
-                KeyValue<String,CustomerOrder>  customerOrderKeyValue=keyValueIterator.next();
-                customerOrderList.add(customerOrderKeyValue.value);
-                System.out.println("customerOrderKeyValue.value.toString() ->"+customerOrderKeyValue.value.toString());
-            }*/
             latch.await();
-            //System.out.println("customerOrdersStore.approximateNumEntries() -> " + customerOrdersStore.approximateNumEntries());
         }
 
         catch (Exception e)

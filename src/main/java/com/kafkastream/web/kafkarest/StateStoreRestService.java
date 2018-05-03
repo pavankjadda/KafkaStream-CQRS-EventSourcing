@@ -78,6 +78,7 @@ public class StateStoreRestService
                     .request(MediaType.APPLICATION_JSON_TYPE)
                     .get(new GenericType<List<CustomerOrder>>(){});
         }
+
         List<CustomerOrder> customerOrderList = new ArrayList<>();
         ReadOnlyKeyValueStore<String, CustomerOrder> customerOrdersStore = waitUntilStoreIsQueryable("customerordersstore", QueryableStoreTypes.keyValueStore(), streams);
         KeyValueIterator<String, CustomerOrder> keyValueIterator = customerOrdersStore.all();

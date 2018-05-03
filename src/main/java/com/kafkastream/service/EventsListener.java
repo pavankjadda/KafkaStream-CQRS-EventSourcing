@@ -4,6 +4,7 @@ import com.kafkastream.config.StreamsBuilderConfig;
 import com.kafkastream.model.Customer;
 import com.kafkastream.model.CustomerOrder;
 import com.kafkastream.model.Order;
+import com.kafkastream.web.kafkarest.StateStoreRestService;
 import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
 import io.confluent.kafka.streams.serdes.avro.SpecificAvroDeserializer;
 import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde;
@@ -48,6 +49,7 @@ public class EventsListener
     public static void main(String[] args)
     {
         setUp();
+        List<CustomerOrder> customerOrderList=null;
         SpecificAvroSerde<Customer> customerSerde = createSerde("http://localhost:8081");
         SpecificAvroSerde<Order> orderSerde = createSerde("http://localhost:8081");
         SpecificAvroSerde<CustomerOrder> customerOrderSerde = createSerde("http://localhost:8081");
@@ -97,13 +99,17 @@ public class EventsListener
         try
         {
             streams.start();
-            ReadOnlyKeyValueStore<String, CustomerOrder> customerOrdersStore = waitUntilStoreIsQueryable("customerordersstore", QueryableStoreTypes.keyValueStore(),streams);
+            final HostInfo restEndpoint = new HostInfo("localhost", 8095);
+            final StateStoreRestService restService = startRestProxy(streams, restEndpoint);
+            customerOrderList=restService.getCustomerOrders();
+            printList(customerOrderList);
+           /* ReadOnlyKeyValueStore<String, CustomerOrder> customerOrdersStore = waitUntilStoreIsQueryable("customerordersstore", QueryableStoreTypes.keyValueStore(),streams);
             KeyValueIterator<String,CustomerOrder> keyValueIterator=customerOrdersStore.all();
             while(keyValueIterator.hasNext())
             {
                 KeyValue<String,CustomerOrder>  customerOrderKeyValue=keyValueIterator.next();
                 System.out.println("customerOrderKeyValue.value.toString() ->"+customerOrderKeyValue.value.toString());
-            }
+            }*/
             latch.await();
         }
         catch (Exception e)
@@ -124,6 +130,13 @@ public class EventsListener
         System.exit(0);
     }
 
+    private static void printList(List<CustomerOrder> customerOrderList)
+    {
+        for (CustomerOrder customerOrder : customerOrderList)
+        {
+            System.out.println("customerOrder-> " + customerOrder);
+        }
+    }
 
 
     private static <VT extends SpecificRecord> SpecificAvroSerde<VT> createSerde(final String schemaRegistryUrl)
@@ -153,6 +166,11 @@ public class EventsListener
         }
     }
 
-
+    static StateStoreRestService startRestProxy(final KafkaStreams streams, final HostInfo hostInfo) throws Exception
+    {
+        final StateStoreRestService interactiveQueriesRestService = new StateStoreRestService(streams, hostInfo);
+        interactiveQueriesRestService.start();
+        return interactiveQueriesRestService;
+    }
 
 }
