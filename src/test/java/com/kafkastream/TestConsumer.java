@@ -47,7 +47,7 @@ public class TestConsumer
 
 
     @Test
-    public void consumeCustomerEvent() throws InterruptedException
+    public void consumeCustomerEvent()
     {
         SpecificAvroSerde<Customer> customerSerde = createSerde("http://localhost:8081");
         StoreBuilder customerStateStore = Stores.keyValueStoreBuilder(Stores.persistentKeyValueStore("customer-store"),Serdes.String(), customerSerde)
@@ -88,7 +88,7 @@ public class TestConsumer
     }
 
     @Test
-    public void consumeCustomerEvent_withKTable() throws InterruptedException
+    public void consumeCustomerEvent_withKTable()
     {
         SpecificAvroSerde<Customer> customerSerde = createSerde("http://localhost:8081");
         StoreBuilder customerStateStore = Stores.keyValueStoreBuilder(Stores.persistentKeyValueStore("customer-store"),Serdes.String(), customerSerde)
@@ -129,7 +129,7 @@ public class TestConsumer
     }
 
     @Test
-    public void consumeOrderEvent() throws InterruptedException
+    public void consumeOrderEvent()
     {
         SpecificAvroSerde<Order> orderSerde = createSerde("http://localhost:8081");
        /* KStream<String, Order> orderKStream = streamsBuilder.stream("order",Consumed.with(Serdes.String(), orderSerde))
@@ -358,7 +358,7 @@ public class TestConsumer
     //Not using this test case
     @Test
     @Ignore
-    public void queryCustomerStore() throws InterruptedException
+    public void queryCustomerStore()
     {
         SpecificAvroSerde<Customer> customerSerde = createSerde("http://localhost:8081");
         Topology topology = streamsBuilder.build();

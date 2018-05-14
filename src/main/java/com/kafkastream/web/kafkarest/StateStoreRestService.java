@@ -37,6 +37,7 @@ public class StateStoreRestService
     private final HostInfo hostInfo;
     private final Client client = ClientBuilder.newBuilder().register(JacksonFeature.class).build();
     private Server jettyServer;
+    private final String    customerOrdersStoreName="customerordersstore";
 
     public StateStoreRestService(final KafkaStreams streams, final HostInfo hostInfo)
     {
@@ -72,9 +73,9 @@ public class StateStoreRestService
     public List<CustomerOrderDTO> getCustomerOrders(@PathParam("customerId") String customerId) throws InterruptedException
     {
         System.out.println("Inside getCustomerOrders()");
-        final HostStoreInfo host = metadataService.streamsMetadataForStoreAndKey("customerordersstore", "all", new StringSerializer());
+        /* final HostStoreInfo host = metadataService.streamsMetadataForStoreAndKey("customerordersstore", "all", new StringSerializer()); */
         List<CustomerOrderDTO> customerOrderList = new ArrayList<>();
-        ReadOnlyKeyValueStore<String, CustomerOrder> customerOrdersStore = waitUntilStoreIsQueryable("customerordersstore", QueryableStoreTypes.keyValueStore(), streams);
+        ReadOnlyKeyValueStore<String, CustomerOrder> customerOrdersStore = waitUntilStoreIsQueryable(this.customerOrdersStoreName, QueryableStoreTypes.keyValueStore(), streams);
         KeyValueIterator<String, CustomerOrder> keyValueIterator = customerOrdersStore.all();
         while (keyValueIterator.hasNext())
         {
@@ -94,7 +95,7 @@ public class StateStoreRestService
     public List<CustomerOrderDTO> getAllCustomersOrders() throws InterruptedException
     {
         System.out.println("Inside getAllCustomersOrders()");
-        final HostStoreInfo host = metadataService.streamsMetadataForStoreAndKey("customerordersstore", "all", new StringSerializer());
+        final HostStoreInfo host = metadataService.streamsMetadataForStoreAndKey(this.customerOrdersStoreName, "all", new StringSerializer());
         // Customer Orders view is hosted on another instance
      /*   if (!thisHost(host))
         {
@@ -104,7 +105,7 @@ public class StateStoreRestService
         }*/
 
         List<CustomerOrderDTO> customerOrderList = new ArrayList<>();
-        ReadOnlyKeyValueStore<String, CustomerOrder> customerOrdersStore = waitUntilStoreIsQueryable("customerordersstore", QueryableStoreTypes.keyValueStore(), streams);
+        ReadOnlyKeyValueStore<String, CustomerOrder> customerOrdersStore = waitUntilStoreIsQueryable(this.customerOrdersStoreName, QueryableStoreTypes.keyValueStore(), streams);
         KeyValueIterator<String, CustomerOrder> keyValueIterator = customerOrdersStore.all();
         while (keyValueIterator.hasNext())
         {

@@ -36,7 +36,7 @@ public class KafkaConsumerTestEventsListner
             for (ConsumerRecord<String, String> record : records)
             {
                 System.out.printf("customer offset = %d, key = %s, value = %s", record.offset(), record.key(), record.value());
-                System.out.println("");
+                System.out.println();
             }
 
         }

@@ -14,7 +14,7 @@ public class JettyRESTServer
     private Server jettyServer;
 
     @Before
-    public void setUp() throws Exception
+    public void setUp()
     {
         ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
         context.setContextPath("/");

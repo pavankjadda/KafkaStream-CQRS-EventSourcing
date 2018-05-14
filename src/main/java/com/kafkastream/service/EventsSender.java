@@ -30,7 +30,7 @@ public class EventsSender
     private StreamsBuilder streamsBuilder;
 
 
-    public EventsSender() throws UnknownHostException
+    public EventsSender()
     {
         this.properties = new Properties();
         properties.put("application.id", "cqrs-streams");

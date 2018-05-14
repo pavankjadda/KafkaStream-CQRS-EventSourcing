@@ -17,7 +17,7 @@ import java.util.Properties;
 
 public class TestEventsListener
 {
-    public static void main(String[] args) throws InterruptedException, UnknownHostException
+    public static void main(String[] args)
     {
         Properties properties = new Properties();
         properties.put(StreamsConfig.APPLICATION_ID_CONFIG,"cqrs-streams");

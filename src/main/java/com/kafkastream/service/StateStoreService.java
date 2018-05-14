@@ -60,7 +60,7 @@ public class StateStoreService
     }
 
 
-    public List<CustomerOrderDTO> getCustomerOrders(String customerId) throws Exception
+    public List<CustomerOrderDTO> getCustomerOrders(String customerId)
     {
         List<CustomerOrderDTO> customerOrderDTOList = new ArrayList<>();
         //start();
@@ -146,7 +146,7 @@ public class StateStoreService
         }
     }
 
-    public List<CustomerOrderDTO> getCustomerOrders_Old(String customerId) throws InterruptedException
+    public List<CustomerOrderDTO> getCustomerOrders_Old(String customerId)
     {
 
         List<CustomerOrderDTO> customerOrderList = new ArrayList<>();
