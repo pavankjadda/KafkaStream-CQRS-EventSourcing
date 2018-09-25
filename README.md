@@ -9,7 +9,7 @@ This repository demonstrates [CQRS](https://www.confluent.io/blog/event-sourcing
 4. Modify [code](https://github.com/pavankjadda/KafkaStream-CQRS-EventSourcing/blob/master/src/main/java/com/kafkastream/web/EventsController.java), if you want to send events with dofferent information.
 
 ## Technologies Used
-1. Kafka Streams [(Confluent)](https://docs.confluent.io/current/installation/installing_cp.html#zip-and-tar-archives)
+1. Kafka Streams [(Confluent)](https://docs.confluent.io/current/platform.html)
 2. Confluent Schema Registry
 3. Avro Serialization/Deserialization
 4. Spring Boot
