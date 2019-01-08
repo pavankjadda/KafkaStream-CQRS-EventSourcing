@@ -8,7 +8,7 @@ This repository demonstrates [CQRS](https://www.confluent.io/blog/event-sourcing
 3. Go to http://localhost:9021 => Topics=> create topics `customer`, `order` and `order-to-ktable` (if they do not exist)
 4. Go to EventsListener class and execute main method to start REST Proxy (Jetty) then access Kafka data through REST API
 5. Open http://localhost:8090/orders or http://localhost:8090/customers or http://localhost:8090/sendevents to send kafka events (objects). 
-6. Go to http://localhost:8095/customer-orders/all to see all customer orders. See [StateStore Rest](https://github.com/pavankjadda/KafkaStream-CQRS-EventSourcing/blob/master/src/main/java/com/kafkastream/web/kafkarest/StateStoreRestService.java) Api for possible methods, you can customize it further
+6. Go to http://localhost:8095/customer-orders/all to see all customer orders fetched from Kafka State Store. See [StateStore Rest](https://github.com/pavankjadda/KafkaStream-CQRS-EventSourcing/blob/master/src/main/java/com/kafkastream/web/kafkarest/StateStoreRestService.java) Api for possible methods, you can customize it further
 7. Modify [code](https://github.com/pavankjadda/KafkaStream-CQRS-EventSourcing/blob/master/src/main/java/com/kafkastream/web/EventsController.java), if you want to send events with different information.
 
 ## Technologies Used
