@@ -9,7 +9,9 @@ import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde;
 import org.apache.avro.specific.SpecificRecord;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.common.utils.Bytes;
-import org.apache.kafka.streams.*;
+import org.apache.kafka.streams.KafkaStreams;
+import org.apache.kafka.streams.StreamsBuilder;
+import org.apache.kafka.streams.Topology;
 import org.apache.kafka.streams.errors.InvalidStateStoreException;
 import org.apache.kafka.streams.kstream.*;
 import org.apache.kafka.streams.state.*;
@@ -22,7 +24,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
 public class TestConsumer
 {
@@ -54,7 +55,7 @@ public class TestConsumer
                 .withLoggingEnabled(new HashMap<>());
         streamsBuilder.stream("customer", Consumed.with(Serdes.String(), customerSerde)).to("customer-to-ktable-topic",Produced.with(Serdes.String(), customerSerde));
         KTable<String, Customer> customerKTable = streamsBuilder.table("customer-to-ktable-topic", Consumed.with(Serdes.String(), customerSerde),Materialized.as(customerStateStore.name()));
-        customerKTable.foreach(((key, value) -> System.out.println("Customer from Topic: " + value)));
+        //customerKTable.foreach(((key, value) -> System.out.println("Customer from Topic: " + value)));
 
         Topology topology = streamsBuilder.build();
         KafkaStreams streams = new KafkaStreams(topology, properties);
@@ -96,7 +97,7 @@ public class TestConsumer
         KTable<String, Customer> customerKTable = streamsBuilder.table("customer",Materialized.<String, Customer, KeyValueStore<Bytes, byte[]>>as(customerStateStore.name())
                                                                 .withKeySerde(Serdes.String())
                                                                 .withValueSerde(customerSerde));
-        customerKTable.foreach(((key, value) -> System.out.println("Customer from Topic: " + value)));
+        //customerKTable.foreach(((key, value) -> System.out.println("Customer from Topic: " + value)));
 
         Topology topology = streamsBuilder.build();
         KafkaStreams streams = new KafkaStreams(topology, properties);
@@ -139,7 +140,7 @@ public class TestConsumer
         orderKTable.foreach(((key, value) -> System.out.println("Order from Topic: "+value)));
 */
         KTable<String,Order> orderKTable=streamsBuilder.table("order",Consumed.with(Serdes.String(),orderSerde),Materialized.as("order"));
-        orderKTable.foreach(((key, value) -> System.out.println("Order from Topic: "+value)));
+        //orderKTable.foreach(((key, value) -> System.out.println("Order from Topic: "+value)));
 
         Topology topology = streamsBuilder.build();
         KafkaStreams streams = new KafkaStreams(topology, properties);
@@ -188,14 +189,14 @@ public class TestConsumer
         KTable<String, Customer> customerKTable = streamsBuilder.table("customer",Materialized.<String, Customer, KeyValueStore<Bytes, byte[]>>as(customerStateStore.name())
                                                                 .withKeySerde(Serdes.String())
                                                                 .withValueSerde(customerSerde));
-        customerKTable.foreach(((key, value) -> System.out.println("Customer from Topic: " + value)));
+        //customerKTable.foreach(((key, value) -> System.out.println("Customer from Topic: " + value)));
 
         streamsBuilder.stream("order",Consumed.with(Serdes.String(), orderSerde))
                       .selectKey((key, value) -> value.getCustomerId().toString()).to("order-to-ktable",Produced.with(Serdes.String(),orderSerde));
         KTable<String,Order> orderKTable=streamsBuilder.table("order-to-ktable",Materialized.<String, Order, KeyValueStore<Bytes, byte[]>>as(orderStateStore.name())
                                                         .withKeySerde(Serdes.String())
                                                         .withValueSerde(orderSerde));
-        orderKTable.foreach(((key, value) -> System.out.println("Order from Topic: " + value)));
+        //orderKTable.foreach(((key, value) -> System.out.println("Order from Topic: " + value)));
 
         KTable<String,CustomerOrder> customerOrderKTable=customerKTable.join(orderKTable,(customer, order)->
         {
@@ -216,7 +217,7 @@ public class TestConsumer
             }
             return  null;
         },Materialized.<String, CustomerOrder, KeyValueStore<Bytes, byte[]>>as(customerOrderStateStore.name()).withKeySerde(Serdes.String()).withValueSerde(customerOrderSerde));
-        customerOrderKTable.foreach(((key, value) -> System.out.println("Customer Order -> "+value.toString())));
+        //customerOrderKTable.foreach(((key, value) -> System.out.println("Customer Order -> "+value.toString())));
 
 
         Topology topology = streamsBuilder.build();
@@ -266,14 +267,14 @@ public class TestConsumer
                 .withLoggingEnabled(new HashMap<>());
         streamsBuilder.stream("customer", Consumed.with(Serdes.String(), customerSerde)).to("customer-to-ktable-topic",Produced.with(Serdes.String(), customerSerde));
         KTable<String, Customer> customerKTable = streamsBuilder.table("customer-to-ktable-topic", Consumed.with(Serdes.String(), customerSerde), Materialized.<String, Customer, KeyValueStore<Bytes, byte[]>>as(customerStateStore.name()).withKeySerde(Serdes.String()).withValueSerde(customerSerde));
-        customerKTable.foreach(((key, value) -> System.out.println("Customer from Topic: " + value)));
+        //customerKTable.foreach(((key, value) -> System.out.println("Customer from Topic: " + value)));
 
 
         KStream<String,Order> orderKStream=streamsBuilder.stream("order",Consumed.with(Serdes.String(), orderSerde))
                                                                 .selectKey((key, value) -> value.getCustomerId().toString());
         orderKStream.to("order-to-ktable-topic",Produced.with(Serdes.String(),orderSerde));
         KTable<String,Order> orderKTable=streamsBuilder.table("order-to-ktable-topic",Consumed.with(Serdes.String(),orderSerde));
-        orderKTable.foreach(((key, value) -> System.out.println("Order from Topic: " + value)));
+        //orderKTable.foreach(((key, value) -> System.out.println("Order from Topic: " + value)));
 
         KStream<String ,CustomerOrder> customerOrderKStream=orderKStream.join(customerKTable, new ValueJoiner<Order, Customer, CustomerOrder>()
         {

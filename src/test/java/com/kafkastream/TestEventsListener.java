@@ -7,10 +7,13 @@ import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde;
 import org.apache.avro.specific.SpecificRecord;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
-import org.apache.kafka.streams.*;
+import org.apache.kafka.streams.KafkaStreams;
+import org.apache.kafka.streams.StreamsBuilder;
+import org.apache.kafka.streams.StreamsConfig;
+import org.apache.kafka.streams.Topology;
+import org.apache.kafka.streams.kstream.Consumed;
 import org.apache.kafka.streams.kstream.KStream;
 
-import java.net.UnknownHostException;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Properties;
@@ -78,7 +81,7 @@ public class TestEventsListener
         SpecificAvroSerde<Customer> customerSerde = createSerde("http://localhost:8081");
 
         //SpecificAvroSerde<Customer> customerSerde = createSerde("http://localhost:8081/");
-        KStream<String, Customer> customerKStream = streamsBuilder.stream("customer",Consumed.with(Serdes.String(), customerSerde));
+        KStream<String, Customer> customerKStream = streamsBuilder.stream("customer", Consumed.with(Serdes.String(), customerSerde));
         customerKStream.foreach(((key, value) -> System.out.println("Customer value from Topic:  " + value.toString())));
 
         /*KTable<String, String> ordersKTable = streamsBuilder.table("order",Materialized.as("OrderKeyStore"));

@@ -2,12 +2,10 @@ package com.kafkastream.web;
 
 import com.kafkastream.dto.CustomerOrderDTO;
 import com.kafkastream.model.Customer;
-import com.kafkastream.model.CustomerOrder;
 import com.kafkastream.model.Greetings;
 import com.kafkastream.model.Order;
-import com.kafkastream.service.EventsListener;
 import com.kafkastream.service.EventsSender;
-import com.kafkastream.service.StateStoreService;
+import com.kafkastream.statestore.StateStoreService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,7 +26,7 @@ public class EventsController
 
     private StateStoreService   stateStoreService;
 
-    Random  random=new Random(1);
+    private Random random = new Random(1);
 
     @Autowired
     public EventsController(EventsSender    eventsSender,StateStoreService  stateStoreService)
