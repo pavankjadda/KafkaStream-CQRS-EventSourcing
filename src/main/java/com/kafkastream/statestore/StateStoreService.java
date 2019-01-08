@@ -1,14 +1,12 @@
-package com.kafkastream.service;
+package com.kafkastream.statestore;
 
 import com.kafkastream.config.StreamsBuilderConfig;
 import com.kafkastream.dto.CustomerOrderDTO;
 import com.kafkastream.model.CustomerOrder;
 import com.kafkastream.web.kafkarest.StateStoreRestService;
 import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
-import io.confluent.kafka.streams.serdes.avro.SpecificAvroDeserializer;
 import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde;
 import org.apache.avro.specific.SpecificRecord;
-import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.errors.InvalidStateStoreException;
@@ -29,23 +27,22 @@ import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 import java.util.*;
 
+
+/**
+ * Not using this class for the moment see EventsListener class for more details
+ */
+
 @Service
 public class StateStoreService
 {
-    private Properties properties;
-
-    private StreamsBuilder streamsBuilder;
-
-    private String host="localhost";
-
-    private int port=8096;
 
     private final Client client = ClientBuilder.newBuilder().register(JacksonFeature.class).build();
     private Server jettyServer;
 
     public StateStoreService()
     {
-        this.properties = new Properties();
+        /*
+        Properties properties = new Properties();
         properties.put("application.id", "cqrs-streams");
         properties.put("bootstrap.servers", "localhost:9092");
         properties.put("application.server", "localhost:8096");
@@ -54,9 +51,9 @@ public class StateStoreService
         properties.put("schema.registry.url", "http://localhost:8081");
         properties.put("acks", "all");
         properties.put("key.deserializer", Serdes.String().deserializer().getClass());
-        properties.put("value.deserializer", SpecificAvroDeserializer.class);
+        properties.put("value.deserializer", SpecificAvroDeserializer.class); */
 
-        this.streamsBuilder = StreamsBuilderConfig.getInstance();
+        StreamsBuilder streamsBuilder = StreamsBuilderConfig.getInstance();
     }
 
 
@@ -65,7 +62,8 @@ public class StateStoreService
         List<CustomerOrderDTO> customerOrderDTOList = new ArrayList<>();
         //start();
         //Remote server config. Will replace place holders in future
-        List<CustomerOrder> customerOrderList=client.target(String.format("http://%s:%d/%s",host, 8095, "customer-orders/all")).request(MediaType.APPLICATION_JSON_TYPE).get(new GenericType<List<CustomerOrder>>()
+        String host = "localhost";
+        List<CustomerOrder> customerOrderList = client.target(String.format("http://%s:%d/%s", host, 8095, "customer-orders/all")).request(MediaType.APPLICATION_JSON_TYPE).get(new GenericType<List<CustomerOrder>>()
         {
         });
 
@@ -124,6 +122,7 @@ public class StateStoreService
         ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
         context.setContextPath("/");
 
+        int port = 8096;
         jettyServer = new Server(port);
         jettyServer.setHandler(context);
 
