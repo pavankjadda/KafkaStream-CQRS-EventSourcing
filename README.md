@@ -1,6 +1,6 @@
 # CQRS Event Sourcing and Materialized views with Kafka Streams
 ## What's this?
-This repository demonstrates [CQRS](https://www.confluent.io/blog/event-sourcing-cqrs-stream-processing-apache-kafka-whats-connection/) Event Sourcing (Materialized views) with Kafka Streaming (Version:0.11.x) ([not Kafka messaging](https://github.com/pavankjadda/SpringCloudStream-Kafka))
+This repository demonstrates [CQRS](https://www.confluent.io/blog/event-sourcing-cqrs-stream-processing-apache-kafka-whats-connection/) Event Sourcing (Materialized views) with Kafka Streaming (Version: [0.11.1[(https://archive.apache.org/dist/kafka/0.11.0.1/RELEASE_NOTES.html))
 
 ## How to Run?
 1. Download and install Kafka either from [Confluent](https://docs.confluent.io/current/installation/installing_cp.html#zip-and-tar-archives) or follow instructions [from here](https://www.tutorialspoint.com/apache_kafka/apache_kafka_installation_steps.htm) first. I recommend [Confluent](https://docs.confluent.io/current/installation/installing_cp.html#zip-and-tar-archives) as it combines all the servers into one package with additional tools.
