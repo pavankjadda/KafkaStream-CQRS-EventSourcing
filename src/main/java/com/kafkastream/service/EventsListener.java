@@ -1,7 +1,6 @@
 package com.kafkastream.service;
 
-import com.kafkastream.dto.CustomerOrderDTO;
-import com.kafkastream.config.StreamsBuilderConfig;
+import com.kafkastream.constants.KafkaConstants;
 import com.kafkastream.dto.CustomerOrderDTO;
 import com.kafkastream.model.Customer;
 import com.kafkastream.model.CustomerOrder;
@@ -14,9 +13,15 @@ import org.apache.avro.specific.SpecificRecord;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.common.utils.Bytes;
-import org.apache.kafka.streams.*;
+import org.apache.kafka.streams.KafkaStreams;
+import org.apache.kafka.streams.StreamsBuilder;
+import org.apache.kafka.streams.StreamsConfig;
+import org.apache.kafka.streams.Topology;
 import org.apache.kafka.streams.errors.InvalidStateStoreException;
-import org.apache.kafka.streams.kstream.*;
+import org.apache.kafka.streams.kstream.Consumed;
+import org.apache.kafka.streams.kstream.KTable;
+import org.apache.kafka.streams.kstream.Materialized;
+import org.apache.kafka.streams.kstream.Produced;
 import org.apache.kafka.streams.state.*;
 
 import java.util.*;
@@ -27,58 +32,73 @@ public class EventsListener
 {
     private static KafkaStreams streams;
 
-    private static StreamsBuilder  streamsBuilder;
+    private static StreamsBuilder streamsBuilder;
 
     private static Properties properties;
 
     private static void setUp()
     {
         properties = new Properties();
-        properties.put(StreamsConfig.APPLICATION_ID_CONFIG, "cqrs-streams");
-        properties.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
-        properties.put(StreamsConfig.APPLICATION_SERVER_CONFIG,"localhost:8095");
-        properties.put(StreamsConfig.COMMIT_INTERVAL_MS_CONFIG, "2000");
-        properties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-        properties.put("schema.registry.url", "http://localhost:8081");
+        properties.put(StreamsConfig.APPLICATION_ID_CONFIG, KafkaConstants.APPLICATION_ID_CONFIG);
+        properties.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, KafkaConstants.BOOTSTRAP_SERVERS_CONFIG);
+        properties.put(StreamsConfig.APPLICATION_SERVER_CONFIG, KafkaConstants.APPLICATION_SERVER_CONFIG);
+        properties.put(StreamsConfig.COMMIT_INTERVAL_MS_CONFIG, KafkaConstants.COMMIT_INTERVAL_MS_CONFIG);
+        properties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, KafkaConstants.AUTO_OFFSET_RESET_CONFIG);
+        properties.put("schema.registry.url", KafkaConstants.schemaRegistryUrl);
         properties.put("acks", "all");
         properties.put("key.deserializer", Serdes.String().deserializer().getClass());
         properties.put("value.deserializer", SpecificAvroDeserializer.class);
 
-        //streamsBuilder = StreamsBuilderConfig.getInstance();
         streamsBuilder = new StreamsBuilder();
     }
 
     public static void main(String[] args)
     {
+        //Setup StreamsBuilder
         setUp();
-        List<CustomerOrderDTO> customerOrderList=null;
-        SpecificAvroSerde<Customer> customerSerde = createSerde("http://localhost:8081");
-        SpecificAvroSerde<Order> orderSerde = createSerde("http://localhost:8081");
-        SpecificAvroSerde<CustomerOrder> customerOrderSerde = createSerde("http://localhost:8081");
 
-        StoreBuilder customerStateStore = Stores.keyValueStoreBuilder(Stores.persistentKeyValueStore("customer-store"),Serdes.String(), customerSerde)
+        List<CustomerOrderDTO> customerOrderList;
+        SpecificAvroSerde<Customer> customerSerde = createSerde(KafkaConstants.schemaRegistryUrl);
+        SpecificAvroSerde<Order> orderSerde = createSerde(KafkaConstants.schemaRegistryUrl);
+        SpecificAvroSerde<CustomerOrder> customerOrderSerde = createSerde(KafkaConstants.schemaRegistryUrl);
+
+        StoreBuilder customerStateStore = Stores.keyValueStoreBuilder(Stores.persistentKeyValueStore("customer-store"), Serdes.String(), customerSerde)
                 .withLoggingEnabled(new HashMap<>());
-        StoreBuilder orderStateStore = Stores.keyValueStoreBuilder(Stores.persistentKeyValueStore("order-store"),Serdes.String(), customerSerde)
+        StoreBuilder orderStateStore = Stores.keyValueStoreBuilder(Stores.persistentKeyValueStore("order-store"), Serdes.String(), customerSerde)
                 .withLoggingEnabled(new HashMap<>());
-        StoreBuilder customerOrderStateStore = Stores.keyValueStoreBuilder(Stores.persistentKeyValueStore("customerordersstore"),Serdes.String(), customerSerde)
+        StoreBuilder customerOrderStateStore = Stores.keyValueStoreBuilder(Stores.persistentKeyValueStore("customerordersstore"), Serdes.String(), customerSerde)
                 .withLoggingEnabled(new HashMap<>()).withCachingEnabled();
-        KTable<String, Customer> customerKTable = streamsBuilder.table("customer",Materialized.<String, Customer, KeyValueStore<Bytes, byte[]>>as(customerStateStore.name())
+
+        KTable<String, Customer> customerKTable = streamsBuilder.table("customer", Materialized.<String, Customer, KeyValueStore<Bytes, byte[]>>as(customerStateStore.name())
                 .withKeySerde(Serdes.String())
                 .withValueSerde(customerSerde));
-        customerKTable.foreach(((key, value) -> System.out.println("Customer from Topic: " + value)));
 
-        streamsBuilder.stream("order",Consumed.with(Serdes.String(), orderSerde))
-                .selectKey((key, value) -> value.getCustomerId().toString()).to("order-to-ktable",Produced.with(Serdes.String(),orderSerde));
-        KTable<String,Order> orderKTable=streamsBuilder.table("order-to-ktable",Materialized.<String, Order, KeyValueStore<Bytes, byte[]>>as(orderStateStore.name())
+        customerKTable.filter((key, value) ->
+        {
+            System.out.println("customerKTable.key: " + key);
+            System.out.println("customerKTable.value: " + value);
+            return true;
+        });
+
+        streamsBuilder.stream("order", Consumed.with(Serdes.String(), orderSerde))
+                .selectKey((key, value) -> value.getCustomerId().toString()).to("order-to-ktable", Produced.with(Serdes.String(), orderSerde));
+        KTable<String, Order> orderKTable = streamsBuilder.table("order-to-ktable", Materialized.<String, Order, KeyValueStore<Bytes, byte[]>>as(orderStateStore.name())
                 .withKeySerde(Serdes.String())
                 .withValueSerde(orderSerde));
-        orderKTable.foreach(((key, value) -> System.out.println("Order from Topic: " + value)));
-
-        KTable<String,CustomerOrder> customerOrderKTable=customerKTable.join(orderKTable,(customer, order)->
+        //Print orderKTable
+        orderKTable.filter((key, value) ->
         {
-            if(customer!=null && order!=null)
+            System.out.println("orderKTable.key: " + key);
+            System.out.println("orderKTable.value: " + value);
+            return true;
+        });
+
+
+        KTable<String, CustomerOrder> customerOrderKTable = customerKTable.join(orderKTable, (customer, order) ->
+        {
+            if (customer != null && order != null)
             {
-                CustomerOrder customerOrder=new CustomerOrder();
+                CustomerOrder customerOrder = new CustomerOrder();
                 customerOrder.setCustomerId(customer.getCustomerId());
                 customerOrder.setFirstName(customer.getFirstName());
                 customerOrder.setLastName(customer.getLastName());
@@ -90,9 +110,17 @@ public class EventsListener
                 customerOrder.setOrderPurchaseTime(order.getOrderPurchaseTime());
                 return customerOrder;
             }
-            return  null;
-        },Materialized.<String, CustomerOrder, KeyValueStore<Bytes, byte[]>>as(customerOrderStateStore.name()).withKeySerde(Serdes.String()).withValueSerde(customerOrderSerde));
-        customerOrderKTable.foreach(((key, value) -> System.out.println("Customer Order -> "+value.toString())));
+            return null;
+        }, Materialized.<String, CustomerOrder, KeyValueStore<Bytes, byte[]>>as(customerOrderStateStore.name()).withKeySerde(Serdes.String()).withValueSerde(customerOrderSerde));
+        //Print customerOrderKTable
+        customerOrderKTable.filter((key, value) ->
+        {
+            System.out.println("customerOrderKTable.key: " + key);
+            System.out.println("customerOrderKTable.value: " + value);
+            return true;
+        });
+
+
 
         Topology topology = streamsBuilder.build();
         streams = new KafkaStreams(topology, properties);
@@ -101,9 +129,9 @@ public class EventsListener
         try
         {
             streams.start();
-            final HostInfo restEndpoint = new HostInfo("localhost", 8095);
+            final HostInfo restEndpoint = new HostInfo(KafkaConstants.REST_PROXY_HOST, KafkaConstants.REST_PROXY_PORT);
             final StateStoreRestService restService = startRestProxy(streams, restEndpoint);
-            customerOrderList=restService.getAllCustomersOrders();
+            customerOrderList = restService.getAllCustomersOrders();
             printList(customerOrderList);
             latch.await();
         }
@@ -125,6 +153,10 @@ public class EventsListener
         System.exit(0);
     }
 
+    private static void printKTable()
+    {
+    }
+
     private static void printList(List<CustomerOrderDTO> customerOrderList)
     {
         for (CustomerOrderDTO customerOrderdto : customerOrderList)
@@ -134,7 +166,7 @@ public class EventsListener
     }
 
 
-    private static <VT extends SpecificRecord> SpecificAvroSerde<VT> createSerde(final String schemaRegistryUrl)
+    private static <VT extends SpecificRecord> SpecificAvroSerde<VT> createSerde(String schemaRegistryUrl)
     {
 
         final SpecificAvroSerde<VT> serde = new SpecificAvroSerde<>();
@@ -161,7 +193,7 @@ public class EventsListener
         }
     }
 
-    static StateStoreRestService startRestProxy(final KafkaStreams streams, final HostInfo hostInfo) throws Exception
+    private static StateStoreRestService startRestProxy(final KafkaStreams streams, final HostInfo hostInfo) throws Exception
     {
         final StateStoreRestService interactiveQueriesRestService = new StateStoreRestService(streams, hostInfo);
         interactiveQueriesRestService.start();
