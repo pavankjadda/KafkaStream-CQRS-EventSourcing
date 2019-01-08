@@ -1,5 +1,6 @@
 package com.kafkastream.service;
 
+import com.kafkastream.constants.KafkaConstants;
 import com.kafkastream.model.Customer;
 import com.kafkastream.model.Greetings;
 import com.kafkastream.model.Order;
@@ -12,7 +13,6 @@ import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.serialization.Serdes;
-import org.apache.kafka.streams.StreamsBuilder;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.stereotype.Service;
 
@@ -29,18 +29,13 @@ public class EventsSender
 {
     private Properties properties;
 
-    private StreamsBuilder streamsBuilder;
-
-
     public EventsSender()
     {
         this.properties = new Properties();
-        properties.put("bootstrap.servers", "localhost:9092");
+        properties.put("bootstrap.servers", KafkaConstants.BOOTSTRAP_SERVERS_CONFIG);
         properties.put("acks", "all");
         properties.put("key.serializer", Serdes.String().serializer().getClass());
         properties.put("value.serializer", SpecificAvroSerializer.class);
-
-        this.streamsBuilder=new StreamsBuilder();
     }
 
     public void sendGreetingsEvent(Greetings greetings) throws ExecutionException, InterruptedException
@@ -56,7 +51,7 @@ public class EventsSender
 
     public void sendCustomerEvent(Customer customer) throws ExecutionException, InterruptedException
     {
-        SpecificAvroSerde<Customer> customerSerde = createSerde("http://localhost:8081");
+        SpecificAvroSerde<Customer> customerSerde = createSerde(KafkaConstants.schemaRegistryUrl);
         Producer<String, Customer> kafkaProducerCustomer = new KafkaProducer<>(properties,Serdes.String().serializer(),customerSerde.serializer());
         ProducerRecord<String, Customer> customerRecord = new ProducerRecord<>("customer", customer.getCustomerId().toString(), customer);
         Future<RecordMetadata> future = kafkaProducerCustomer.send(customerRecord);
@@ -66,7 +61,7 @@ public class EventsSender
 
     public void sendOrderEvent(Order order) throws ExecutionException, InterruptedException
     {
-        SpecificAvroSerde<Order> orderSerde = createSerde("http://localhost:8081");
+        SpecificAvroSerde<Order> orderSerde = createSerde(KafkaConstants.schemaRegistryUrl);
         Producer<String, Order> kafkaOrderProducer = new KafkaProducer<>(properties,Serdes.String().serializer(),orderSerde.serializer());
         ProducerRecord<String, Order> orderRecord = new ProducerRecord<>("order", order.getOrderId().toString(), order);
         Future<RecordMetadata> future = kafkaOrderProducer.send(orderRecord);

@@ -49,12 +49,12 @@ public class EventsListener
         properties.put("key.deserializer", Serdes.String().deserializer().getClass());
         properties.put("value.deserializer", SpecificAvroDeserializer.class);
 
-        //streamsBuilder = StreamsBuilderConfig.getInstance();
         streamsBuilder = new StreamsBuilder();
     }
 
     public static void main(String[] args)
     {
+        //Setup StreamsBuilder
         setUp();
 
         List<CustomerOrderDTO> customerOrderList;
@@ -129,7 +129,7 @@ public class EventsListener
         try
         {
             streams.start();
-            final HostInfo restEndpoint = new HostInfo("localhost", 8095);
+            final HostInfo restEndpoint = new HostInfo(KafkaConstants.REST_PROXY_HOST, KafkaConstants.REST_PROXY_PORT);
             final StateStoreRestService restService = startRestProxy(streams, restEndpoint);
             customerOrderList = restService.getAllCustomersOrders();
             printList(customerOrderList);

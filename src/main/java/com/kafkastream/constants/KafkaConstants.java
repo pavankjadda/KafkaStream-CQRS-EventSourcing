@@ -8,4 +8,16 @@ public class KafkaConstants
     public static String BOOTSTRAP_SERVERS_CONFIG = "localhost:9092";
     public static String COMMIT_INTERVAL_MS_CONFIG = "2000";
     public static String AUTO_OFFSET_RESET_CONFIG = "earliest";
+
+
+    public static String REST_PROXY_HOST = "localhost";
+    public static int REST_PROXY_PORT = 8095;
+
+
+    public static String orderTopic = "order";
+    public static String customerTopic = "customer";
+    public static String customerOrderTopic = "customer-order";
+    public static String greetingsTopic = "greetings";
+    public static String orderToKtableTopic = "order-to-ktable";
+
 }
