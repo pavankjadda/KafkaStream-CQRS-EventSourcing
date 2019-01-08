@@ -7,13 +7,15 @@ import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
 import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde;
 import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerializer;
 import org.apache.avro.specific.SpecificRecord;
-import org.apache.kafka.clients.producer.*;
+import org.apache.kafka.clients.producer.KafkaProducer;
+import org.apache.kafka.clients.producer.Producer;
+import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.stereotype.Service;
 
-import java.net.UnknownHostException;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Properties;
@@ -33,12 +35,7 @@ public class EventsSender
     public EventsSender()
     {
         this.properties = new Properties();
-        properties.put("application.id", "cqrs-streams");
         properties.put("bootstrap.servers", "localhost:9092");
-        properties.put("schema.registry.url", "http://localhost:8081");
-        properties.put("group.id", "cqrs");
-        properties.put("commit.interval.ms","100");
-        properties.put("topic.metadata.refresh.interval.ms","100");
         properties.put("acks", "all");
         properties.put("key.serializer", Serdes.String().serializer().getClass());
         properties.put("value.serializer", SpecificAvroSerializer.class);

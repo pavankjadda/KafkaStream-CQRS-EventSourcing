@@ -1,8 +1,6 @@
 package com.kafkastream.service;
 
 import com.kafkastream.dto.CustomerOrderDTO;
-import com.kafkastream.config.StreamsBuilderConfig;
-import com.kafkastream.dto.CustomerOrderDTO;
 import com.kafkastream.model.Customer;
 import com.kafkastream.model.CustomerOrder;
 import com.kafkastream.model.Order;
@@ -14,9 +12,15 @@ import org.apache.avro.specific.SpecificRecord;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.common.utils.Bytes;
-import org.apache.kafka.streams.*;
+import org.apache.kafka.streams.KafkaStreams;
+import org.apache.kafka.streams.StreamsBuilder;
+import org.apache.kafka.streams.StreamsConfig;
+import org.apache.kafka.streams.Topology;
 import org.apache.kafka.streams.errors.InvalidStateStoreException;
-import org.apache.kafka.streams.kstream.*;
+import org.apache.kafka.streams.kstream.Consumed;
+import org.apache.kafka.streams.kstream.KTable;
+import org.apache.kafka.streams.kstream.Materialized;
+import org.apache.kafka.streams.kstream.Produced;
 import org.apache.kafka.streams.state.*;
 
 import java.util.*;
@@ -65,14 +69,15 @@ public class EventsListener
         KTable<String, Customer> customerKTable = streamsBuilder.table("customer",Materialized.<String, Customer, KeyValueStore<Bytes, byte[]>>as(customerStateStore.name())
                 .withKeySerde(Serdes.String())
                 .withValueSerde(customerSerde));
-        customerKTable.foreach(((key, value) -> System.out.println("Customer from Topic: " + value)));
+        //customerKTable.foreach(((key, value) -> System.out.println("Customer from Topic: " + value)));
+
 
         streamsBuilder.stream("order",Consumed.with(Serdes.String(), orderSerde))
                 .selectKey((key, value) -> value.getCustomerId().toString()).to("order-to-ktable",Produced.with(Serdes.String(),orderSerde));
         KTable<String,Order> orderKTable=streamsBuilder.table("order-to-ktable",Materialized.<String, Order, KeyValueStore<Bytes, byte[]>>as(orderStateStore.name())
                 .withKeySerde(Serdes.String())
                 .withValueSerde(orderSerde));
-        orderKTable.foreach(((key, value) -> System.out.println("Order from Topic: " + value)));
+        //orderKTable.foreach(((key, value) -> System.out.println("Order from Topic: " + value)));
 
         KTable<String,CustomerOrder> customerOrderKTable=customerKTable.join(orderKTable,(customer, order)->
         {
@@ -92,7 +97,7 @@ public class EventsListener
             }
             return  null;
         },Materialized.<String, CustomerOrder, KeyValueStore<Bytes, byte[]>>as(customerOrderStateStore.name()).withKeySerde(Serdes.String()).withValueSerde(customerOrderSerde));
-        customerOrderKTable.foreach(((key, value) -> System.out.println("Customer Order -> "+value.toString())));
+        //customerOrderKTable.foreach(((key, value) -> System.out.println("Customer Order -> "+value.toString())));
 
         Topology topology = streamsBuilder.build();
         streams = new KafkaStreams(topology, properties);
