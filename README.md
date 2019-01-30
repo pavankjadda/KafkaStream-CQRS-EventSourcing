@@ -28,8 +28,9 @@ This repository demonstrates [CQRS](https://www.confluent.io/blog/event-sourcing
 1. Kafka Streams [(Confluent)](https://docs.confluent.io/current/platform.html)
 2. Materialized views and Kafka State Stores
 3. REST Api using Jetty Server
-2. Confluent Schema Registry
-3. Avro Serializer/Deserializer
-4. Spring Boot
+4. Confluent Schema Registry
+5. Avro Serializer/Deserializer
+6. Spring Boot
+7. Java 8
 
 Note: For Kafka messaging implementation please look at this [repository](https://github.com/pavankjadda/SpringCloudStream-Kafka)
