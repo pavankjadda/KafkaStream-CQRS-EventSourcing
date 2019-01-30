@@ -4,17 +4,17 @@
 Kafka helps you to build fast, high through put, fault tolerance, scalable microservices and applications. Kafka Streams stores data in Kafka Clusters (Kafka State Stores) and gets data wicket fast. 
 
 This repository demonstrates [CQRS](https://www.confluent.io/blog/event-sourcing-cqrs-stream-processing-apache-kafka-whats-connection/) Event Sourcing (Materialized views) with Kafka Streaming ([Version: 2.1.0](https://archive.apache.org/dist/kafka/2.1.0/RELEASE_NOTES.html)). \
+```
+1. In typical production environment, we have multiple microservices and we want to perform multiphase commit to each microservice databases. 
+2. Let's say if you user wants place an order in eShopping application, we have different microservices do the following operations (mentioned high level tasks)
+        - Check the inventory for the requested product (Inventory MicroService takes care of this) 
+        - Check the if any Payment method available and process payment(Payments MicroService takes care of this) 
+        - Get Shipping Address and Billing Address (Customer Management MicroService takes care of this)
 
-> 1. In typical production environment, we have multiple microservices and we want to perform multiphase commit to each microservice databases. 
-> 2. Let's say if you user wants place an order in eShopping application, we have different microservices do the following operations (mentioned high level tasks)
-                - Check the inventory for the requested product (Inventory MicroService takes care of this) 
-                - Check the if any Payment method available and process payment(Payments MicroService takes care of this) 
-                - Get Shipping Address and Billing Address (Customer Management MicroService takes care of this)
-
-> 3. If anyone of the above microservice fails, we want to roll back the transaction and roll back updates made to microservices
-> 4. In this repository all of the above operations (except roll back, because it makes application big and complicated to execute) done through EventSourcing or Event Streaming. In simple words we split each transaction in to small operations and then process through multi phase commit. 
-> 5. For the sake of simplicity, in this repository you can send customers, orders and greetings events through url and  processed in receiver then stored in Kafka State Stores, which then accessed through REST API implemented through Jetty Server (Not MicroServices REST API)
-
+3. If anyone of the above microservice fails, we want to roll back the transaction and roll back updates made to microservices
+4. In this repository all of the above operations (except roll back, because it makes application big and complicated to execute) done through EventSourcing or Event Streaming. In simple words we split each transaction in to small operations and then process through multi phase commit. 
+5. For the sake of simplicity, in this repository you can send customers, orders and greetings events through url and  processed in receiver then stored in Kafka State Stores, which then accessed through REST API implemented through Jetty Server (Not MicroServices REST API)
+```
 
 
 ## How to Run?
