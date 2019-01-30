@@ -2,7 +2,7 @@ package com.kafkastream.constants;
 
 public class KafkaConstants
 {
-    public static String schemaRegistryUrl = "http://localhost:8081";
+    public static String SCHEMA_REGISTRY_URL = "http://localhost:8081";
     public static String APPLICATION_ID_CONFIG = "cqrs-streams";
     public static String APPLICATION_SERVER_CONFIG = "localhost:8095";
     public static String BOOTSTRAP_SERVERS_CONFIG = "localhost:9092";
@@ -14,10 +14,15 @@ public class KafkaConstants
     public static int REST_PROXY_PORT = 8095;
 
 
-    public static String orderTopic = "order";
-    public static String customerTopic = "customer";
-    public static String customerOrderTopic = "customer-order";
-    public static String greetingsTopic = "greetings";
-    public static String orderToKtableTopic = "order-to-ktable";
+    //Kafka Topics
+    public static String ORDER_TOPIC = "order";
+    public static String CUSTOMER_TOPIC = "customer";
+    public static String CUSTOMER_ORDER_TOPIC = "customer-order";
+    public static String GREETINGS_TOPIC = "greetings";
+    public static String ORDER_TO_KTABLE_TOPIC = "order-to-ktable";
+
+
+    //Kafka State Stores
+    public static String CUSTOMER_ORDERS_STORE_NAME = "customerordersstore";
 
 }

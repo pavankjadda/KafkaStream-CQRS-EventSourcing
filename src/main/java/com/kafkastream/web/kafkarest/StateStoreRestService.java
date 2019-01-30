@@ -1,10 +1,10 @@
 package com.kafkastream.web.kafkarest;
 
+import com.kafkastream.constants.KafkaConstants;
 import com.kafkastream.dto.CustomerOrderDTO;
 import com.kafkastream.model.CustomerOrder;
 import com.kafkastream.util.HostStoreInfo;
 import com.kafkastream.util.MetadataService;
-import org.apache.kafka.common.serialization.StringSerializer;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.errors.InvalidStateStoreException;
@@ -20,12 +20,9 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.MediaType;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 
 
@@ -35,9 +32,7 @@ public class StateStoreRestService
     private final KafkaStreams streams;
     private final MetadataService metadataService;
     private final HostInfo hostInfo;
-    private final Client client = ClientBuilder.newBuilder().register(JacksonFeature.class).build();
     private Server jettyServer;
-    private final String    customerOrdersStoreName="customerordersstore";
 
     public StateStoreRestService(final KafkaStreams streams, final HostInfo hostInfo)
     {
@@ -53,10 +48,9 @@ public class StateStoreRestService
             try
             {
                 Collection<StreamsMetadata> streamsMetadataCollection = streams.allMetadata();
-                Iterator<StreamsMetadata> streamsMetadataIterator = streamsMetadataCollection.iterator();
-                while (streamsMetadataIterator.hasNext())
+                for (StreamsMetadata streamsMetadata : streamsMetadataCollection)
                 {
-                    System.out.println("streamsMetadataIterator.next() -> " + streamsMetadataIterator.next());
+                    System.out.println("streamsMetadataIterator.next() -> " + streamsMetadata);
                 }
                 return streams.store(storeName, queryableStoreType);
             } catch (InvalidStateStoreException ignored)
@@ -73,9 +67,9 @@ public class StateStoreRestService
     public List<CustomerOrderDTO> getCustomerOrders(@PathParam("customerId") String customerId) throws InterruptedException
     {
         System.out.println("Inside getCustomerOrders()");
-        /* final HostStoreInfo host = metadataService.streamsMetadataForStoreAndKey("customerordersstore", "all", new StringSerializer()); */
         List<CustomerOrderDTO> customerOrderList = new ArrayList<>();
-        ReadOnlyKeyValueStore<String, CustomerOrder> customerOrdersStore = waitUntilStoreIsQueryable(this.customerOrdersStoreName, QueryableStoreTypes.keyValueStore(), streams);
+        ReadOnlyKeyValueStore<String, CustomerOrder> customerOrdersStore = waitUntilStoreIsQueryable(KafkaConstants.CUSTOMER_ORDERS_STORE_NAME, QueryableStoreTypes.keyValueStore(), streams);
+
         KeyValueIterator<String, CustomerOrder> keyValueIterator = customerOrdersStore.all();
         while (keyValueIterator.hasNext())
         {
@@ -95,17 +89,9 @@ public class StateStoreRestService
     public List<CustomerOrderDTO> getAllCustomersOrders() throws InterruptedException
     {
         System.out.println("Inside getAllCustomersOrders()");
-        final HostStoreInfo host = metadataService.streamsMetadataForStoreAndKey(this.customerOrdersStoreName, "all", new StringSerializer());
-        // Customer Orders view is hosted on another instance
-     /*   if (!thisHost(host))
-        {
-            return client.target(String.format("http://%s:%d/%s", host.getHost(), host.getPort(), "/customer-orders/all"))
-                    .request(MediaType.APPLICATION_JSON_TYPE)
-                    .get(new GenericType<List<CustomerOrder>>(){});
-        }*/
-
         List<CustomerOrderDTO> customerOrderList = new ArrayList<>();
-        ReadOnlyKeyValueStore<String, CustomerOrder> customerOrdersStore = waitUntilStoreIsQueryable(this.customerOrdersStoreName, QueryableStoreTypes.keyValueStore(), streams);
+        ReadOnlyKeyValueStore<String, CustomerOrder> customerOrdersStore = waitUntilStoreIsQueryable(KafkaConstants.CUSTOMER_ORDERS_STORE_NAME, QueryableStoreTypes.keyValueStore(), streams);
+
         KeyValueIterator<String, CustomerOrder> keyValueIterator = customerOrdersStore.all();
         while (keyValueIterator.hasNext())
         {

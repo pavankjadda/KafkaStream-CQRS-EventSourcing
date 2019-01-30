@@ -44,7 +44,7 @@ public class EventsListener
         properties.put(StreamsConfig.APPLICATION_SERVER_CONFIG, KafkaConstants.APPLICATION_SERVER_CONFIG);
         properties.put(StreamsConfig.COMMIT_INTERVAL_MS_CONFIG, KafkaConstants.COMMIT_INTERVAL_MS_CONFIG);
         properties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, KafkaConstants.AUTO_OFFSET_RESET_CONFIG);
-        properties.put("schema.registry.url", KafkaConstants.schemaRegistryUrl);
+        properties.put("schema.registry.url", KafkaConstants.SCHEMA_REGISTRY_URL);
         properties.put("acks", "all");
         properties.put("key.deserializer", Serdes.String().deserializer().getClass());
         properties.put("value.deserializer", SpecificAvroDeserializer.class);
@@ -58,9 +58,9 @@ public class EventsListener
         setUp();
 
         List<CustomerOrderDTO> customerOrderList;
-        SpecificAvroSerde<Customer> customerSerde = createSerde(KafkaConstants.schemaRegistryUrl);
-        SpecificAvroSerde<Order> orderSerde = createSerde(KafkaConstants.schemaRegistryUrl);
-        SpecificAvroSerde<CustomerOrder> customerOrderSerde = createSerde(KafkaConstants.schemaRegistryUrl);
+        SpecificAvroSerde<Customer> customerSerde = createSerde(KafkaConstants.SCHEMA_REGISTRY_URL);
+        SpecificAvroSerde<Order> orderSerde = createSerde(KafkaConstants.SCHEMA_REGISTRY_URL);
+        SpecificAvroSerde<CustomerOrder> customerOrderSerde = createSerde(KafkaConstants.SCHEMA_REGISTRY_URL);
 
         StoreBuilder customerStateStore = Stores.keyValueStoreBuilder(Stores.persistentKeyValueStore("customer-store"), Serdes.String(), customerSerde)
                 .withLoggingEnabled(new HashMap<>());
