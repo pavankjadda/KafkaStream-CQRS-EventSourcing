@@ -13,8 +13,10 @@ This repository demonstrates [CQRS](https://www.confluent.io/blog/event-sourcing
 
 ## Technologies Used
 1. Kafka Streams [(Confluent)](https://docs.confluent.io/current/platform.html)
+2. Materialized views and Kafka State Stores
+3. REST Api using Jetty Server
 2. Confluent Schema Registry
-3. Avro Serialization/Deserialization
+3. Avro Serializer/Deserializer
 4. Spring Boot
 
 Note: For Kafka messaging implementation please look at this [repository](https://github.com/pavankjadda/SpringCloudStream-Kafka)
