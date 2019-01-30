@@ -42,7 +42,10 @@ public class EventsController
     public ModelAndView createCustomer(@ModelAttribute Customer customer) throws ExecutionException, InterruptedException
     {
         eventsSender.sendCustomerEvent(customer);
-        return new ModelAndView("redirect:http://localhost:8095/customers");
+        ModelAndView modelAndView=new ModelAndView("new-customer");
+        modelAndView.addObject(customer);
+
+        return modelAndView;
     }
 
     @PostMapping("/create-order")
@@ -50,6 +53,9 @@ public class EventsController
     public ModelAndView createOrder(@ModelAttribute Order order) throws ExecutionException, InterruptedException
     {
         eventsSender.sendOrderEvent(order);
-        return new ModelAndView("redirect:http://localhost:8095/orders");
+        ModelAndView modelAndView=new ModelAndView("new-order");
+        modelAndView.addObject(order);
+
+        return modelAndView;
     }
 }

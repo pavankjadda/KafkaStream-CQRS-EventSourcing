@@ -16,23 +16,23 @@
 </head>
 <body>
 <div class="container container-fluid">
-    <h1>Created Customer</h1>
+    <h1>Created Order</h1>
     <br> <br>
     <div>
-        <p th:text="'customerId: ' + ${customer.customerId}"></p>
-        <p th:text="'First Name: ' + ${customer.firstName}"></p>
-        <p th:text="'Last Name: ' + ${customer.lastName}"></p>
-        <p th:text="'Email: ' + ${customer.email}"></p>
-        <p th:text="'Phone: ' + ${customer.phone}"></p>
+        <p th:text="'orderId: ' + ${order.orderId}"></p>
+        <p th:text="'customerId: ' + ${order.customerId}"></p>
+        <p th:text="'Order ItemName: ' + ${order.orderItemName}"></p>
+        <p th:text="'Order Place: ' + ${order.orderPlace}"></p>
+        <p th:text="'Order Purchase Time: ' + ${order.orderPurchaseTime}"></p>
 
         <br>
-        <a href="/create-customer">Create another Customer</a>
+        <a href="/create-order">Create another Order</a>
 
         <br> <br>
         <br> <br>
     </div>
     <div>
-        <a href="http://localhost:8095/store/customers" target="_blank">Click here to see all customers</a>
+        <a href="http://localhost:8095/store/orders" target="_blank">Click here to see all Orders</a>
     </div>
 </div>
 </body>
