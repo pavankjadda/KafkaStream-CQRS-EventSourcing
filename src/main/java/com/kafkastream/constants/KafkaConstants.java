@@ -25,7 +25,7 @@ public class KafkaConstants
 
 
     //Kafka State Stores
-    public static String CUSTOMER_ORDERS_STORE_NAME = "customerordersstore";
+    public static String CUSTOMER_ORDER_STORE_NAME = "customer-order-store";
     public static String CUSTOMER_STORE_NAME = "customer-store";
     public static String ORDER_STORE_NAME = "order-store";
 

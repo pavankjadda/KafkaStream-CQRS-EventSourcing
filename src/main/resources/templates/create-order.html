@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>Create New Order</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Bootstrap JS -->
+    <script src="js/jquery.slim.min.js"></script>
+    <script src="js/popper.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+</head>
+<body>
+<br/> <br/>
+<div class="container container-fluid">
+    <h1>Create Order</h1>
+    <form  method="post" th:action="@{/create-order}" class="col-xs-12 col-sm-12 col-md-9 col-lg-9">
+        <div class="form-group">
+            <label for="orderId">Order Id</label>
+            <input type="text" class="form-control" id="orderId" name="orderId">
+        </div>
+        <div class="form-group">
+            <label for="customerId">Customer Id</label>
+            <input type="text" class="form-control" id="customerId" name="customerId">
+        </div>
+        <div class="form-group">
+            <label for="orderItemName">Order Item Name</label>
+            <input type="text" class="form-control" id="orderItemName" name="orderItemName">
+        </div>
+        <div class="form-group">
+            <label for="orderPlace">Order Place</label>
+            <input type="text" class="form-control" id="orderPlace" name="orderPlace">
+        </div>
+        <div class="form-group">
+            <label for="orderPurchaseTime">Order Purchase Time</label>
+            <input type="text" class="form-control" id="orderPurchaseTime" name="orderPurchaseTime">
+        </div>
+        <button type="submit" value="Create" class="btn btn-primary" style="margin-top: 20px">Create Order</button>
+    </form>
+</div>
+</body>
+</html>

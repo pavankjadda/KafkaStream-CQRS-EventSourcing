@@ -3,8 +3,10 @@ package com.kafkastream.web.kafkarest;
 import com.kafkastream.constants.KafkaConstants;
 import com.kafkastream.dto.CustomerDto;
 import com.kafkastream.dto.CustomerOrderDTO;
+import com.kafkastream.dto.OrderDto;
 import com.kafkastream.model.Customer;
 import com.kafkastream.model.CustomerOrder;
+import com.kafkastream.model.Order;
 import com.kafkastream.util.HostStoreInfo;
 import com.kafkastream.util.MetadataService;
 import org.apache.kafka.streams.KafkaStreams;
@@ -70,7 +72,7 @@ public class StateStoreRestService
     {
         System.out.println("Inside getCustomerOrders()");
         List<CustomerOrderDTO> customerOrderList = new ArrayList<>();
-        ReadOnlyKeyValueStore<String, CustomerOrder> customerOrdersStore = waitUntilStoreIsQueryable(KafkaConstants.CUSTOMER_ORDERS_STORE_NAME, QueryableStoreTypes.keyValueStore(), streams);
+        ReadOnlyKeyValueStore<String, CustomerOrder> customerOrdersStore = waitUntilStoreIsQueryable(KafkaConstants.CUSTOMER_ORDER_STORE_NAME, QueryableStoreTypes.keyValueStore(), streams);
 
         KeyValueIterator<String, CustomerOrder> keyValueIterator = customerOrdersStore.all();
         while (keyValueIterator.hasNext())
@@ -92,7 +94,7 @@ public class StateStoreRestService
     {
         System.out.println("Inside getAllCustomersOrders()");
         List<CustomerOrderDTO> customerOrderList = new ArrayList<>();
-        ReadOnlyKeyValueStore<String, CustomerOrder> customerOrdersStore = waitUntilStoreIsQueryable(KafkaConstants.CUSTOMER_ORDERS_STORE_NAME, QueryableStoreTypes.keyValueStore(), streams);
+        ReadOnlyKeyValueStore<String, CustomerOrder> customerOrdersStore = waitUntilStoreIsQueryable(KafkaConstants.CUSTOMER_ORDER_STORE_NAME, QueryableStoreTypes.keyValueStore(), streams);
 
         KeyValueIterator<String, CustomerOrder> keyValueIterator = customerOrdersStore.all();
         while (keyValueIterator.hasNext())
@@ -121,6 +123,23 @@ public class StateStoreRestService
         return customersDtoList;
     }
 
+    @GET
+    @Path("/orders")
+    @Produces(MediaType.APPLICATION_JSON)
+    public List<OrderDto> getAllOrders() throws InterruptedException
+    {
+        List<OrderDto> orderDtoList = new ArrayList<>();
+        ReadOnlyKeyValueStore<String, Order> ordersStore = waitUntilStoreIsQueryable(KafkaConstants.ORDER_STORE_NAME, QueryableStoreTypes.keyValueStore(), streams);
+
+        KeyValueIterator<String, Order> keyValueIterator = ordersStore.all();
+        while (keyValueIterator.hasNext())
+        {
+            Order order=keyValueIterator.next().value;
+            orderDtoList.add(new OrderDto(order.getCustomerId().toString(),order.getOrderId().toString(), order.getOrderItemName().toString(),order.getOrderPlace().toString(),order.getOrderPurchaseTime().toString()));
+        }
+        return orderDtoList;
+    }
+
     @GET()
     @Path("/instances")
     @Produces(MediaType.APPLICATION_JSON)
@@ -142,11 +161,6 @@ public class StateStoreRestService
         return new CustomerOrderDTO(customerOrder.getCustomerId().toString(), customerOrder.getFirstName().toString(), customerOrder.getLastName().toString(), customerOrder.getEmail().toString(), customerOrder.getPhone().toString(), customerOrder.getOrderId().toString(), customerOrder.getOrderItemName().toString(), customerOrder.getOrderPlace().toString(), customerOrder.getOrderPurchaseTime().toString());
     }
 
-    private boolean thisHost(final HostStoreInfo host)
-    {
-        return host.getHost().equals(hostInfo.host()) && host.getPort() == hostInfo.port();
-    }
-
     public void start() throws Exception
     {
         ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
@@ -165,13 +179,4 @@ public class StateStoreRestService
 
         jettyServer.start();
     }
-
-    void stop() throws Exception
-    {
-        if (jettyServer != null)
-        {
-            jettyServer.stop();
-        }
-    }
-
 }

@@ -1,6 +1,7 @@
 package com.kafkastream.web;
 
 import com.kafkastream.model.Customer;
+import com.kafkastream.model.Order;
 import com.kafkastream.service.EventsSender;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -30,13 +31,25 @@ public class EventsController
         return new ModelAndView("create-customer");
     }
 
+    @GetMapping("/create-order")
+    public ModelAndView createOrder()
+    {
+        return new ModelAndView("create-order");
+    }
 
     @PostMapping("/create-customer")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public ModelAndView createCustomer(@ModelAttribute Customer customer) throws ExecutionException, InterruptedException
     {
         eventsSender.sendCustomerEvent(customer);
-        return new ModelAndView("new-customer");
+        return new ModelAndView("redirect:http://localhost:8095/customers");
     }
 
+    @PostMapping("/create-order")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public ModelAndView createOrder(@ModelAttribute Order order) throws ExecutionException, InterruptedException
+    {
+        eventsSender.sendOrderEvent(order);
+        return new ModelAndView("redirect:http://localhost:8095/orders");
+    }
 }
