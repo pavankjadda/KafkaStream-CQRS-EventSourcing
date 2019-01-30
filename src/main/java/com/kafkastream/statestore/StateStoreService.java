@@ -1,31 +1,6 @@
 package com.kafkastream.statestore;
 
-import com.kafkastream.config.StreamsBuilderConfig;
-import com.kafkastream.dto.CustomerOrderDTO;
-import com.kafkastream.model.CustomerOrder;
-import com.kafkastream.web.kafkarest.StateStoreRestService;
-import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
-import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde;
-import org.apache.avro.specific.SpecificRecord;
-import org.apache.kafka.streams.KafkaStreams;
-import org.apache.kafka.streams.StreamsBuilder;
-import org.apache.kafka.streams.errors.InvalidStateStoreException;
-import org.apache.kafka.streams.state.HostInfo;
-import org.apache.kafka.streams.state.QueryableStoreType;
-import org.apache.kafka.streams.state.StreamsMetadata;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
-import org.glassfish.jersey.jackson.JacksonFeature;
-import org.glassfish.jersey.server.ResourceConfig;
-import org.glassfish.jersey.servlet.ServletContainer;
 import org.springframework.stereotype.Service;
-
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.core.GenericType;
-import javax.ws.rs.core.MediaType;
-import java.util.*;
 
 
 /**
@@ -37,12 +12,12 @@ import java.util.*;
 public class StateStoreService
 {
 
-    private final Client client = ClientBuilder.newBuilder().register(JacksonFeature.class).build();
+ /*   private final Client client = ClientBuilder.newBuilder().register(JacksonFeature.class).build();
     private Server jettyServer;
 
     public StateStoreService()
     {
-        /*
+        *//*
         Properties properties = new Properties();
         properties.put("application.id", "cqrs-streams");
         properties.put("bootstrap.servers", "localhost:9092");
@@ -52,7 +27,7 @@ public class StateStoreService
         properties.put("schema.registry.url", "http://localhost:8081");
         properties.put("acks", "all");
         properties.put("key.deserializer", Serdes.String().deserializer().getClass());
-        properties.put("value.deserializer", SpecificAvroDeserializer.class); */
+        properties.put("value.deserializer", SpecificAvroDeserializer.class); *//*
 
         StreamsBuilder streamsBuilder = StreamsBuilderConfig.getInstance();
     }
@@ -150,7 +125,7 @@ public class StateStoreService
     {
 
         List<CustomerOrderDTO> customerOrderList = new ArrayList<>();
-        /*
+        *//*
         Topology topology = streamsBuilder.build();
         KafkaStreams streams = new KafkaStreams(topology, properties);
         CountDownLatch latch = new CountDownLatch(1);
@@ -177,9 +152,9 @@ public class StateStoreService
                 latch.countDown();
             }
         });
-        */
+        *//*
         return customerOrderList;
-    }
+    }*/
 
 
 }

@@ -169,8 +169,8 @@ public class EventsListener
     private static <VT extends SpecificRecord> SpecificAvroSerde<VT> createSerde(String schemaRegistryUrl)
     {
 
-        final SpecificAvroSerde<VT> serde = new SpecificAvroSerde<>();
-        final Map<String, String> serdeConfig = Collections.singletonMap(AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, schemaRegistryUrl);
+        SpecificAvroSerde<VT> serde = new SpecificAvroSerde<>();
+        Map<String, String> serdeConfig = Collections.singletonMap(AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, schemaRegistryUrl);
         serde.configure(serdeConfig, false);
         return serde;
     }
@@ -195,7 +195,7 @@ public class EventsListener
 
     private static StateStoreRestService startRestProxy(final KafkaStreams streams, final HostInfo hostInfo) throws Exception
     {
-        final StateStoreRestService interactiveQueriesRestService = new StateStoreRestService(streams, hostInfo);
+        StateStoreRestService interactiveQueriesRestService = new StateStoreRestService(streams, hostInfo);
         interactiveQueriesRestService.start();
         return interactiveQueriesRestService;
     }

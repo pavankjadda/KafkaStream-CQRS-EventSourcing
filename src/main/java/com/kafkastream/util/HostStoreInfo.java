@@ -6,50 +6,61 @@ import java.util.Set;
 /**
  * A simple bean that can be JSON serialized via Jersey. Represents a KafkaStreams instance
  * that has a set of state stores. See {@link WordCountInteractiveQueriesRestService} for how it is used.
- *
+ * <p>
  * We use this JavaBean based approach as it fits nicely with JSON serialization provided by
  * jax-rs/jersey
  */
-public class HostStoreInfo {
+public class HostStoreInfo
+{
 
     private String host;
     private int port;
     private Set<String> storeNames;
 
-    public HostStoreInfo(){}
+    public HostStoreInfo()
+    {
+    }
 
-    public HostStoreInfo(final String host, final int port, final Set<String> storeNames) {
+    public HostStoreInfo(final String host, final int port, final Set<String> storeNames)
+    {
         this.host = host;
         this.port = port;
         this.storeNames = storeNames;
     }
 
-    public String getHost() {
+    public String getHost()
+    {
         return host;
     }
 
-    public void setHost(final String host) {
+    public void setHost(final String host)
+    {
         this.host = host;
     }
 
-    public int getPort() {
+    public int getPort()
+    {
         return port;
     }
 
-    public void setPort(final int port) {
+    public void setPort(final int port)
+    {
         this.port = port;
     }
 
-    public Set<String> getStoreNames() {
+    public Set<String> getStoreNames()
+    {
         return storeNames;
     }
 
-    public void setStoreNames(final Set<String> storeNames) {
+    public void setStoreNames(final Set<String> storeNames)
+    {
         this.storeNames = storeNames;
     }
 
     @Override
-    public String toString() {
+    public String toString()
+    {
         return "HostStoreInfo{" +
                 "host='" + host + '\'' +
                 ", port=" + port +
@@ -58,11 +69,14 @@ public class HostStoreInfo {
     }
 
     @Override
-    public boolean equals(final Object o) {
-        if (this == o) {
+    public boolean equals(final Object o)
+    {
+        if (this == o)
+        {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (o == null || getClass() != o.getClass())
+        {
             return false;
         }
         final HostStoreInfo that = (HostStoreInfo) o;
@@ -72,7 +86,8 @@ public class HostStoreInfo {
     }
 
     @Override
-    public int hashCode() {
+    public int hashCode()
+    {
         return Objects.hash(host, port, storeNames);
     }
 }
