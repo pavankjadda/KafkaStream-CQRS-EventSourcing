@@ -2,6 +2,7 @@ package com.kafkastream.constants;
 
 public class KafkaConstants
 {
+    //Kafka Streams Configuration
     public static String SCHEMA_REGISTRY_URL = "http://localhost:8081";
     public static String APPLICATION_ID_CONFIG = "cqrs-streams";
     public static String APPLICATION_SERVER_CONFIG = "localhost:8095";
@@ -10,6 +11,7 @@ public class KafkaConstants
     public static String AUTO_OFFSET_RESET_CONFIG = "earliest";
 
 
+    //Kafka REST Proxy
     public static String REST_PROXY_HOST = "localhost";
     public static int REST_PROXY_PORT = 8095;
 
