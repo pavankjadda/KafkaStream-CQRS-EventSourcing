@@ -1,4 +1,4 @@
-package com.kafkastream.event;
+package com.kafkastream.events;
 
 import com.kafkastream.model.Customer;
 
