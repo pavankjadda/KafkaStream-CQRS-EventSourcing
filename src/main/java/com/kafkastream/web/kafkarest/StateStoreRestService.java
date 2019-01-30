@@ -56,7 +56,7 @@ public class StateStoreRestService
             } catch (InvalidStateStoreException ignored)
             {
                 // store not yet ready for querying
-                Thread.sleep(100);
+                Thread.sleep(1000);
             }
         }
     }
