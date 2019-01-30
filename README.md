@@ -13,7 +13,7 @@ This repository demonstrates [CQRS](https://www.confluent.io/blog/event-sourcing
 
 3. If anyone of the above microservice fails, we want to roll back the transaction and roll back updates made to microservices
 4. In this repository all of the above operations (except roll back, because it makes application big and complicated to execute) done through EventSourcing or Event Streaming. In simple words we split each transaction in to small operations and then process through multi phase commit. 
-5. For the sake of simplicity, in this repository you can send customers, orders and greetings events through url and  processed in receiver then stored in Kafka State Stores, which then accessed through REST API implemented through Jetty Server (Not MicroServices REST API)
+5. For the sake of simplicity, in this repository you can send customers, orders and greetings events through url and  processed in listener/receiver then stored in Kafka State Stores, which then accessed through REST API implemented through Jetty Server (Not MicroServices REST API)
 ```
 
 
@@ -26,8 +26,8 @@ This repository demonstrates [CQRS](https://www.confluent.io/blog/event-sourcing
 2. Clone this repository and open in IntelliJ or Eclipse as maven project and run `KafkaStreamApplication` class. This will bring up producer class.
 3. Go to http://localhost:9021 => Topics=> create topics `customer`, `order` and `order-to-ktable` (if they do not exist)
 4. Go to EventsListener class and execute main method to start REST Proxy (Jetty) then access Kafka data through REST API
-5. Open http://localhost:8090/orders or http://localhost:8090/customers or http://localhost:8090/sendevents to send kafka events (objects). 
-6. Go to http://localhost:8095/customer-orders/all to see all customer orders fetched from Kafka State Store. See [StateStore Rest](https://github.com/pavankjadda/KafkaStream-CQRS-EventSourcing/blob/master/src/main/java/com/kafkastream/web/kafkarest/StateStoreRestService.java) Api for possible methods, you can customize it further
+5. Open http://localhost:8090/sendevents to send 3 kafka events or send individual events through `http://localhost:8090/orders` or `http://localhost:8090/customers` or `http://localhost:8090/sendevents` to send kafka events (objects). 
+6. Go to `http://localhost:8095/customer-orders/all` to see all customer orders fetched from Kafka State Store. See [StateStore Rest](https://github.com/pavankjadda/KafkaStream-CQRS-EventSourcing/blob/master/src/main/java/com/kafkastream/web/kafkarest/StateStoreRestService.java) Api for possible methods, you can customize it further
 7. Modify [code](https://github.com/pavankjadda/KafkaStream-CQRS-EventSourcing/blob/master/src/main/java/com/kafkastream/web/EventsController.java), if you want to send events with different information.
 
 ## Technologies Used
