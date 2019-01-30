@@ -51,7 +51,7 @@ public class EventsSender
 
     public void sendCustomerEvent(Customer customer) throws ExecutionException, InterruptedException
     {
-        SpecificAvroSerde<Customer> customerSerde = createSerde(KafkaConstants.schemaRegistryUrl);
+        SpecificAvroSerde<Customer> customerSerde = createSerde(KafkaConstants.SCHEMA_REGISTRY_URL);
         Producer<String, Customer> kafkaProducerCustomer = new KafkaProducer<>(properties,Serdes.String().serializer(),customerSerde.serializer());
         ProducerRecord<String, Customer> customerRecord = new ProducerRecord<>("customer", customer.getCustomerId().toString(), customer);
         Future<RecordMetadata> future = kafkaProducerCustomer.send(customerRecord);
@@ -61,7 +61,7 @@ public class EventsSender
 
     public void sendOrderEvent(Order order) throws ExecutionException, InterruptedException
     {
-        SpecificAvroSerde<Order> orderSerde = createSerde(KafkaConstants.schemaRegistryUrl);
+        SpecificAvroSerde<Order> orderSerde = createSerde(KafkaConstants.SCHEMA_REGISTRY_URL);
         Producer<String, Order> kafkaOrderProducer = new KafkaProducer<>(properties,Serdes.String().serializer(),orderSerde.serializer());
         ProducerRecord<String, Order> orderRecord = new ProducerRecord<>("order", order.getOrderId().toString(), order);
         Future<RecordMetadata> future = kafkaOrderProducer.send(orderRecord);

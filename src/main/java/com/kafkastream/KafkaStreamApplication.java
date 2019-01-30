@@ -10,5 +10,4 @@ public class KafkaStreamApplication
     {
         SpringApplication.run(KafkaStreamApplication.class, args);
     }
-
 }
