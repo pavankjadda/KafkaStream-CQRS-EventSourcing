@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>Created Customer</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Bootstrap JS -->
+    <script src="js/jquery.slim.min.js"></script>
+    <script src="js/popper.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+
+    <br/> <br/>
+</head>
+<body>
+<div class="container container-fluid">
+    <h1>Created Customer</h1>
+    <div>
+        <p th:text="'id: ' + ${greeting.id}"></p>
+        <p th:text="'content: ' + ${greeting.content}"></p>
+        <a href="/create-customer">Create another Customer</a>
+    </div>
+</div>
+</body>
+</html>

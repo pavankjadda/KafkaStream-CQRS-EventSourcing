@@ -26,8 +26,14 @@ This repository demonstrates [CQRS](https://www.confluent.io/blog/event-sourcing
 2. Clone this repository and open in IntelliJ or Eclipse as maven project and run `KafkaStreamApplication` class. This will bring up producer class.
 3. Go to http://localhost:9021 => Topics=> create topics `customer`, `order` and `order-to-ktable` (if they do not exist)
 4. Go to EventsListener class and execute main method to start REST Proxy (Jetty) then access Kafka data through REST API
-5. Open http://localhost:8090/sendevents to send 3 kafka events or send individual events through `http://localhost:8090/orders` or `http://localhost:8090/customers` or `http://localhost:8090/sendevents` to send kafka events (objects). 
-6. Go to `http://localhost:8095/customer-orders/all` to see all customer orders fetched from Kafka State Store. See [StateStore Rest](https://github.com/pavankjadda/KafkaStream-CQRS-EventSourcing/blob/master/src/main/java/com/kafkastream/web/kafkarest/StateStoreRestService.java) Api for possible methods, you can customize it further
+5. Use following web pages to send `customer, order and greetings` events
+    - Go to the page `http://localhost:8090/create-customer` to send customer event
+    - Go to the page `http://localhost:8090/create-order` to send order event
+    - Go to the page `http://localhost:8090/create-greeting` to send greeting event
+6. Sent events can be accessed through REST API created through Jetty Server which gets it from Kafka State Store. See [StateStore Rest](https://github.com/pavankjadda/KafkaStream-CQRS-EventSourcing/blob/master/src/main/java/com/kafkastream/web/kafkarest/StateStoreRestService.java) Api for possible methods, you can customize it further
+    - Go to `http://localhost:8095/store/customer-order/all` to see all customer orders
+    - Go to `http://localhost:8095/store/customers` to get all customers
+    - Go to `http://localhost:8095/store/orders` to get all orders
 7. Modify [code](https://github.com/pavankjadda/KafkaStream-CQRS-EventSourcing/blob/master/src/main/java/com/kafkastream/web/EventsController.java), if you want to send events with different information.
 
 ## Technologies Used

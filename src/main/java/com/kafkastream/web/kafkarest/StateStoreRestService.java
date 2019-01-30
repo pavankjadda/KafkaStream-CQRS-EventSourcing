@@ -1,7 +1,9 @@
 package com.kafkastream.web.kafkarest;
 
 import com.kafkastream.constants.KafkaConstants;
+import com.kafkastream.dto.CustomerDto;
 import com.kafkastream.dto.CustomerOrderDTO;
+import com.kafkastream.model.Customer;
 import com.kafkastream.model.CustomerOrder;
 import com.kafkastream.util.HostStoreInfo;
 import com.kafkastream.util.MetadataService;
@@ -26,7 +28,7 @@ import java.util.Collection;
 import java.util.List;
 
 
-@Path("customer-orders")
+@Path("store")
 public class StateStoreRestService
 {
     private final KafkaStreams streams;
@@ -62,7 +64,7 @@ public class StateStoreRestService
     }
 
     @GET
-    @Path("/{customerId}")
+    @Path("/customer-order/{customerId}")
     @Produces(MediaType.APPLICATION_JSON)
     public List<CustomerOrderDTO> getCustomerOrders(@PathParam("customerId") String customerId) throws InterruptedException
     {
@@ -84,7 +86,7 @@ public class StateStoreRestService
     }
 
     @GET
-    @Path("/all")
+    @Path("/customer-order/all")
     @Produces(MediaType.APPLICATION_JSON)
     public List<CustomerOrderDTO> getAllCustomersOrders() throws InterruptedException
     {
@@ -99,6 +101,24 @@ public class StateStoreRestService
             customerOrderList.add(getCustomerOrderDTOFromCustomerOrder(customerOrderKeyValue.value));
         }
         return customerOrderList;
+    }
+
+    @GET
+    @Path("/customers")
+    @Produces(MediaType.APPLICATION_JSON)
+    public List<CustomerDto> getAllCustomers() throws InterruptedException
+    {
+        System.out.println("Inside getAllCustomers()");
+        List<CustomerDto> customersDtoList = new ArrayList<>();
+        ReadOnlyKeyValueStore<String, Customer> customersStore = waitUntilStoreIsQueryable(KafkaConstants.CUSTOMER_STORE_NAME, QueryableStoreTypes.keyValueStore(), streams);
+
+        KeyValueIterator<String, Customer> keyValueIterator = customersStore.all();
+        while (keyValueIterator.hasNext())
+        {
+            Customer customer=keyValueIterator.next().value;
+            customersDtoList.add(new CustomerDto(customer.getCustomerId().toString(),customer.getFirstName().toString(), customer.getLastName().toString(),customer.getEmail().toString(),customer.getPhone().toString()));
+        }
+        return customersDtoList;
     }
 
     @GET()

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>Customers List</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Bootstrap JS -->
+    <script src="js/jquery.slim.min.js"></script>
+    <script src="js/popper.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+</head>
+<body>
+<br/> <br/>
+<div class="container container-fluid">
+    <h1> Customers List</h1>
+    <table>
+        <thead>
+        <tr>
+            <td> Customer Id</td>
+            <td> First Name</td>
+            <td> Last Name</td>
+            <td> Email</td>
+            <td> Phone</td>
+
+        </tr>
+        </thead>
+        <tbody>
+            <tr th:each="customer: ${customers}">
+                <td th:text="${student.customerId}"></td>
+                <td th:text="${student.firstName}"></td>
+                <td th:text="${student.lastName}"></td>
+                <td th:text="${student.email}"></td>
+                <td th:text="${student.phone}"></td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</body>
+</html>
