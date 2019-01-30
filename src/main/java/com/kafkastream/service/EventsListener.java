@@ -17,12 +17,14 @@ import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.Topology;
-import org.apache.kafka.streams.errors.InvalidStateStoreException;
 import org.apache.kafka.streams.kstream.Consumed;
 import org.apache.kafka.streams.kstream.KTable;
 import org.apache.kafka.streams.kstream.Materialized;
 import org.apache.kafka.streams.kstream.Produced;
-import org.apache.kafka.streams.state.*;
+import org.apache.kafka.streams.state.HostInfo;
+import org.apache.kafka.streams.state.KeyValueStore;
+import org.apache.kafka.streams.state.StoreBuilder;
+import org.apache.kafka.streams.state.Stores;
 
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
@@ -150,9 +152,6 @@ public class EventsListener
         System.exit(0);
     }
 
-    private static void printKTable()
-    {
-    }
 
     private static void printList(List<CustomerOrderDTO> customerOrderList)
     {
@@ -172,23 +171,6 @@ public class EventsListener
         return serde;
     }
 
-
-    public static <T> T waitUntilStoreIsQueryable(final String storeName, final QueryableStoreType<T> queryableStoreType, final KafkaStreams streams) throws InterruptedException
-    {
-        while (true)
-        {
-            try
-            {
-                return streams.store(storeName, queryableStoreType);
-            }
-
-            catch (InvalidStateStoreException ignored)
-            {
-                // store not yet ready for querying
-                Thread.sleep(100);
-            }
-        }
-    }
 
     private static StateStoreRestService startRestProxy(final KafkaStreams streams, final HostInfo hostInfo) throws Exception
     {
