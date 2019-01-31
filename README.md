@@ -26,7 +26,7 @@ This repository demonstrates [CQRS](https://www.confluent.io/blog/event-sourcing
 3. Go to http://localhost:9021 => Topics=> create topics `customer`, `order` and `order-to-ktable` (if they do not exist)
 4. Go to `EventsListener` class and execute main method to start REST Proxy (Jetty) which accesses Kafka Materialized view data through REST API
 5. Go to [http://localhost:8090/](http://localhost:8090/) to send events and retrieve and see data from Kafka Materialized views
-    > 1. This new User Interface developed to simplify the process of sending events and retrieving data
+    > 1. I created new User Interface to simplify the process of sending events and retrieving data
     > 2. Since, EventsSender application and Jetty Server run on different ports( you can run them as different applications), I used RestTemplate to get data from Kafka Materialized views and show it in HTML pages
     
 5. Skip this step if you followed step 5, otherwise use following web pages to send `customer, order and greetings` events
