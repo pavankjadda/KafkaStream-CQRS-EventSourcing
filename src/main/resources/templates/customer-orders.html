@@ -16,7 +16,7 @@
 <div class="container container-fluid">
     <h1> Customer Orders List</h1>
     <br/> <br/>
-    <table class="table table-bordered">
+    <table class="table table-bordered" th:if="!${customerorders.empty}">
         <thead class="font-weight-bold">
         <tr>
             <td> Customer Id</td>
@@ -31,9 +31,6 @@
         </tr>
         </thead>
         <tbody>
-            <tr th:if="${customerorders.empty}">
-                <td colspan="2"> No Customers Available </td>
-            </tr>
             <tr th:each="customerorder: ${customerorders}">
                 <td th:text="${customerorder.customerId}"></td>
                 <td th:text="${customerorder.firstName}">/td>
@@ -48,9 +45,12 @@
         </tbody>
     </table>
 
+    <div th:if="${customerorders.empty}">
+        <p> No Customer Orders Available </p>
+    </div>
     <br/> <br/>
     <p>
-        <a href="/home" th:href="@{/}">Home</a>
+        <a th:href="@{/}">Home</a>
     </p>
 </div>
 </body>

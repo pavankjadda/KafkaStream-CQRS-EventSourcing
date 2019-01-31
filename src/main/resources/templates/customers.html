@@ -17,7 +17,7 @@
 <div class="container container-fluid">
     <h1> Customers List</h1>
     <br/> <br/>
-    <table class="table table-bordered">
+    <table class="table table-bordered"  th:if="!${customers.empty}">
         <thead class="font-weight-bold">
         <tr>
             <td> Customer Id</td>
@@ -41,10 +41,17 @@
         </tbody>
     </table>
 
-    <br/> <br/>
-    <p>
-        <a href="/home" th:href="@{/}">Home</a>
-    </p>
+    <div th:if="${customers.empty}">
+        <p> No Customers Available </p>
+    </div>
+
+    <br> <br>
+    <div>
+        <p>
+            <a href="/create-customer" style="margin: 10px">Create New</a>
+            <a href="/home" style="margin: 10px">Home</a>
+        </p>
+    </div>
 </div>
 </body>
 </html>

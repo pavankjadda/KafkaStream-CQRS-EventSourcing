@@ -17,7 +17,7 @@
 <div class="container container-fluid">
     <h1> Greetings List</h1>
     <br/> <br/>
-    <table class="table table-bordered">
+    <table class="table table-bordered" th:if="!${greetings.empty}">
         <thead class="font-weight-bold">
         <tr>
             <td> Message </td>
@@ -25,9 +25,6 @@
         </tr>
         </thead>
         <tbody>
-            <tr th:if="${greetings.empty}">
-                <td colspan="2"> No Greetings Available </td>
-            </tr>
             <tr th:each="greeting: ${greetings}">
                 <td th:text="${greeting.message}"></td>
                 <td th:text="${greeting.timestamp}"></td>
@@ -35,10 +32,18 @@
         </tbody>
     </table>
 
-    <br/> <br/>
-    <p>
-        <a href="/home" th:href="@{/}">Home</a>
-    </p>
+    <div th:if="${greetings.empty}">
+        <p> No Greetings Available </p>
+    </div>
+
+
+    <br> <br>
+    <div>
+        <p>
+            <a href="/create-greeting" style="margin: 10px">Create New</a>
+            <a href="/home" style="margin: 10px">Home</a>
+        </p>
+    </div>
 </div>
 </body>
 </html>

@@ -120,8 +120,7 @@ public class EventsListener
         {
             streams.start();
             final HostInfo restEndpoint = new HostInfo(KafkaConstants.REST_PROXY_HOST, KafkaConstants.REST_PROXY_PORT);
-            final StateStoreRestService restService = startRestProxy(streams, restEndpoint);
-            customerOrderList = restService.getAllCustomersOrders();
+            startRestProxy(streams, restEndpoint);
             latch.await();
         }
         catch (Exception e)
