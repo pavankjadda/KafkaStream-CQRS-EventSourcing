@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
 <head>
     <meta charset="UTF-8">
     <title>Home</title>
@@ -20,29 +20,38 @@
     <br/>
     <h4>Customer Orders</h4>
     <div class="card">
-        <div class="card-body"><a href="customer-orders">Customer Orders (Retrieved from Kafka Materialized views)</a></div>
+        <div class="card-body">
+            <a th:href="@{/customer-orders}">Customer Orders</a>
+            (Retrieved from Kafka Materialized views)
+        </div>
     </div>
 
     <br/> <br/>
     <h4>Customers</h4>
     <div class="card">
-        <div class="card-body"><a href="customers">Customers</a></div>
-        <div class="card-footer"><a href="create-customer">Create New Customer</a></div>
+        <div class="card-body">
+            <p><a th:href="@{/customers}">Customers</a> (Retrieved from Kafka Materialized views)</p>
+            <p><a th:href="@{/create-customer}">Create New Customer</a></p>
+        </div>
     </div>
 
     <br/> <br/>
     <h4>Orders</h4>
     <div class="card">
-        <div class="card-body"><a href="orders">Orders</a></div>
-        <div class="card-footer"><a href="create-order">Create New Order</a></div>
+        <div class="card-body">
+            <p><a th:href="@{/orders}">Orders</a> (Retrieved from Kafka Materialized views)</p>
+            <p><a  th:href="@{/create-order}">Create New Order</a></p>
+        </div>
     </div>
 
 
     <br/> <br/>
     <h4>Greetings</h4>
     <div class="card">
-        <div class="card-body"><a href="greetings">Greetings</a></div>
-        <div class="card-footer"><a href="create-greeting">Create New Greeting</a></div>
+        <div class="card-body">
+            <p><a th:href="@{/greetings}">Greetings</a> (Retrieved from Kafka Materialized views)</p>
+            <p><a th:href="@{/create-greeting}">Create New Greeting</a></p>
+        </div>
     </div>
 
 </div>

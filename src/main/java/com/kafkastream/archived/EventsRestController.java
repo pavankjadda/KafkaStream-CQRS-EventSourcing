@@ -1,23 +1,6 @@
 package com.kafkastream.archived;
 
-import com.kafkastream.dto.CustomerOrderDTO;
-import com.kafkastream.model.Customer;
-import com.kafkastream.model.Greetings;
-import com.kafkastream.model.Order;
-import com.kafkastream.service.EventsSender;
-import com.kafkastream.statestore.StateStoreService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.Calendar;
-import java.util.List;
-import java.util.Random;
-import java.util.TimeZone;
-import java.util.concurrent.ExecutionException;
 
 @RestController
 public class EventsRestController

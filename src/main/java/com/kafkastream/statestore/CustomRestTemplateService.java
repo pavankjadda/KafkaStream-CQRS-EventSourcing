@@ -1,4 +1,4 @@
-package com.kafkastream.service;
+package com.kafkastream.statestore;
 
 import com.kafkastream.dto.CustomerDto;
 import com.kafkastream.dto.CustomerOrderDTO;

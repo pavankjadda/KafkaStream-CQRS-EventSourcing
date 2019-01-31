@@ -1,4 +1,4 @@
-package com.kafkastream.service;
+package com.kafkastream.events;
 
 import com.kafkastream.constants.KafkaConstants;
 import com.kafkastream.dto.CustomerOrderDTO;
@@ -75,13 +75,13 @@ public class EventsListener
 
         KTable<String, Order> orderKTable = streamsBuilder.table("order", Materialized.<String, Order,
                 KeyValueStore<Bytes, byte[]>>as(orderStateStore.name())
-                .withKeySerde(Serdes.String())
-                .withValueSerde(orderSerde));
+                                                                .withKeySerde(Serdes.String())
+                                                                .withValueSerde(orderSerde));
 
         KTable<String, Greetings> greetingsKTable = streamsBuilder.table("greetings", Materialized.<String, Greetings,
                 KeyValueStore<Bytes, byte[]>>as(greetingsStateStore.name())
-                .withKeySerde(Serdes.String())
-                .withValueSerde(greetingsSerde));
+                                                                    .withKeySerde(Serdes.String())
+                                                                    .withValueSerde(greetingsSerde));
 
 
         KTable<String, CustomerOrder> customerOrderKTable = customerKTable.join(orderKTable, (customer, order) ->
@@ -122,7 +122,6 @@ public class EventsListener
             final HostInfo restEndpoint = new HostInfo(KafkaConstants.REST_PROXY_HOST, KafkaConstants.REST_PROXY_PORT);
             final StateStoreRestService restService = startRestProxy(streams, restEndpoint);
             customerOrderList = restService.getAllCustomersOrders();
-            printList(customerOrderList);
             latch.await();
         }
         catch (Exception e)
@@ -141,15 +140,6 @@ public class EventsListener
             }
         });
         System.exit(0);
-    }
-
-
-    private static void printList(List<CustomerOrderDTO> customerOrderList)
-    {
-        for (CustomerOrderDTO customerOrderdto : customerOrderList)
-        {
-            System.out.println("Customer Order DTO-> " + customerOrderdto);
-        }
     }
 
 

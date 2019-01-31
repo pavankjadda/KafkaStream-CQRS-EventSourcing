@@ -1,10 +1,10 @@
 package com.kafkastream.web;
 
+import com.kafkastream.events.EventsSender;
 import com.kafkastream.model.Customer;
 import com.kafkastream.model.Greetings;
 import com.kafkastream.model.Order;
-import com.kafkastream.service.CustomRestTemplateService;
-import com.kafkastream.service.EventsSender;
+import com.kafkastream.statestore.CustomRestTemplateService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;

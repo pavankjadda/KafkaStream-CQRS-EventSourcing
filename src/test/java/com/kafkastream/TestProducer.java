@@ -1,8 +1,8 @@
 package com.kafkastream;
 
+import com.kafkastream.events.EventsSender;
 import com.kafkastream.model.Customer;
 import com.kafkastream.model.Order;
-import com.kafkastream.service.EventsSender;
 import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
 import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde;
 import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerializer;
