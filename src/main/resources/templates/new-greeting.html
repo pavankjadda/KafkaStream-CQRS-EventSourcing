@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>Created Greeting</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Bootstrap JS -->
+    <script src="js/jquery.slim.min.js"></script>
+    <script src="js/popper.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+
+    <br/> <br/>
+</head>
+<body>
+<div class="container container-fluid">
+    <h1>Created Greeting</h1>
+    <br> <br>
+    <div>
+        <p th:text="'Greeting Message: ' + ${greetings.message}"></p>
+        <p th:text="'Time Stamp: ' + ${greetings.timestamp}"></p>
+
+        <br>
+        <a href="/create-greeting">Create another Greeting</a>
+
+        <br> <br>
+        <br> <br>
+    </div>
+    <div>
+        <a href="http://localhost:8095/store/greetings" target="_blank">Click here to see all Greetings</a>
+    </div>
+</div>
+</body>
+</html>

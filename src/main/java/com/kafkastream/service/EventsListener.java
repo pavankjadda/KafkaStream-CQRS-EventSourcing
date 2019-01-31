@@ -4,6 +4,7 @@ import com.kafkastream.constants.KafkaConstants;
 import com.kafkastream.dto.CustomerOrderDTO;
 import com.kafkastream.model.Customer;
 import com.kafkastream.model.CustomerOrder;
+import com.kafkastream.model.Greetings;
 import com.kafkastream.model.Order;
 import com.kafkastream.web.kafkarest.StateStoreRestService;
 import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
@@ -62,10 +63,12 @@ public class EventsListener
         List<CustomerOrderDTO> customerOrderList;
         SpecificAvroSerde<Customer> customerSerde = createSerde(KafkaConstants.SCHEMA_REGISTRY_URL);
         SpecificAvroSerde<Order> orderSerde = createSerde(KafkaConstants.SCHEMA_REGISTRY_URL);
+        SpecificAvroSerde<Greetings> greetingsSerde = createSerde(KafkaConstants.SCHEMA_REGISTRY_URL);
         SpecificAvroSerde<CustomerOrder> customerOrderSerde = createSerde(KafkaConstants.SCHEMA_REGISTRY_URL);
 
         StoreBuilder customerStateStore = Stores.keyValueStoreBuilder(Stores.persistentKeyValueStore(KafkaConstants.CUSTOMER_STORE_NAME), Serdes.String(), customerSerde).withLoggingEnabled(new HashMap<>());
         StoreBuilder orderStateStore = Stores.keyValueStoreBuilder(Stores.persistentKeyValueStore(KafkaConstants.ORDER_STORE_NAME), Serdes.String(), customerSerde).withLoggingEnabled(new HashMap<>());
+        StoreBuilder greetingsStateStore = Stores.keyValueStoreBuilder(Stores.persistentKeyValueStore(KafkaConstants.GREETING_STORE_NAME), Serdes.String(), greetingsSerde).withLoggingEnabled(new HashMap<>());
         StoreBuilder customerOrderStateStore = Stores.keyValueStoreBuilder(Stores.persistentKeyValueStore(KafkaConstants.CUSTOMER_ORDER_STORE_NAME), Serdes.String(), customerSerde).withLoggingEnabled(new HashMap<>()).withCachingEnabled();
 
         KTable<String, Customer> customerKTable = streamsBuilder.table("customer", Materialized.<String, Customer, KeyValueStore<Bytes, byte[]>>as(customerStateStore.name())
@@ -84,6 +87,7 @@ public class EventsListener
         KTable<String, Order> orderKTable = streamsBuilder.table("order-to-ktable", Materialized.<String, Order, KeyValueStore<Bytes, byte[]>>as(orderStateStore.name())
                 .withKeySerde(Serdes.String())
                 .withValueSerde(orderSerde));
+
         //Print orderKTable
         orderKTable.filter((key, value) ->
         {
@@ -91,6 +95,12 @@ public class EventsListener
             System.out.println("orderKTable.value: " + value);
             return true;
         });
+
+
+        KTable<String, Greetings> greetingsKTable = streamsBuilder.table("greetings", Materialized.<String, Greetings,
+                KeyValueStore<Bytes, byte[]>>as(greetingsStateStore.name())
+                .withKeySerde(Serdes.String())
+                .withValueSerde(greetingsSerde));
 
 
         KTable<String, CustomerOrder> customerOrderKTable = customerKTable.join(orderKTable, (customer, order) ->
@@ -111,6 +121,7 @@ public class EventsListener
             }
             return null;
         }, Materialized.<String, CustomerOrder, KeyValueStore<Bytes, byte[]>>as(customerOrderStateStore.name()).withKeySerde(Serdes.String()).withValueSerde(customerOrderSerde));
+
         //Print customerOrderKTable
         customerOrderKTable.filter((key, value) ->
         {

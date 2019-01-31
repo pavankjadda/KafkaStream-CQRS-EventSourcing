@@ -28,5 +28,6 @@ public class KafkaConstants
     public static String CUSTOMER_ORDER_STORE_NAME = "customer-order-store";
     public static String CUSTOMER_STORE_NAME = "customer-store";
     public static String ORDER_STORE_NAME = "order-store";
+    public static String GREETING_STORE_NAME = "greetings-store";
 
 }

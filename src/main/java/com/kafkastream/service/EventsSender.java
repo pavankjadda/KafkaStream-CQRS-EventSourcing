@@ -40,7 +40,8 @@ public class EventsSender
 
     public void sendGreetingsEvent(Greetings greetings) throws ExecutionException, InterruptedException
     {
-        Producer<String, Greetings> kafkaGreetingsProducer = new KafkaProducer<>(properties);
+        SpecificAvroSerde<Greetings> greetingsSerde = createSerde(KafkaConstants.SCHEMA_REGISTRY_URL);
+        Producer<String, Greetings> kafkaGreetingsProducer = new KafkaProducer<>(properties, Serdes.String().serializer(),greetingsSerde.serializer());
         ProducerRecord<String, Greetings> greetingsRecord = new ProducerRecord<>("greetings", greetings.getMessage().toString(), greetings);
         Future<RecordMetadata> future = kafkaGreetingsProducer.send(greetingsRecord);
         System.out.println("Greetings record Sent. Greetings message: " + greetings.getMessage());

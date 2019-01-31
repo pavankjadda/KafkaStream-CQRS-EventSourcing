@@ -4,7 +4,6 @@ package com.kafkastream.jersey;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.jhades.JHades;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

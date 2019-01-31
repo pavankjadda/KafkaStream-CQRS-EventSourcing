@@ -3,9 +3,11 @@ package com.kafkastream.web.kafkarest;
 import com.kafkastream.constants.KafkaConstants;
 import com.kafkastream.dto.CustomerDto;
 import com.kafkastream.dto.CustomerOrderDTO;
+import com.kafkastream.dto.GreetingDto;
 import com.kafkastream.dto.OrderDto;
 import com.kafkastream.model.Customer;
 import com.kafkastream.model.CustomerOrder;
+import com.kafkastream.model.Greetings;
 import com.kafkastream.model.Order;
 import com.kafkastream.util.HostStoreInfo;
 import com.kafkastream.util.MetadataService;
@@ -138,6 +140,23 @@ public class StateStoreRestService
             orderDtoList.add(new OrderDto(order.getCustomerId().toString(),order.getOrderId().toString(), order.getOrderItemName().toString(),order.getOrderPlace().toString(),order.getOrderPurchaseTime().toString()));
         }
         return orderDtoList;
+    }
+
+    @GET
+    @Path("/greetings")
+    @Produces(MediaType.APPLICATION_JSON)
+    public List<GreetingDto> getAllGreetings() throws InterruptedException
+    {
+        List<GreetingDto> greetingDtoList = new ArrayList<>();
+        ReadOnlyKeyValueStore<String, Greetings> ordersStore = waitUntilStoreIsQueryable(KafkaConstants.GREETING_STORE_NAME, QueryableStoreTypes.keyValueStore(), streams);
+
+        KeyValueIterator<String, Greetings> keyValueIterator = ordersStore.all();
+        while (keyValueIterator.hasNext())
+        {
+            Greetings greetings=keyValueIterator.next().value;
+            greetingDtoList.add(new GreetingDto(greetings.getMessage().toString(),greetings.getTimestamp().toString()));
+        }
+        return greetingDtoList;
     }
 
     @GET()
