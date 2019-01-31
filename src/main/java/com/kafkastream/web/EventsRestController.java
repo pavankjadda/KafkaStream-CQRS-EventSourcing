@@ -22,6 +22,7 @@ import java.util.concurrent.ExecutionException;
 @RestController
 public class EventsRestController
 {
+    /*
     private EventsSender eventsSender;
 
     private StateStoreService   stateStoreService;
@@ -106,5 +107,5 @@ public class EventsRestController
         Calendar calendar=Calendar.getInstance(TimeZone.getDefault());
         return calendar.getTime().toString();
     }
-
+*/
 }

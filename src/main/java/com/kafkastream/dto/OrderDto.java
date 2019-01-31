@@ -2,9 +2,13 @@ package com.kafkastream.dto;
 
 import lombok.Data;
 
+import java.io.Serializable;
+
 @Data
-public class OrderDto
+public class OrderDto implements Serializable
 {
+    private static final long serialVersionUID = 2729048783015827572L;
+
     public String orderId;
     public String customerId;
     public String orderItemName;

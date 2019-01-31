@@ -3,10 +3,12 @@ package com.kafkastream.web;
 import com.kafkastream.model.Customer;
 import com.kafkastream.model.Greetings;
 import com.kafkastream.model.Order;
+import com.kafkastream.service.CustomRestTemplateService;
 import com.kafkastream.service.EventsSender;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,10 +23,13 @@ public class EventsController
 {
     private final EventsSender eventsSender;
 
+    private final CustomRestTemplateService customRestTemplateService;
+
     @Autowired
-    public EventsController(EventsSender eventsSender)
+    public EventsController(EventsSender eventsSender, CustomRestTemplateService customRestTemplateService)
     {
         this.eventsSender = eventsSender;
+        this.customRestTemplateService = customRestTemplateService;
     }
 
     @GetMapping("/create-customer")
@@ -43,6 +48,13 @@ public class EventsController
     public ModelAndView getCreateGreeting()
     {
         return new ModelAndView("create-greeting");
+    }
+
+    @GetMapping("/customers")
+    public String getAllCustomers(Model model)
+    {
+        model.addAttribute("customers",customRestTemplateService.getAllCustomers());
+        return "customers";
     }
 
     @PostMapping("/create-customer")

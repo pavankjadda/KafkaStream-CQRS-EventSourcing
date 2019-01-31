@@ -16,7 +16,7 @@
 <br/> <br/>
 <div class="container container-fluid">
     <h1> Customers List</h1>
-    <table>
+    <table class="table table-bordered">
         <thead>
         <tr>
             <td> Customer Id</td>
@@ -24,16 +24,18 @@
             <td> Last Name</td>
             <td> Email</td>
             <td> Phone</td>
-
         </tr>
         </thead>
         <tbody>
+            <tr th:if="${customers.empty}">
+                <td colspan="2"> No Customers Available </td>
+            </tr>
             <tr th:each="customer: ${customers}">
-                <td th:text="${student.customerId}"></td>
-                <td th:text="${student.firstName}"></td>
-                <td th:text="${student.lastName}"></td>
-                <td th:text="${student.email}"></td>
-                <td th:text="${student.phone}"></td>
+                <td th:text="${customer.customerId}"> Customer Id</td>
+                <td th:text="${customer.firstName}">First Name</td>
+                <td th:text="${customer.lastName}">Last Name</td>
+                <td th:text="${customer.email}">Email</td>
+                <td th:text="${customer.phone}">Phone</td>
             </tr>
         </tbody>
     </table>
