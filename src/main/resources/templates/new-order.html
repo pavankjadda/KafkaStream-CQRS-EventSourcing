@@ -24,15 +24,16 @@
         <p th:text="'Order ItemName: ' + ${order.orderItemName}"></p>
         <p th:text="'Order Place: ' + ${order.orderPlace}"></p>
         <p th:text="'Order Purchase Time: ' + ${order.orderPurchaseTime}"></p>
-
-        <br>
-        <a href="/create-order">Create another Order</a>
-
-        <br> <br>
-        <br> <br>
     </div>
+
+
+    <br> <br>
     <div>
-        <a href="http://localhost:8095/store/orders" target="_blank">Click here to see all Orders</a>
+        <p>
+            <a href="/create-order" style="margin: 10px">Create New</a>
+            <a href="/orders" style="margin: 10px">All Orders</a>
+            <a href="/home" style="margin: 10px">Home</a>
+        </p>
     </div>
 </div>
 </body>

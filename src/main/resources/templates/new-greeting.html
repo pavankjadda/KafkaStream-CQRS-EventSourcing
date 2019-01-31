@@ -21,15 +21,15 @@
     <div>
         <p th:text="'Greeting Message: ' + ${greetings.message}"></p>
         <p th:text="'Time Stamp: ' + ${greetings.timestamp}"></p>
-
-        <br>
-        <a href="/create-greeting">Create another Greeting</a>
-
-        <br> <br>
-        <br> <br>
     </div>
+
+    <br> <br>
     <div>
-        <a href="http://localhost:8095/store/greetings" target="_blank">Click here to see all Greetings</a>
+        <p>
+            <a href="/create-greeting" style="margin: 10px">Create New</a>
+            <a href="/greetings" style="margin: 10px">All Greetings</a>
+            <a href="/home" style="margin: 10px">Home</a>
+        </p>
     </div>
 </div>
 </body>

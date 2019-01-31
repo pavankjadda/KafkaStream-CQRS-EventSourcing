@@ -2,7 +2,7 @@
 <html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
 <head>
     <meta charset="UTF-8">
-    <title>Customers List</title>
+    <title>Greetings List</title>
 
     <!-- Bootstrap CSS -->
     <link href="css/bootstrap.min.css" rel="stylesheet">
@@ -15,28 +15,22 @@
 <body>
 <br/> <br/>
 <div class="container container-fluid">
-    <h1> Customers List</h1>
+    <h1> Greetings List</h1>
     <br/> <br/>
     <table class="table table-bordered">
         <thead class="font-weight-bold">
         <tr>
-            <td> Customer Id</td>
-            <td> First Name</td>
-            <td> Last Name</td>
-            <td> Email</td>
-            <td> Phone</td>
+            <td> Message </td>
+            <td> Time Stamp</td>
         </tr>
         </thead>
         <tbody>
-            <tr th:if="${customers.empty}">
-                <td colspan="2"> No Customers Available </td>
+            <tr th:if="${greetings.empty}">
+                <td colspan="2"> No Greetings Available </td>
             </tr>
-            <tr th:each="customer: ${customers}">
-                <td th:text="${customer.customerId}"> Customer Id</td>
-                <td th:text="${customer.firstName}">First Name</td>
-                <td th:text="${customer.lastName}">Last Name</td>
-                <td th:text="${customer.email}">Email</td>
-                <td th:text="${customer.phone}">Phone</td>
+            <tr th:each="greeting: ${greetings}">
+                <td th:text="${greeting.message}"></td>
+                <td th:text="${greeting.timestamp}"></td>
             </tr>
         </tbody>
     </table>

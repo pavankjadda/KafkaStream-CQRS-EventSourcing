@@ -32,6 +32,12 @@ public class EventsController
         this.customRestTemplateService = customRestTemplateService;
     }
 
+    @GetMapping(value = {"/","/home"})
+    public ModelAndView getHome()
+    {
+        return new ModelAndView("home");
+    }
+
     @GetMapping("/create-customer")
     public ModelAndView getCreateCustomer()
     {
@@ -57,6 +63,27 @@ public class EventsController
         return "customers";
     }
 
+    @GetMapping("/orders")
+    public String getAllOrders(Model model)
+    {
+        model.addAttribute("orders",customRestTemplateService.getAllOrders());
+        return "orders";
+    }
+
+    @GetMapping("/customer-orders/all")
+    public String getAllCustomersOrders(Model model)
+    {
+        model.addAttribute("customer-orders",customRestTemplateService.getAllCustomersOrders());
+        return "customer-orders";
+    }
+
+    @GetMapping("/greetings")
+    public String getAllGreetings(Model model)
+    {
+        model.addAttribute("greetings",customRestTemplateService.getAllGreetings());
+        return "greetings";
+    }
+
     @PostMapping("/create-customer")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public ModelAndView createCustomer(@ModelAttribute Customer customer) throws ExecutionException, InterruptedException
@@ -72,6 +99,7 @@ public class EventsController
     @ResponseStatus(HttpStatus.ACCEPTED)
     public ModelAndView createOrder(@ModelAttribute Order order) throws ExecutionException, InterruptedException
     {
+        order.setOrderPurchaseTime(LocalDateTime.now().toString());
         eventsSender.sendOrderEvent(order);
 
         ModelAndView modelAndView=new ModelAndView("new-order");

@@ -25,14 +25,15 @@
         <p th:text="'Email: ' + ${customer.email}"></p>
         <p th:text="'Phone: ' + ${customer.phone}"></p>
 
-        <br>
-        <a href="/create-customer">Create another Customer</a>
-
-        <br> <br>
-        <br> <br>
     </div>
+
+    <br> <br>
     <div>
-        <a href="http://localhost:8095/store/customers" target="_blank">Click here to see all customers</a>
+        <p>
+            <a href="/create-customer" style="margin: 10px">Create New</a>
+            <a href="/customers" style="margin: 10px">All Customers</a>
+            <a href="/home" style="margin: 10px">Home</a>
+        </p>
     </div>
 </div>
 </body>

@@ -2,7 +2,7 @@
 <html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
 <head>
     <meta charset="UTF-8">
-    <title>Customers List</title>
+    <title>Orders List</title>
 
     <!-- Bootstrap CSS -->
     <link href="css/bootstrap.min.css" rel="stylesheet">
@@ -15,31 +15,32 @@
 <body>
 <br/> <br/>
 <div class="container container-fluid">
-    <h1> Customers List</h1>
+    <h1> Order List</h1>
     <br/> <br/>
-    <table class="table table-bordered">
+    <table class="table table-bordered"  th:if="!${orders.empty}">
         <thead class="font-weight-bold">
         <tr>
+            <td> Order Id</td>
             <td> Customer Id</td>
-            <td> First Name</td>
-            <td> Last Name</td>
-            <td> Email</td>
-            <td> Phone</td>
+            <td> Item Name</td>
+            <td> Order Place</td>
+            <td> Purchase Time</td>
         </tr>
         </thead>
         <tbody>
-            <tr th:if="${customers.empty}">
-                <td colspan="2"> No Customers Available </td>
-            </tr>
-            <tr th:each="customer: ${customers}">
-                <td th:text="${customer.customerId}"> Customer Id</td>
-                <td th:text="${customer.firstName}">First Name</td>
-                <td th:text="${customer.lastName}">Last Name</td>
-                <td th:text="${customer.email}">Email</td>
-                <td th:text="${customer.phone}">Phone</td>
+            <tr th:each="order: ${orders}">
+                <td th:text="${order.orderId}"></td>
+                <td th:text="${order.customerId}"></td>
+                <td th:text="${order.orderItemName}"></td>
+                <td th:text="${order.orderPlace}"></td>
+                <td th:text="${order.orderPurchaseTime}"></td>
             </tr>
         </tbody>
     </table>
+
+    <div th:if="${orders.empty}">
+        <p> No Orders Available </p>
+    </div>
 
     <br/> <br/>
     <p>
