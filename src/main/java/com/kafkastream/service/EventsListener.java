@@ -75,27 +75,10 @@ public class EventsListener
                                                                 .withKeySerde(Serdes.String())
                                                                 .withValueSerde(customerSerde));
 
-        customerKTable.filter((key, value) ->
-        {
-            System.out.println("customerKTable.key: " + key);
-            System.out.println("customerKTable.value: " + value);
-            return true;
-        });
-
-        streamsBuilder.stream("order", Consumed.with(Serdes.String(), orderSerde))
-                .selectKey((key, value) -> value.getCustomerId().toString()).to("order-to-ktable", Produced.with(Serdes.String(), orderSerde));
-        KTable<String, Order> orderKTable = streamsBuilder.table("order-to-ktable", Materialized.<String, Order, KeyValueStore<Bytes, byte[]>>as(orderStateStore.name())
+        KTable<String, Order> orderKTable = streamsBuilder.table("order", Materialized.<String, Order,
+                KeyValueStore<Bytes, byte[]>>as(orderStateStore.name())
                 .withKeySerde(Serdes.String())
                 .withValueSerde(orderSerde));
-
-        //Print orderKTable
-        orderKTable.filter((key, value) ->
-        {
-            System.out.println("orderKTable.key: " + key);
-            System.out.println("orderKTable.value: " + value);
-            return true;
-        });
-
 
         KTable<String, Greetings> greetingsKTable = streamsBuilder.table("greetings", Materialized.<String, Greetings,
                 KeyValueStore<Bytes, byte[]>>as(greetingsStateStore.name())
