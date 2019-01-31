@@ -1,4 +1,4 @@
-package com.kafkastream.web;
+package com.kafkastream.archived;
 
 import com.kafkastream.dto.CustomerOrderDTO;
 import com.kafkastream.model.Customer;

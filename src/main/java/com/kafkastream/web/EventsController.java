@@ -70,10 +70,10 @@ public class EventsController
         return "orders";
     }
 
-    @GetMapping("/customer-orders/all")
+    @GetMapping(value = {"/customer-orders","/customer-orders/all"})
     public String getAllCustomersOrders(Model model)
     {
-        model.addAttribute("customer-orders",customRestTemplateService.getAllCustomersOrders());
+        model.addAttribute("customerorders",customRestTemplateService.getAllCustomersOrders());
         return "customer-orders";
     }
 
