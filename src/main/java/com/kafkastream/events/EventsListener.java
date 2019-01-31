@@ -72,41 +72,50 @@ public class EventsListener
         KTable<String, Customer> customerKTable = streamsBuilder.table("customer", Materialized.<String, Customer, KeyValueStore<Bytes, byte[]>>as(customerStateStore.name())
                                                                 .withKeySerde(Serdes.String())
                                                                 .withValueSerde(customerSerde));
-
+        customerKTable.filter((key, value) ->
+        {
+            System.out.println("customerKTable.key: " + key);
+            System.out.println("customerKTable.value: " + value);
+            return true;
+        });
         KTable<String, Order> orderKTable = streamsBuilder.table("order", Materialized.<String, Order, KeyValueStore<Bytes, byte[]>>as(orderStateStore.name())
                                                                 .withKeySerde(Serdes.String())
                                                                 .withValueSerde(orderSerde));
-
+        //Print orderKTable
+        orderKTable.filter((key, value) ->
+        {
+            System.out.println("orderKTable.key: " + key);
+            System.out.println("orderKTable.value: " + value);
+            return true;
+        });
         KTable<String, Greetings> greetingsKTable = streamsBuilder.table("greetings", Materialized.<String, Greetings,
                 KeyValueStore<Bytes, byte[]>>as(greetingsStateStore.name())
                                                                     .withKeySerde(Serdes.String())
                                                                     .withValueSerde(greetingsSerde));
 
-/*        KTable<String, CustomerOrder> customerOrderKTable2 = streamsBuilder.table("customer-order", Materialized.<String, CustomerOrder, KeyValueStore<Bytes, byte[]>>as(customerOrderStateStore.name())
-                                                                    .withKeySerde(Serdes.String())
-                                                                    .withValueSerde(customerOrderSerde));*/
 
-        KTable<String, CustomerOrder> customerOrderKTable =orderKTable.join(customerKTable,(order,customer)->
+        KTable<String, CustomerOrder> customerOrderKTable=orderKTable.join(customerKTable, (order, customer) ->
+                {
+                    CustomerOrder customerOrder = new CustomerOrder();
+                    customerOrder.setCustomerId(order.getCustomerId());
+                    customerOrder.setFirstName(customer.getFirstName());
+                    customerOrder.setLastName(customer.getLastName());
+                    customerOrder.setEmail(customer.getEmail());
+                    customerOrder.setPhone(customer.getPhone());
+                    customerOrder.setOrderId(order.getOrderId());
+                    customerOrder.setOrderItemName(order.getOrderItemName());
+                    customerOrder.setOrderPlace(order.getOrderPlace());
+                    customerOrder.setOrderPurchaseTime(order.getOrderPurchaseTime());
+                    return customerOrder;
+
+                }, Materialized.<String, CustomerOrder, KeyValueStore<Bytes, byte[]>>as(customerOrderStateStore.name()).withKeySerde(Serdes.String()).withValueSerde(customerOrderSerde));
+
+        customerOrderKTable.filter((key,value) ->
         {
-            if(customer.getCustomerId().equals(order.getCustomerId()))
-            {
-                CustomerOrder customerOrder = new CustomerOrder();
-                customerOrder.setCustomerId(order.getCustomerId());
-                customerOrder.setFirstName(customer.getFirstName());
-                customerOrder.setLastName(customer.getLastName());
-                customerOrder.setEmail(customer.getEmail());
-                customerOrder.setPhone(customer.getPhone());
-                customerOrder.setOrderId(order.getOrderId());
-                customerOrder.setOrderItemName(order.getOrderItemName());
-                customerOrder.setOrderPlace(order.getOrderPlace());
-                customerOrder.setOrderPurchaseTime(order.getOrderPurchaseTime());
-                return customerOrder;
-            }
-            return null;
-        },Materialized.<String, CustomerOrder, KeyValueStore<Bytes, byte[]>>as(customerOrderStateStore.name())
-                .withKeySerde(Serdes.String())
-                .withValueSerde(customerOrderSerde));
-        customerOrderKTable.toStream().to("customer-order");
+            System.out.println("Customer Order: "+value.toString());
+            return true;
+        });
+
 
         Topology topology = streamsBuilder.build();
         streams = new KafkaStreams(topology, properties);
