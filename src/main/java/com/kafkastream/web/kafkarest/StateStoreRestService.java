@@ -137,7 +137,7 @@ public class StateStoreRestService
         while (keyValueIterator.hasNext())
         {
             Order order=keyValueIterator.next().value;
-            orderDtoList.add(new OrderDto(order.getCustomerId().toString(),order.getOrderId().toString(), order.getOrderItemName().toString(),order.getOrderPlace().toString(),order.getOrderPurchaseTime().toString()));
+            orderDtoList.add(new OrderDto(order.getOrderId().toString(),order.getCustomerId().toString(), order.getOrderItemName().toString(),order.getOrderPlace().toString(),order.getOrderPurchaseTime().toString()));
         }
         return orderDtoList;
     }
@@ -174,6 +174,7 @@ public class StateStoreRestService
     {
         return metadataService.streamsMetadataForStore(store);
     }
+
 
     private CustomerOrderDTO getCustomerOrderDTOFromCustomerOrder(CustomerOrder customerOrder)
     {
