@@ -19,8 +19,8 @@
     <h1>Created Order</h1>
     <br> <br>
     <div>
-        <p th:text="'orderId: ' + ${order.orderId}"></p>
-        <p th:text="'customerId: ' + ${order.customerId}"></p>
+        <p th:text="'Order Id: ' + ${order.orderId}"></p>
+        <p th:text="'Customer Id: ' + ${order.customerId}"></p>
         <p th:text="'Order ItemName: ' + ${order.orderItemName}"></p>
         <p th:text="'Order Place: ' + ${order.orderPlace}"></p>
         <p th:text="'Order Purchase Time: ' + ${order.orderPurchaseTime}"></p>
@@ -28,7 +28,7 @@
 
 
     <br> <br>
-    <div>
+    <div style="text-align: center">
         <p>
             <a href="/create-order" style="margin: 10px">Create New</a>
             <a href="/orders" style="margin: 10px">All Orders</a>

@@ -19,7 +19,7 @@
     <h1>Created Customer</h1>
     <br> <br>
     <div>
-        <p th:text="'customerId: ' + ${customer.customerId}"></p>
+        <p th:text="'Customer Id: ' + ${customer.customerId}"></p>
         <p th:text="'First Name: ' + ${customer.firstName}"></p>
         <p th:text="'Last Name: ' + ${customer.lastName}"></p>
         <p th:text="'Email: ' + ${customer.email}"></p>
@@ -28,7 +28,7 @@
     </div>
 
     <br> <br>
-    <div>
+    <div style="text-align: center">
         <p>
             <a href="/create-customer" style="margin: 10px">Create New</a>
             <a href="/customers" style="margin: 10px">All Customers</a>
