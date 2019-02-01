@@ -24,6 +24,7 @@ import org.apache.kafka.streams.state.HostInfo;
 import org.apache.kafka.streams.state.KeyValueStore;
 import org.apache.kafka.streams.state.StoreBuilder;
 import org.apache.kafka.streams.state.Stores;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -89,10 +90,22 @@ public class EventsListener
             System.out.println("orderKTable.value: " + order);
             CustomerOrder customerOrder = new CustomerOrder();
             customerOrder.setCustomerId(order.getCustomerId());
-            customerOrder.setFirstName("");
-            customerOrder.setLastName("");
-            customerOrder.setEmail("");
-            customerOrder.setPhone("");
+            Customer customer=getCustomerInformation(order.getCustomerId());
+            if(customer == null)
+            {
+                customerOrder.setFirstName("");
+                customerOrder.setLastName("");
+                customerOrder.setEmail("");
+                customerOrder.setPhone("");
+            }
+            else
+            {
+                customerOrder.setFirstName(customer.getFirstName());
+                customerOrder.setLastName(customer.getLastName());
+                customerOrder.setEmail(customer.getEmail());
+                customerOrder.setPhone(customer.getPhone());
+            }
+
             customerOrder.setOrderId(order.getOrderId());
             customerOrder.setOrderItemName(order.getOrderItemName());
             customerOrder.setOrderPlace(order.getOrderPlace());
@@ -133,6 +146,12 @@ public class EventsListener
             }
         });
         System.exit(0);
+    }
+
+    private static Customer getCustomerInformation(CharSequence customerId)
+    {
+        RestTemplate restTemplate=new RestTemplate();
+        return restTemplate.getForObject("http://localhost:8095/store/customer/"+customerId,Customer.class);
     }
 
 

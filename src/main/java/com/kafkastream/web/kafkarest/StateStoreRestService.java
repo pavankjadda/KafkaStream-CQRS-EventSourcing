@@ -200,7 +200,10 @@ public class StateStoreRestService
         jettyServer.start();
     }
 
-    public Customer getCustomerInformation(CharSequence customerId)
+    @GET
+    @Path("/customer/{customerId}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Customer getCustomerInformation(@PathParam("customerId") String customerId)
     {
         try
         {
