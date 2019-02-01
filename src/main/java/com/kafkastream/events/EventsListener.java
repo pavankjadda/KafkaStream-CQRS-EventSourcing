@@ -83,10 +83,10 @@ public class EventsListener
             System.out.println("orderKTable.value: " + order);
                 CustomerOrder customerOrder = new CustomerOrder();
                 customerOrder.setCustomerId(order.getCustomerId());
-                /*customerOrder.setFirstName(customer.getFirstName());
-                customerOrder.setLastName(customer.getLastName());
-                customerOrder.setEmail(customer.getEmail());
-                customerOrder.setPhone(customer.getPhone());*/
+                customerOrder.setFirstName("");
+                customerOrder.setLastName("");
+                customerOrder.setEmail("");
+                customerOrder.setPhone("");
                 customerOrder.setOrderId(order.getOrderId());
                 customerOrder.setOrderItemName(order.getOrderItemName());
                 customerOrder.setOrderPlace(order.getOrderPlace());
