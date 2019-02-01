@@ -2,6 +2,7 @@ package com.kafkastream.events;
 
 import com.kafkastream.constants.KafkaConstants;
 import com.kafkastream.model.Customer;
+import com.kafkastream.model.CustomerOrder;
 import com.kafkastream.model.Greetings;
 import com.kafkastream.model.Order;
 import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
@@ -69,12 +70,20 @@ public class EventsSender
         System.out.println("Order sent. Order Id: " + order.getOrderId());
         System.out.println("Order future.get(): " + future.get());
     }
+
+
+    public void sendCustomerOrderEvent(CustomerOrder customerOrder) throws ExecutionException, InterruptedException
+    {
+        SpecificAvroSerde<CustomerOrder> customerOrderSerde = createSerde(KafkaConstants.SCHEMA_REGISTRY_URL);
+        Producer<String, CustomerOrder> kafkaCustomerOrderProducer = new KafkaProducer<>(properties, Serdes.String().serializer(),customerOrderSerde.serializer());
+        ProducerRecord<String, CustomerOrder> customerOrderRecord = new ProducerRecord<>("customer-order", customerOrder.getOrderId().toString(), customerOrder);
+        Future<RecordMetadata> future = kafkaCustomerOrderProducer.send(customerOrderRecord);
+
+    }
     private static <VT extends SpecificRecord> SpecificAvroSerde<VT> createSerde(final String schemaRegistryUrl)
     {
-
         final SpecificAvroSerde<VT> serde = new SpecificAvroSerde<>();
-        final Map<String, String> serdeConfig = Collections.singletonMap(
-                AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, schemaRegistryUrl);
+        final Map<String, String> serdeConfig = Collections.singletonMap(AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, schemaRegistryUrl);
         serde.configure(serdeConfig, false);
         return serde;
     }

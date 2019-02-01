@@ -1,7 +1,6 @@
 package com.kafkastream.events;
 
 import com.kafkastream.constants.KafkaConstants;
-import com.kafkastream.dto.CustomerOrderDTO;
 import com.kafkastream.model.Customer;
 import com.kafkastream.model.CustomerOrder;
 import com.kafkastream.model.Greetings;
@@ -26,7 +25,10 @@ import org.apache.kafka.streams.state.KeyValueStore;
 import org.apache.kafka.streams.state.StoreBuilder;
 import org.apache.kafka.streams.state.Stores;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
 
 
@@ -59,7 +61,6 @@ public class EventsListener
         //Setup StreamsBuilder
         setUp();
 
-        List<CustomerOrderDTO> customerOrderList;
         SpecificAvroSerde<Customer> customerSerde = createSerde(KafkaConstants.SCHEMA_REGISTRY_URL);
         SpecificAvroSerde<Order> orderSerde = createSerde(KafkaConstants.SCHEMA_REGISTRY_URL);
         SpecificAvroSerde<Greetings> greetingsSerde = createSerde(KafkaConstants.SCHEMA_REGISTRY_URL);
@@ -77,14 +78,29 @@ public class EventsListener
         KTable<String, Order> orderKTable = streamsBuilder.table("order", Materialized.<String, Order, KeyValueStore<Bytes, byte[]>>as(orderStateStore.name())
                                                                 .withKeySerde(Serdes.String())
                                                                 .withValueSerde(orderSerde));
+        orderKTable.mapValues(order ->
+        {
+            System.out.println("orderKTable.value: " + order);
+                CustomerOrder customerOrder = new CustomerOrder();
+                customerOrder.setCustomerId(order.getCustomerId());
+                /*customerOrder.setFirstName(customer.getFirstName());
+                customerOrder.setLastName(customer.getLastName());
+                customerOrder.setEmail(customer.getEmail());
+                customerOrder.setPhone(customer.getPhone());*/
+                customerOrder.setOrderId(order.getOrderId());
+                customerOrder.setOrderItemName(order.getOrderItemName());
+                customerOrder.setOrderPlace(order.getOrderPlace());
+                customerOrder.setOrderPurchaseTime(order.getOrderPurchaseTime());
+                return customerOrder;
+        }).toStream().to("customer-order",Produced.with(Serdes.String(),customerOrderSerde));
+
         KTable<String, Greetings> greetingsKTable = streamsBuilder.table("greetings", Materialized.<String, Greetings,
                 KeyValueStore<Bytes, byte[]>>as(greetingsStateStore.name())
                                                                     .withKeySerde(Serdes.String())
                                                                     .withValueSerde(greetingsSerde));
 
 
-        KTable<String, CustomerOrder> customerOrderKTable= streamsBuilder.table("customer-order",Materialized.<String,
-                CustomerOrder, KeyValueStore<Bytes, byte[]>>as(customerOrderStateStore.name())
+        KTable<String, CustomerOrder> customerOrderKTable= streamsBuilder.table("customer-order",Materialized.<String, CustomerOrder, KeyValueStore<Bytes, byte[]>>as(customerOrderStateStore.name())
                                                                     .withKeySerde(Serdes.String())
                                                                     .withValueSerde(customerOrderSerde));
 
@@ -98,36 +114,13 @@ public class EventsListener
             final HostInfo restEndpoint = new HostInfo(KafkaConstants.REST_PROXY_HOST, KafkaConstants.REST_PROXY_PORT);
             StateStoreRestService stateStoreRestService=startRestProxy(streams, restEndpoint);
 
-            //Print orderKTable
-            orderKTable.filter((key, order) ->
-            {
-                System.out.println("orderKTable.key: " + key);
-                System.out.println("orderKTable.value: " + order);
-
-                Customer customer=stateStoreRestService.getCustomerInformation(order.getCustomerId());
-
-                CustomerOrder customerOrder = new CustomerOrder();
-                customerOrder.setCustomerId(order.getCustomerId());
-                customerOrder.setFirstName(customer.getFirstName());
-                customerOrder.setLastName(customer.getLastName());
-                customerOrder.setEmail(customer.getEmail());
-                customerOrder.setPhone(customer.getPhone());
-                customerOrder.setOrderId(order.getOrderId());
-                customerOrder.setOrderItemName(order.getOrderItemName());
-                customerOrder.setOrderPlace(order.getOrderPlace());
-                customerOrder.setOrderPurchaseTime(order.getOrderPurchaseTime());
-                customerOrderKTable.toStream().to("customer-order", Produced.with(Serdes.String(),customerOrderSerde));
-
-                return true;
-            });
-
-
             latch.await();
         }
         catch (Exception e)
         {
             e.printStackTrace();
         }
+
 
         //Close Runtime
         Runtime.getRuntime().addShutdownHook(new Thread("streams-shutdown-hook")
