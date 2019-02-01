@@ -200,4 +200,22 @@ public class StateStoreRestService
         jettyServer.start();
     }
 
+    public Customer getCustomerInformation(CharSequence customerId)
+    {
+        try
+        {
+            ReadOnlyKeyValueStore<String, Customer> customersStore = waitUntilStoreIsQueryable(KafkaConstants.CUSTOMER_STORE_NAME, QueryableStoreTypes.keyValueStore(), streams);
+            KeyValueIterator<String, Customer> keyValueIterator = customersStore.all();
+            while (keyValueIterator.hasNext())
+            {
+                if(keyValueIterator.next().value.getCustomerId().equals(customerId))
+                    return keyValueIterator.next().value;
+            }
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+        return null;
+    }
 }
