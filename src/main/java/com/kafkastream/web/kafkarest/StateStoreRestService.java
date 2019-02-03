@@ -70,9 +70,9 @@ public class StateStoreRestService
     @GET
     @Path("/customer-order/{customerId}")
     @Produces(MediaType.APPLICATION_JSON)
-    public List<CustomerOrderDTO> getCustomerOrders(@PathParam("customerId") String customerId) throws InterruptedException
+    public List<CustomerOrderDTO> getCustomerOrder(@PathParam("customerId") String customerId) throws InterruptedException
     {
-        System.out.println("Inside getCustomerOrders()");
+        System.out.println("Inside getCustomerOrder()");
         List<CustomerOrderDTO> customerOrderList = new ArrayList<>();
         ReadOnlyKeyValueStore<String, CustomerOrder> customerOrdersStore = waitUntilStoreIsQueryable(KafkaConstants.CUSTOMER_ORDER_STORE_NAME, QueryableStoreTypes.keyValueStore(), streams);
 
@@ -203,7 +203,29 @@ public class StateStoreRestService
     @GET
     @Path("/customer/{customerId}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Customer getCustomerInformation(@PathParam("customerId") String customerId)
+    public CustomerDto getCustomerInformation(@PathParam("customerId") String customerId)
+    {
+        try
+        {
+            ReadOnlyKeyValueStore<String, Customer> customersStore = waitUntilStoreIsQueryable(KafkaConstants.CUSTOMER_STORE_NAME, QueryableStoreTypes.keyValueStore(), streams);
+            KeyValueIterator<String, Customer> keyValueIterator = customersStore.all();
+            while (keyValueIterator.hasNext())
+            {
+                Customer customer=keyValueIterator.next().value;
+                if(customer.getCustomerId().toString().equals(customerId))
+                    return new CustomerDto(customer.getCustomerId().toString(),customer.getFirstName().toString(),customer.getLastName().toString(),
+                            customer.getEmail().toString(),customer.getPhone().toString());
+            }
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+
+    public Customer getCustomer(String customerId)
     {
         try
         {

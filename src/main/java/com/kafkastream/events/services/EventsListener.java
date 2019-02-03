@@ -1,6 +1,7 @@
-package com.kafkastream.events;
+package com.kafkastream.events.services;
 
 import com.kafkastream.constants.KafkaConstants;
+import com.kafkastream.dto.CustomerDto;
 import com.kafkastream.model.Customer;
 import com.kafkastream.model.CustomerOrder;
 import com.kafkastream.model.Greetings;
@@ -24,6 +25,8 @@ import org.apache.kafka.streams.state.HostInfo;
 import org.apache.kafka.streams.state.KeyValueStore;
 import org.apache.kafka.streams.state.StoreBuilder;
 import org.apache.kafka.streams.state.Stores;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Collections;
@@ -44,7 +47,7 @@ public class EventsListener
     private static void setUp()
     {
         properties = new Properties();
-        properties.put(StreamsConfig.APPLICATION_ID_CONFIG, KafkaConstants.APPLICATION_ID_CONFIG);
+        properties.put(StreamsConfig.APPLICATION_ID_CONFIG, KafkaConstants.APPLICATION_ID_CONFIG2);
         properties.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, KafkaConstants.BOOTSTRAP_SERVERS_CONFIG);
         properties.put(StreamsConfig.APPLICATION_SERVER_CONFIG, KafkaConstants.APPLICATION_SERVER_CONFIG);
         properties.put(StreamsConfig.COMMIT_INTERVAL_MS_CONFIG, KafkaConstants.COMMIT_INTERVAL_MS_CONFIG);
@@ -59,8 +62,11 @@ public class EventsListener
 
     public static void main(String[] args)
     {
+        //StateStoreService stateStoreService=new StateStoreService();
+
         //Setup StreamsBuilder
         setUp();
+
 
         SpecificAvroSerde<Customer> customerSerde = createSerde(KafkaConstants.SCHEMA_REGISTRY_URL);
         SpecificAvroSerde<Order> orderSerde = createSerde(KafkaConstants.SCHEMA_REGISTRY_URL);
@@ -90,7 +96,7 @@ public class EventsListener
             System.out.println("orderKTable.value: " + order);
             CustomerOrder customerOrder = new CustomerOrder();
             customerOrder.setCustomerId(order.getCustomerId());
-            Customer customer=getCustomerInformation(order.getCustomerId());
+            CustomerDto customer=getCustomerInformation(order.getCustomerId());
             if(customer == null)
             {
                 customerOrder.setFirstName("");
@@ -134,7 +140,6 @@ public class EventsListener
             e.printStackTrace();
         }
 
-
         //Close Runtime
         Runtime.getRuntime().addShutdownHook(new Thread("streams-shutdown-hook")
         {
@@ -148,10 +153,16 @@ public class EventsListener
         System.exit(0);
     }
 
-    private static Customer getCustomerInformation(CharSequence customerId)
+    private static CustomerDto getCustomerInformation(CharSequence customerId)
     {
         RestTemplate restTemplate=new RestTemplate();
-        return restTemplate.getForObject("http://localhost:8095/store/customer/"+customerId,Customer.class);
+        if(customerId!=null)
+        {
+            ResponseEntity<CustomerDto> customerResponseEntity= restTemplate.exchange("http://" +KafkaConstants.REST_PROXY_HOST+":"+KafkaConstants.REST_PROXY_PORT+ "store/customer/"+customerId, HttpMethod.GET,null, CustomerDto.class);
+            return customerResponseEntity.getBody();
+
+        }
+        return null;
     }
 
 

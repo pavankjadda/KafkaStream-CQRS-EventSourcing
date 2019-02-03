@@ -1,6 +1,6 @@
 package com.kafkastream.web;
 
-import com.kafkastream.events.EventsSender;
+import com.kafkastream.events.services.EventsSender;
 import com.kafkastream.model.Customer;
 import com.kafkastream.model.Greetings;
 import com.kafkastream.model.Order;
