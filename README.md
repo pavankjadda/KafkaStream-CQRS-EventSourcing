@@ -5,7 +5,7 @@ Kafka helps you to build fast, high through put, fault tolerance, scalable micro
 
 This repository demonstrates [CQRS](https://www.confluent.io/blog/event-sourcing-cqrs-stream-processing-apache-kafka-whats-connection/) Event Sourcing (Materialized views) with Kafka Streaming ([Version: 2.1.0](https://archive.apache.org/dist/kafka/2.1.0/RELEASE_NOTES.html))
 
-> 1. In typical production environment, we have multiple microservices and we want to perform multiphase commit to each microservice databases. 
+> 1. In typical production environment, we have multiple microservices and we want to perform multiphase commit to each microservice database. 
 > 2. Let's say if you user wants place an order in eShopping application, we have different microservices do the following operations (mentioned high level tasks)
         (a) Check the inventory for the requested product (Inventory MicroService takes care of this) 
         (b) Check the if any Payment method available and process payment(Payments MicroService takes care of this) 
