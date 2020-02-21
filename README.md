@@ -17,7 +17,7 @@ This repository demonstrates [CQRS](https://www.confluent.io/blog/event-sourcing
 
 
 ## How to Run?
-1. Download and install Kafka either from [Confluent](https://docs.confluent.io/current/installation/installing_cp.html#zip-and-tar-archives) or follow instructions [from here](https://www.tutorialspoint.com/apache_kafka/apache_kafka_installation_steps.htm) first. I recommend [Confluent](https://docs.confluent.io/current/installation/installing_cp.html#zip-and-tar-archives) as it combines all the servers into one package with additional tools.
+1. Download Kafka from [Confluent](https://docs.confluent.io/current/installation/installing_cp.html#zip-and-tar-archives) and install it using the [quick start guide](https://docs.confluent.io/current/quickstart/ce-quickstart.html#ce-quickstart) or follow instructions [from here](https://www.tutorialspoint.com/apache_kafka/apache_kafka_installation_steps.htm) first. I recommend [Confluent](https://docs.confluent.io/current/quickstart/ce-quickstart.html#ce-quickstart) as it combines all the servers into one package with additional tools.
    start kafka with the following command
     ```
     <path-to-confluent>/bin/confluent start
