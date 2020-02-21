@@ -17,11 +17,8 @@ This repository demonstrates [CQRS](https://www.confluent.io/blog/event-sourcing
 
 
 ## How to Run?
-1. Download Kafka from [Confluent](https://docs.confluent.io/current/installation/installing_cp.html#zip-and-tar-archives) and install it using the [quick start guide](https://docs.confluent.io/current/quickstart/ce-quickstart.html#ce-quickstart) or follow instructions [from here](https://www.tutorialspoint.com/apache_kafka/apache_kafka_installation_steps.htm) first. I recommend [Confluent](https://docs.confluent.io/current/quickstart/ce-quickstart.html#ce-quickstart) as it combines all the servers into one package with additional tools.
-   start kafka with the following command
-    ```
-    <path-to-confluent>/bin/confluent start
-    ```
+1. Use confluent [docker installation](https://docs.confluent.io/current/quickstart/ce-docker-quickstart.html#ce-docker-quickstart) for the faster steup or Download Kafka from [Confluent](https://docs.confluent.io/current/installation/installing_cp.html#zip-and-tar-archives) and install it using the [quick start guide](https://docs.confluent.io/current/quickstart/ce-quickstart.html#ce-quickstart)
+
 2. Clone this repository and open in IntelliJ or Eclipse as maven project and run `KafkaStreamApplication` class. This will bring up producer class.
 3. Go to http://localhost:9021 => Topics=> create topics `customer`, `order` and `order-to-ktable` (if they do not exist)
 4. Go to `EventsListener` class and execute main method to start REST Proxy (Jetty) which accesses Kafka Materialized view data through REST API
