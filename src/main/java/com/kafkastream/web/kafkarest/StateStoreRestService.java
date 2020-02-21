@@ -14,7 +14,12 @@ import com.kafkastream.util.MetadataService;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.errors.InvalidStateStoreException;
-import org.apache.kafka.streams.state.*;
+import org.apache.kafka.streams.state.HostInfo;
+import org.apache.kafka.streams.state.KeyValueIterator;
+import org.apache.kafka.streams.state.QueryableStoreType;
+import org.apache.kafka.streams.state.QueryableStoreTypes;
+import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
+import org.apache.kafka.streams.state.StreamsMetadata;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
@@ -38,7 +43,6 @@ public class StateStoreRestService
     private final KafkaStreams streams;
     private final MetadataService metadataService;
     private final HostInfo hostInfo;
-    private Server jettyServer;
 
     public StateStoreRestService(final KafkaStreams streams, final HostInfo hostInfo)
     {
@@ -186,7 +190,7 @@ public class StateStoreRestService
         ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
         context.setContextPath("/");
 
-        jettyServer = new Server(hostInfo.port());
+        Server jettyServer = new Server(hostInfo.port());
         jettyServer.setHandler(context);
 
         ResourceConfig rc = new ResourceConfig();
