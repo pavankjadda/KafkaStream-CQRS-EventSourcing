@@ -19,7 +19,6 @@ import org.apache.kafka.streams.state.KeyValueIterator;
 import org.apache.kafka.streams.state.QueryableStoreType;
 import org.apache.kafka.streams.state.QueryableStoreTypes;
 import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
-import org.apache.kafka.streams.state.StreamsMetadata;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
@@ -35,7 +34,6 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 /*
@@ -64,6 +62,7 @@ public class StateStoreRestService
 
         Server jettyServer = new Server(hostInfo.port());
         jettyServer.setHandler(context);
+        jettyServer.setStopTimeout(60000L);
 
         ResourceConfig rc = new ResourceConfig();
         rc.register(this);
@@ -90,11 +89,11 @@ public class StateStoreRestService
         {
             try
             {
-                Collection<StreamsMetadata> streamsMetadataCollection = streams.allMetadata();
+                /*Collection<StreamsMetadata> streamsMetadataCollection = streams.allMetadata();
                 for (StreamsMetadata streamsMetadata : streamsMetadataCollection)
                 {
                     logger.info("streamsMetadataIterator.next() -> {}", streamsMetadata);
-                }
+                }*/
                 return streams.store(storeName, queryableStoreType);
             } catch (InvalidStateStoreException ignored)
             {

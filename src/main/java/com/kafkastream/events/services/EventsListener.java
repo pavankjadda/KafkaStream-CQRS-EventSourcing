@@ -71,10 +71,10 @@ public class EventsListener
         SpecificAvroSerde<Greetings> greetingsSerde = createSerde();
         SpecificAvroSerde<CustomerOrder> customerOrderSerde = createSerde();
 
-        StoreBuilder customerStateStore = Stores.keyValueStoreBuilder(Stores.persistentKeyValueStore(KafkaConstants.CUSTOMER_STORE_NAME), Serdes.String(), customerSerde).withLoggingEnabled(new HashMap<>());
-        StoreBuilder orderStateStore = Stores.keyValueStoreBuilder(Stores.persistentKeyValueStore(KafkaConstants.ORDER_STORE_NAME), Serdes.String(), orderSerde).withLoggingEnabled(new HashMap<>());
-        StoreBuilder greetingsStateStore = Stores.keyValueStoreBuilder(Stores.persistentKeyValueStore(KafkaConstants.GREETING_STORE_NAME), Serdes.String(), greetingsSerde).withLoggingEnabled(new HashMap<>());
-        StoreBuilder customerOrderStateStore = Stores.keyValueStoreBuilder(Stores.persistentKeyValueStore(KafkaConstants.CUSTOMER_ORDER_STORE_NAME), Serdes.String(), customerSerde).withLoggingEnabled(new HashMap<>()).withCachingEnabled();
+        StoreBuilder<KeyValueStore<String, Customer>> customerStateStore = Stores.keyValueStoreBuilder(Stores.persistentKeyValueStore(KafkaConstants.CUSTOMER_STORE_NAME), Serdes.String(), customerSerde).withLoggingEnabled(new HashMap<>());
+        StoreBuilder<KeyValueStore<String, Order>> orderStateStore = Stores.keyValueStoreBuilder(Stores.persistentKeyValueStore(KafkaConstants.ORDER_STORE_NAME), Serdes.String(), orderSerde).withLoggingEnabled(new HashMap<>());
+        StoreBuilder<KeyValueStore<String, Greetings>> greetingsStateStore = Stores.keyValueStoreBuilder(Stores.persistentKeyValueStore(KafkaConstants.GREETING_STORE_NAME), Serdes.String(), greetingsSerde).withLoggingEnabled(new HashMap<>());
+        StoreBuilder<KeyValueStore<String, CustomerOrder>> customerOrderStateStore = Stores.keyValueStoreBuilder(Stores.persistentKeyValueStore(KafkaConstants.CUSTOMER_ORDER_STORE_NAME), Serdes.String(), customerOrderSerde).withLoggingEnabled(new HashMap<>()).withCachingEnabled();
 
         //Create customerKTable
         streamsBuilder.table("customer", Materialized.<String, Customer, KeyValueStore<Bytes, byte[]>>as(customerStateStore.name())

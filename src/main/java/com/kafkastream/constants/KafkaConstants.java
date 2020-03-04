@@ -10,9 +10,8 @@ public class KafkaConstants
     public  static final  String COMMIT_INTERVAL_MS_CONFIG = "2000";
     public  static final  String AUTO_OFFSET_RESET_CONFIG = "earliest";
 
-
     //Kafka REST Proxy
-    public  static final  String REST_PROXY_HOST = "localhost";
+    public  static final  String REST_PROXY_HOST = "http://localhost";
     public  static final  int REST_PROXY_PORT = 8095;
 
 
