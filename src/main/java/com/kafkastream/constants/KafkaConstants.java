@@ -5,7 +5,6 @@ public class KafkaConstants
     //Kafka Streams Configuration
     public  static final  String SCHEMA_REGISTRY_URL = "http://localhost:8081";
     public  static final  String APPLICATION_ID_CONFIG = "cqrs-streams";
-    public  static final  String APPLICATION_ID_CONFIG2 = "cqrs-streams2";
     public  static final  String APPLICATION_SERVER_CONFIG = "localhost:8095";
     public  static final  String BOOTSTRAP_SERVERS_CONFIG = "localhost:9092";
     public  static final  String COMMIT_INTERVAL_MS_CONFIG = "2000";
@@ -31,4 +30,8 @@ public class KafkaConstants
     public  static final  String ORDER_STORE_NAME = "order-store";
     public  static final  String GREETING_STORE_NAME = "greetings-store";
 
+    private KafkaConstants()
+    {
+        //Hides public constructor
+    }
 }

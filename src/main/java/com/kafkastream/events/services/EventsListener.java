@@ -1,7 +1,7 @@
 package com.kafkastream.events.services;
 
 import com.kafkastream.constants.KafkaConstants;
-import com.kafkastream.dto.CustomerDto;
+import com.kafkastream.dto.CustomerDTO;
 import com.kafkastream.model.Customer;
 import com.kafkastream.model.CustomerOrder;
 import com.kafkastream.model.Greetings;
@@ -25,6 +25,8 @@ import org.apache.kafka.streams.state.HostInfo;
 import org.apache.kafka.streams.state.KeyValueStore;
 import org.apache.kafka.streams.state.StoreBuilder;
 import org.apache.kafka.streams.state.Stores;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
@@ -39,10 +41,9 @@ import java.util.concurrent.CountDownLatch;
 public class EventsListener
 {
     private static KafkaStreams streams;
-
     private static StreamsBuilder streamsBuilder;
-
     private static Properties properties;
+    private static final Logger logger= LoggerFactory.getLogger(EventsListener.class);
 
     private static void setUp()
     {
@@ -65,35 +66,36 @@ public class EventsListener
         //Setup StreamsBuilder
         setUp();
 
-        SpecificAvroSerde<Customer> customerSerde = createSerde(KafkaConstants.SCHEMA_REGISTRY_URL);
-        SpecificAvroSerde<Order> orderSerde = createSerde(KafkaConstants.SCHEMA_REGISTRY_URL);
-        SpecificAvroSerde<Greetings> greetingsSerde = createSerde(KafkaConstants.SCHEMA_REGISTRY_URL);
-        SpecificAvroSerde<CustomerOrder> customerOrderSerde = createSerde(KafkaConstants.SCHEMA_REGISTRY_URL);
+        SpecificAvroSerde<Customer> customerSerde = createSerde();
+        SpecificAvroSerde<Order> orderSerde = createSerde();
+        SpecificAvroSerde<Greetings> greetingsSerde = createSerde();
+        SpecificAvroSerde<CustomerOrder> customerOrderSerde = createSerde();
 
         StoreBuilder customerStateStore = Stores.keyValueStoreBuilder(Stores.persistentKeyValueStore(KafkaConstants.CUSTOMER_STORE_NAME), Serdes.String(), customerSerde).withLoggingEnabled(new HashMap<>());
         StoreBuilder orderStateStore = Stores.keyValueStoreBuilder(Stores.persistentKeyValueStore(KafkaConstants.ORDER_STORE_NAME), Serdes.String(), orderSerde).withLoggingEnabled(new HashMap<>());
         StoreBuilder greetingsStateStore = Stores.keyValueStoreBuilder(Stores.persistentKeyValueStore(KafkaConstants.GREETING_STORE_NAME), Serdes.String(), greetingsSerde).withLoggingEnabled(new HashMap<>());
         StoreBuilder customerOrderStateStore = Stores.keyValueStoreBuilder(Stores.persistentKeyValueStore(KafkaConstants.CUSTOMER_ORDER_STORE_NAME), Serdes.String(), customerSerde).withLoggingEnabled(new HashMap<>()).withCachingEnabled();
 
-        KTable<String, Customer> customerKTable = streamsBuilder.table("customer", Materialized.<String, Customer, KeyValueStore<Bytes, byte[]>>as(customerStateStore.name())
+        //Create customerKTable
+        streamsBuilder.table("customer", Materialized.<String, Customer, KeyValueStore<Bytes, byte[]>>as(customerStateStore.name())
                                                                 .withKeySerde(Serdes.String())
                                                                 .withValueSerde(customerSerde));
-
+        //Create orderKTable
         KTable<String, Order> orderKTable = streamsBuilder.table("order", Materialized.<String, Order, KeyValueStore<Bytes, byte[]>>as(orderStateStore.name())
                                                                 .withKeySerde(Serdes.String())
                                                                 .withValueSerde(orderSerde));
-
-        KTable<String, Greetings> greetingsKTable = streamsBuilder.table("greetings", Materialized.<String, Greetings,
+        //Create greetingsKTable
+        streamsBuilder.table("greetings", Materialized.<String, Greetings,
                 KeyValueStore<Bytes, byte[]>>as(greetingsStateStore.name())
-                                                                    .withKeySerde(Serdes.String())
-                                                                    .withValueSerde(greetingsSerde));
+                .withKeySerde(Serdes.String())
+                .withValueSerde(greetingsSerde));
 
         orderKTable.mapValues(order ->
         {
-            System.out.println("orderKTable.value: " + order);
+            logger.info("orderKTable.value: {}", order);
             CustomerOrder customerOrder = new CustomerOrder();
             customerOrder.setCustomerId(order.getCustomerId());
-            CustomerDto customer=getCustomerInformation(order.getCustomerId());
+            CustomerDTO customer=getCustomerInformation(order.getCustomerId());
             if(customer == null)
             {
                 customerOrder.setFirstName("");
@@ -116,9 +118,10 @@ public class EventsListener
             return customerOrder;
         }).toStream().to("customer-order",Produced.with(Serdes.String(),customerOrderSerde));
 
-        KTable<String, CustomerOrder> customerOrderKTable= streamsBuilder.table("customer-order",Materialized.<String, CustomerOrder, KeyValueStore<Bytes, byte[]>>as(customerOrderStateStore.name())
-                                                                    .withKeySerde(Serdes.String())
-                                                                    .withValueSerde(customerOrderSerde));
+        //Customer Orders Ktable
+        streamsBuilder.table("customer-order", Materialized.<String, CustomerOrder, KeyValueStore<Bytes, byte[]>>as(customerOrderStateStore.name())
+                .withKeySerde(Serdes.String())
+                .withValueSerde(customerOrderSerde));
 
         Topology topology = streamsBuilder.build();
         streams = new KafkaStreams(topology, properties);
@@ -126,15 +129,18 @@ public class EventsListener
         // This is not part of Runtime.getRuntime() block
         try
         {
+            //Start streams
             streams.start();
-            final HostInfo restEndpoint = new HostInfo(KafkaConstants.REST_PROXY_HOST, KafkaConstants.REST_PROXY_PORT);
-            StateStoreRestService stateStoreRestService=startRestProxy(streams, restEndpoint);
+            HostInfo restEndpoint = new HostInfo(KafkaConstants.REST_PROXY_HOST, KafkaConstants.REST_PROXY_PORT);
+
+            //Start State store REST service
+            startRestProxy(streams, restEndpoint);
 
             latch.await();
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            logger.error("Exception occurred while starting REST proxy service. Error: ",e);
         }
 
         //Close Runtime
@@ -150,34 +156,31 @@ public class EventsListener
         System.exit(0);
     }
 
-    private static CustomerDto getCustomerInformation(CharSequence customerId)
+    /* Start REST proxy server using Jetty */
+    private static void startRestProxy(final KafkaStreams streams, final HostInfo hostInfo)
+    {
+        StateStoreRestService stateStoreRestService = new StateStoreRestService(streams, hostInfo);
+        stateStoreRestService.startJettyRestProxyServer();
+    }
+
+    //Get Customer information from Jetty REST API
+    private static CustomerDTO getCustomerInformation(CharSequence customerId)
     {
         RestTemplate restTemplate=new RestTemplate();
         if(customerId!=null)
         {
-            ResponseEntity<CustomerDto> customerResponseEntity= restTemplate.exchange("http://" +KafkaConstants.REST_PROXY_HOST+":"+KafkaConstants.REST_PROXY_PORT+ "store/customer/"+customerId, HttpMethod.GET,null, CustomerDto.class);
+            ResponseEntity<CustomerDTO> customerResponseEntity= restTemplate.exchange("http://" +KafkaConstants.REST_PROXY_HOST+":"+KafkaConstants.REST_PROXY_PORT+ "store/customer/"+customerId, HttpMethod.GET,null, CustomerDTO.class);
             return customerResponseEntity.getBody();
-
         }
         return null;
     }
 
 
-    private static <VT extends SpecificRecord> SpecificAvroSerde<VT> createSerde(String schemaRegistryUrl)
+    private static <VT extends SpecificRecord> SpecificAvroSerde<VT> createSerde()
     {
-
         SpecificAvroSerde<VT> serde = new SpecificAvroSerde<>();
-        Map<String, String> serdeConfig = Collections.singletonMap(AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, schemaRegistryUrl);
+        Map<String, String> serdeConfig = Collections.singletonMap(AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, KafkaConstants.SCHEMA_REGISTRY_URL);
         serde.configure(serdeConfig, false);
         return serde;
     }
-
-
-    private static StateStoreRestService startRestProxy(final KafkaStreams streams, final HostInfo hostInfo) throws Exception
-    {
-        StateStoreRestService interactiveQueriesRestService = new StateStoreRestService(streams, hostInfo);
-        interactiveQueriesRestService.start();
-        return interactiveQueriesRestService;
-    }
-
 }

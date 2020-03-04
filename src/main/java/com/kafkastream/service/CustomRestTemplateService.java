@@ -1,9 +1,9 @@
 package com.kafkastream.service;
 
-import com.kafkastream.dto.CustomerDto;
+import com.kafkastream.dto.CustomerDTO;
 import com.kafkastream.dto.CustomerOrderDTO;
-import com.kafkastream.dto.GreetingDto;
-import com.kafkastream.dto.OrderDto;
+import com.kafkastream.dto.GreetingDTO;
+import com.kafkastream.dto.OrderDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
@@ -24,24 +24,24 @@ public class CustomRestTemplateService
         this.restTemplate = restTemplate;
     }
 
-    public List<CustomerDto> getAllCustomers()
+    public List<CustomerDTO> getAllCustomers()
     {
-        ResponseEntity<List<CustomerDto>> response=restTemplate.exchange("http://localhost:8095/store/customers",
-                HttpMethod.GET,null, new ParameterizedTypeReference<List<CustomerDto>>(){});
+        ResponseEntity<List<CustomerDTO>> response=restTemplate.exchange("http://localhost:8095/store/customers",
+                HttpMethod.GET,null, new ParameterizedTypeReference<List<CustomerDTO>>(){});
         return response.getBody();
     }
 
-    public List<OrderDto> getAllOrders()
+    public List<OrderDTO> getAllOrders()
     {
-        ResponseEntity<List<OrderDto>> response=restTemplate.exchange("http://localhost:8095/store/orders",
-                HttpMethod.GET,null, new ParameterizedTypeReference<List<OrderDto>>(){});
+        ResponseEntity<List<OrderDTO>> response=restTemplate.exchange("http://localhost:8095/store/orders",
+                HttpMethod.GET,null, new ParameterizedTypeReference<List<OrderDTO>>(){});
         return response.getBody();
     }
 
-    public List<GreetingDto> getAllGreetings()
+    public List<GreetingDTO> getAllGreetings()
     {
-        ResponseEntity<List<GreetingDto>> response=restTemplate.exchange("http://localhost:8095/store/greetings",
-                HttpMethod.GET,null, new ParameterizedTypeReference<List<GreetingDto>>(){});
+        ResponseEntity<List<GreetingDTO>> response=restTemplate.exchange("http://localhost:8095/store/greetings",
+                HttpMethod.GET,null, new ParameterizedTypeReference<List<GreetingDTO>>(){});
         return response.getBody();
     }
 
