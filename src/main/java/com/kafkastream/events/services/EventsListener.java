@@ -131,6 +131,7 @@ public class EventsListener
         {
             //Start streams
             streams.start();
+            Thread.sleep(1000L);
             HostInfo restEndpoint = new HostInfo(KafkaConstants.REST_PROXY_HOST, KafkaConstants.REST_PROXY_PORT);
 
             //Start State store REST service

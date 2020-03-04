@@ -89,16 +89,12 @@ public class StateStoreRestService
         {
             try
             {
-                /*Collection<StreamsMetadata> streamsMetadataCollection = streams.allMetadata();
-                for (StreamsMetadata streamsMetadata : streamsMetadataCollection)
-                {
-                    logger.info("streamsMetadataIterator.next() -> {}", streamsMetadata);
-                }*/
                 return streams.store(storeName, queryableStoreType);
-            } catch (InvalidStateStoreException ignored)
+            }
+            catch (InvalidStateStoreException ignored)
             {
                 // store not yet ready for querying
-                Thread.sleep(1000);
+                Thread.sleep(5000);
             }
         }
     }
