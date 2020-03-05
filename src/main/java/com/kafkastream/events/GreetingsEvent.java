@@ -4,7 +4,7 @@ import com.kafkastream.model.Greetings;
 
 public class GreetingsEvent
 {
-    private Greetings   greetings;
+    private Greetings greetings;
     private String  message;
 
     public GreetingsEvent()

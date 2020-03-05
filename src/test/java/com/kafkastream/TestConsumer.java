@@ -13,8 +13,20 @@ import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.Topology;
 import org.apache.kafka.streams.errors.InvalidStateStoreException;
-import org.apache.kafka.streams.kstream.*;
-import org.apache.kafka.streams.state.*;
+import org.apache.kafka.streams.kstream.Consumed;
+import org.apache.kafka.streams.kstream.Joined;
+import org.apache.kafka.streams.kstream.KStream;
+import org.apache.kafka.streams.kstream.KTable;
+import org.apache.kafka.streams.kstream.Materialized;
+import org.apache.kafka.streams.kstream.Produced;
+import org.apache.kafka.streams.kstream.ValueJoiner;
+import org.apache.kafka.streams.state.KeyValueIterator;
+import org.apache.kafka.streams.state.KeyValueStore;
+import org.apache.kafka.streams.state.QueryableStoreType;
+import org.apache.kafka.streams.state.QueryableStoreTypes;
+import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
+import org.apache.kafka.streams.state.StoreBuilder;
+import org.apache.kafka.streams.state.Stores;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -139,7 +151,7 @@ public class TestConsumer
         KTable<String,Order> orderKTable=streamsBuilder.table("order-to-ktable-topic",Consumed.with(Serdes.String(),orderSerde),Materialized.as("order"));
         orderKTable.foreach(((key, value) -> System.out.println("Order from Topic: "+value)));
 */
-        KTable<String,Order> orderKTable=streamsBuilder.table("order",Consumed.with(Serdes.String(),orderSerde),Materialized.as("order"));
+        KTable<String, Order> orderKTable=streamsBuilder.table("order",Consumed.with(Serdes.String(),orderSerde),Materialized.as("order"));
         //orderKTable.foreach(((key, value) -> System.out.println("Order from Topic: "+value)));
 
         Topology topology = streamsBuilder.build();

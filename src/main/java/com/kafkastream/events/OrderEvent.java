@@ -4,7 +4,7 @@ import com.kafkastream.model.Order;
 
 public class OrderEvent
 {
-    private Order   order;
+    private Order order;
 
     //We can ignore this, not necessary
     private String  orderId;
