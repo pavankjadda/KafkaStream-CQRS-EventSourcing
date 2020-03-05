@@ -131,7 +131,7 @@ public class EventsListener
         {
             //Start streams
             streams.start();
-            Thread.sleep(1000L);
+            Thread.sleep(5000L);
             HostInfo restEndpoint = new HostInfo(KafkaConstants.REST_PROXY_HOST, KafkaConstants.REST_PROXY_PORT);
 
             //Start State store REST service
@@ -170,7 +170,7 @@ public class EventsListener
         RestTemplate restTemplate=new RestTemplate();
         if(customerId!=null)
         {
-            ResponseEntity<CustomerDTO> customerResponseEntity= restTemplate.exchange("http://" +KafkaConstants.REST_PROXY_HOST+":"+KafkaConstants.REST_PROXY_PORT+ "store/customer/"+customerId, HttpMethod.GET,null, CustomerDTO.class);
+            ResponseEntity<CustomerDTO> customerResponseEntity= restTemplate.exchange(KafkaConstants.REST_PROXY_HOST+":"+KafkaConstants.REST_PROXY_PORT+ "store/customer/"+customerId, HttpMethod.GET,null, CustomerDTO.class);
             return customerResponseEntity.getBody();
         }
         return null;
