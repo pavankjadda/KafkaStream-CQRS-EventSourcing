@@ -1,20 +1,29 @@
 package com.kafkastream;
 
-import com.kafkastream.events.services.EventsSender;
+import com.kafkastream.events.EventsSender;
 import com.kafkastream.model.Customer;
 import com.kafkastream.model.Order;
 import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
 import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde;
 import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerializer;
 import org.apache.avro.specific.SpecificRecord;
-import org.apache.kafka.clients.producer.*;
+import org.apache.kafka.clients.producer.KafkaProducer;
+import org.apache.kafka.clients.producer.Producer;
+import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.*;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Random;
+import java.util.TimeZone;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 

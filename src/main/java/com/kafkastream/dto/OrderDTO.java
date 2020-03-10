@@ -5,21 +5,21 @@ import lombok.Data;
 import java.io.Serializable;
 
 @Data
-public class OrderDto implements Serializable
+public class OrderDTO implements Serializable
 {
     private static final long serialVersionUID = 2729048783015827572L;
 
-    public String orderId;
-    public String customerId;
-    public String orderItemName;
-    public String orderPlace;
-    public String orderPurchaseTime;
+    private String orderId;
+    private String customerId;
+    private String orderItemName;
+    private String orderPlace;
+    private String orderPurchaseTime;
 
-    public OrderDto()
+    public OrderDTO()
     {
     }
 
-    public OrderDto(String orderId, String customerId, String orderItemName, String orderPlace, String orderPurchaseTime)
+    public OrderDTO(String orderId, String customerId, String orderItemName, String orderPlace, String orderPurchaseTime)
     {
         this.orderId = orderId;
         this.customerId = customerId;

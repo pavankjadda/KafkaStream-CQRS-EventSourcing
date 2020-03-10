@@ -10,20 +10,20 @@ public class CustomerOrderDTO implements Serializable
 {
     private static final long serialVersionUID = 2729048783015827572L;
 
-    public String customerId;
-     public String firstName;
-     public String lastName;
-     public String email;
-     public String phone;
-     public String orderId;
-     public String orderItemName;
-     public String orderPlace;
-     public String orderPurchaseTime;
+    private String customerId;
+    private String firstName;
+    private String lastName;
+    private String email;
+    private String phone;
+    private String orderId;
+    private String orderItemName;
+    private String orderPlace;
+    private String orderPurchaseTime;
 
-     public CustomerOrderDTO()
-     {
+    public CustomerOrderDTO()
+    {
+    }
 
-     }
     public CustomerOrderDTO(String customerId, String firstName, String lastName, String email, String phone, String orderId, String orderItemName, String orderPlace, String orderPurchaseTime)
     {
         this.customerId = customerId;

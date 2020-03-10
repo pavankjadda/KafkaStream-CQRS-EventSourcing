@@ -13,8 +13,20 @@ import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.Topology;
 import org.apache.kafka.streams.errors.InvalidStateStoreException;
-import org.apache.kafka.streams.kstream.*;
-import org.apache.kafka.streams.state.*;
+import org.apache.kafka.streams.kstream.Consumed;
+import org.apache.kafka.streams.kstream.Joined;
+import org.apache.kafka.streams.kstream.KStream;
+import org.apache.kafka.streams.kstream.KTable;
+import org.apache.kafka.streams.kstream.Materialized;
+import org.apache.kafka.streams.kstream.Produced;
+import org.apache.kafka.streams.kstream.ValueJoiner;
+import org.apache.kafka.streams.state.KeyValueIterator;
+import org.apache.kafka.streams.state.KeyValueStore;
+import org.apache.kafka.streams.state.QueryableStoreType;
+import org.apache.kafka.streams.state.QueryableStoreTypes;
+import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
+import org.apache.kafka.streams.state.StoreBuilder;
+import org.apache.kafka.streams.state.Stores;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -51,10 +63,11 @@ public class TestConsumer
     public void consumeCustomerEvent()
     {
         SpecificAvroSerde<Customer> customerSerde = createSerde("http://localhost:8081");
-        StoreBuilder customerStateStore = Stores.keyValueStoreBuilder(Stores.persistentKeyValueStore("customer-store"),Serdes.String(), customerSerde)
+        StoreBuilder<KeyValueStore<String, Customer>> customerStateStore = Stores.keyValueStoreBuilder(Stores.persistentKeyValueStore("customer-store"),Serdes.String(), customerSerde)
                 .withLoggingEnabled(new HashMap<>());
         streamsBuilder.stream("customer", Consumed.with(Serdes.String(), customerSerde)).to("customer-to-ktable-topic",Produced.with(Serdes.String(), customerSerde));
         KTable<String, Customer> customerKTable = streamsBuilder.table("customer-to-ktable-topic", Consumed.with(Serdes.String(), customerSerde),Materialized.as(customerStateStore.name()));
+        System.out.println("customerKTable.queryableStoreName()"+customerKTable.queryableStoreName());
         //customerKTable.foreach(((key, value) -> System.out.println("Customer from Topic: " + value)));
 
         Topology topology = streamsBuilder.build();
@@ -139,7 +152,7 @@ public class TestConsumer
         KTable<String,Order> orderKTable=streamsBuilder.table("order-to-ktable-topic",Consumed.with(Serdes.String(),orderSerde),Materialized.as("order"));
         orderKTable.foreach(((key, value) -> System.out.println("Order from Topic: "+value)));
 */
-        KTable<String,Order> orderKTable=streamsBuilder.table("order",Consumed.with(Serdes.String(),orderSerde),Materialized.as("order"));
+        KTable<String, Order> orderKTable=streamsBuilder.table("order",Consumed.with(Serdes.String(),orderSerde),Materialized.as("order"));
         //orderKTable.foreach(((key, value) -> System.out.println("Order from Topic: "+value)));
 
         Topology topology = streamsBuilder.build();
@@ -411,7 +424,8 @@ public class TestConsumer
             catch (InvalidStateStoreException ignored)
             {
                 // store not yet ready for querying
-                Thread.sleep(100);
+                Thread.sleep(1000);
+                System.out.println("Sleeping");
             }
         }
     }

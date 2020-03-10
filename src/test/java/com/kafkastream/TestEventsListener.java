@@ -139,7 +139,7 @@ public class TestEventsListener
         // This is not part of Runtime.getRuntime() block
         try
         {
-            streams.start();
+            streams.startJettyRestProxyServer();
             latch.await();
 
         } catch (Throwable e)
