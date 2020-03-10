@@ -20,6 +20,10 @@ public class CustomerOrderDTO implements Serializable
     private String orderPlace;
     private String orderPurchaseTime;
 
+    public CustomerOrderDTO()
+    {
+    }
+
     public CustomerOrderDTO(String customerId, String firstName, String lastName, String email, String phone, String orderId, String orderItemName, String orderPlace, String orderPurchaseTime)
     {
         this.customerId = customerId;

@@ -1,4 +1,4 @@
-package com.kafkastream.events.services;
+package com.kafkastream;
 
 import com.kafkastream.constants.KafkaConstants;
 import com.kafkastream.dto.CustomerDTO;
@@ -8,6 +8,7 @@ import com.kafkastream.model.Greetings;
 import com.kafkastream.model.Order;
 import com.kafkastream.web.kafkarest.StateStoreRestService;
 import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
+import io.confluent.kafka.serializers.KafkaAvroDeserializerConfig;
 import io.confluent.kafka.streams.serdes.avro.SpecificAvroDeserializer;
 import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde;
 import org.apache.avro.specific.SpecificRecord;
@@ -37,7 +38,9 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
 
-
+/*
+    This class starts Jersey REST API server that will be used to get Kafka Materialized view data from State stores
+ */
 public class EventsListener
 {
     private static KafkaStreams streams;
@@ -45,51 +48,38 @@ public class EventsListener
     private static Properties properties;
     private static final Logger logger= LoggerFactory.getLogger(EventsListener.class);
 
-    private static void setUp()
-    {
-        properties = new Properties();
-        properties.put(StreamsConfig.APPLICATION_ID_CONFIG, KafkaConstants.APPLICATION_ID_CONFIG);
-        properties.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, KafkaConstants.BOOTSTRAP_SERVERS_CONFIG);
-        properties.put(StreamsConfig.APPLICATION_SERVER_CONFIG, KafkaConstants.APPLICATION_SERVER_CONFIG);
-        properties.put(StreamsConfig.COMMIT_INTERVAL_MS_CONFIG, KafkaConstants.COMMIT_INTERVAL_MS_CONFIG);
-        properties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, KafkaConstants.AUTO_OFFSET_RESET_CONFIG);
-        properties.put("schema.registry.url", KafkaConstants.SCHEMA_REGISTRY_URL);
-        properties.put("acks", "all");
-        properties.put("key.deserializer", Serdes.String().deserializer().getClass());
-        properties.put("value.deserializer", SpecificAvroDeserializer.class);
-
-        streamsBuilder = new StreamsBuilder();
-    }
-
     public static void main(String[] args)
     {
         //Setup StreamsBuilder
         setUp();
 
+        //Instantiate Serializer and Deserializers
         SpecificAvroSerde<Customer> customerSerde = createSerde();
         SpecificAvroSerde<Order> orderSerde = createSerde();
         SpecificAvroSerde<Greetings> greetingsSerde = createSerde();
         SpecificAvroSerde<CustomerOrder> customerOrderSerde = createSerde();
 
+        //Define Materialized view state stores
         StoreBuilder<KeyValueStore<String, Customer>> customerStateStore = Stores.keyValueStoreBuilder(Stores.persistentKeyValueStore(KafkaConstants.CUSTOMER_STORE_NAME), Serdes.String(), customerSerde).withLoggingEnabled(new HashMap<>());
         StoreBuilder<KeyValueStore<String, Order>> orderStateStore = Stores.keyValueStoreBuilder(Stores.persistentKeyValueStore(KafkaConstants.ORDER_STORE_NAME), Serdes.String(), orderSerde).withLoggingEnabled(new HashMap<>());
         StoreBuilder<KeyValueStore<String, Greetings>> greetingsStateStore = Stores.keyValueStoreBuilder(Stores.persistentKeyValueStore(KafkaConstants.GREETING_STORE_NAME), Serdes.String(), greetingsSerde).withLoggingEnabled(new HashMap<>());
         StoreBuilder<KeyValueStore<String, CustomerOrder>> customerOrderStateStore = Stores.keyValueStoreBuilder(Stores.persistentKeyValueStore(KafkaConstants.CUSTOMER_ORDER_STORE_NAME), Serdes.String(), customerOrderSerde).withLoggingEnabled(new HashMap<>()).withCachingEnabled();
 
         //Create customerKTable
-        streamsBuilder.table("customer", Materialized.<String, Customer, KeyValueStore<Bytes, byte[]>>as(customerStateStore.name())
+        streamsBuilder.table(KafkaConstants.CUSTOMER_TOPIC, Materialized.<String, Customer, KeyValueStore<Bytes, byte[]>>as(customerStateStore.name())
                                                                 .withKeySerde(Serdes.String())
                                                                 .withValueSerde(customerSerde));
         //Create orderKTable
-        KTable<String, Order> orderKTable = streamsBuilder.table("order", Materialized.<String, Order, KeyValueStore<Bytes, byte[]>>as(orderStateStore.name())
+        KTable<String, Order> orderKTable = streamsBuilder.table(KafkaConstants.ORDER_TOPIC, Materialized.<String, Order, KeyValueStore<Bytes, byte[]>>as(orderStateStore.name())
                                                                 .withKeySerde(Serdes.String())
                                                                 .withValueSerde(orderSerde));
         //Create greetingsKTable
-        streamsBuilder.table("greetings", Materialized.<String, Greetings,
+        streamsBuilder.table(KafkaConstants.GREETINGS_TOPIC, Materialized.<String, Greetings,
                 KeyValueStore<Bytes, byte[]>>as(greetingsStateStore.name())
                 .withKeySerde(Serdes.String())
                 .withValueSerde(greetingsSerde));
 
+        //Map orderKTable values and stream them to CUSTOMER_ORDER_TOPIC topic
         orderKTable.mapValues(order ->
         {
             logger.info("orderKTable.value: {}", order);
@@ -116,13 +106,14 @@ public class EventsListener
             customerOrder.setOrderPlace(order.getOrderPlace());
             customerOrder.setOrderPurchaseTime(order.getOrderPurchaseTime());
             return customerOrder;
-        }).toStream().to("customer-order",Produced.with(Serdes.String(),customerOrderSerde));
+        }).toStream().to(KafkaConstants.CUSTOMER_ORDER_TOPIC,Produced.with(Serdes.String(),customerOrderSerde));
 
-        //Customer Orders Ktable
-        streamsBuilder.table("customer-order", Materialized.<String, CustomerOrder, KeyValueStore<Bytes, byte[]>>as(customerOrderStateStore.name())
+        //Stream data from CUSTOMER_ORDER_TOPIC and build Customer Orders KTable
+        streamsBuilder.table(KafkaConstants.CUSTOMER_ORDER_TOPIC, Materialized.<String, CustomerOrder, KeyValueStore<Bytes, byte[]>>as(customerOrderStateStore.name())
                 .withKeySerde(Serdes.String())
                 .withValueSerde(customerOrderSerde));
 
+        //Start the topology
         Topology topology = streamsBuilder.build();
         streams = new KafkaStreams(topology, properties);
         CountDownLatch latch = new CountDownLatch(1);
@@ -131,7 +122,9 @@ public class EventsListener
         {
             //Start streams
             streams.start();
-            Thread.sleep(5000L);
+            Thread.sleep(1000L);
+
+            //Define REST proxy server HostInfo and end point
             HostInfo restEndpoint = new HostInfo(KafkaConstants.REST_PROXY_HOST, KafkaConstants.REST_PROXY_PORT);
 
             //Start State store REST service
@@ -157,6 +150,24 @@ public class EventsListener
         System.exit(0);
     }
 
+    //Setup the StreamsBuilder properties
+    private static void setUp()
+    {
+        properties = new Properties();
+        properties.put(StreamsConfig.APPLICATION_ID_CONFIG, KafkaConstants.APPLICATION_ID_CONFIG);
+        properties.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, KafkaConstants.BOOTSTRAP_SERVERS_CONFIG);
+        properties.put(StreamsConfig.APPLICATION_SERVER_CONFIG, KafkaConstants.APPLICATION_SERVER_CONFIG);
+        properties.put(StreamsConfig.COMMIT_INTERVAL_MS_CONFIG, KafkaConstants.COMMIT_INTERVAL_MS_CONFIG);
+        properties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, KafkaConstants.AUTO_OFFSET_RESET_CONFIG);
+        properties.put(KafkaAvroDeserializerConfig.SPECIFIC_AVRO_READER_CONFIG, "true");
+        properties.put("schema.registry.url", KafkaConstants.SCHEMA_REGISTRY_URL);
+        properties.put("acks", "all");
+        properties.put("key.deserializer", Serdes.String().deserializer().getClass());
+        properties.put("value.deserializer", SpecificAvroDeserializer.class);
+
+        streamsBuilder = new StreamsBuilder();
+    }
+
     /* Start REST proxy server using Jetty */
     private static void startRestProxy(final KafkaStreams streams, final HostInfo hostInfo)
     {
@@ -176,7 +187,7 @@ public class EventsListener
         return null;
     }
 
-
+    //Create Serializer and Deserializer
     private static <VT extends SpecificRecord> SpecificAvroSerde<VT> createSerde()
     {
         SpecificAvroSerde<VT> serde = new SpecificAvroSerde<>();

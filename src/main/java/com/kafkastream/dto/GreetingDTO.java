@@ -12,6 +12,10 @@ public class GreetingDTO implements Serializable
     private String message;
     private String timestamp;
 
+    public GreetingDTO()
+    {
+    }
+
     public GreetingDTO(String message, String timestamp)
     {
         this.message = message;

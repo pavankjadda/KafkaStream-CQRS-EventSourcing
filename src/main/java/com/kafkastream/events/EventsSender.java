@@ -1,8 +1,7 @@
-package com.kafkastream.events.services;
+package com.kafkastream.events;
 
 import com.kafkastream.constants.KafkaConstants;
 import com.kafkastream.model.Customer;
-import com.kafkastream.model.CustomerOrder;
 import com.kafkastream.model.Greetings;
 import com.kafkastream.model.Order;
 import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
@@ -60,15 +59,6 @@ public class EventsSender
         Future<RecordMetadata> future = kafkaOrderProducer.send(orderRecord);
         logger.info("Order sent. Order Id: {}" ,order.getOrderId());
         logger.info("Order future.get(): {}" , future.get());
-    }
-
-    // Send Customer Order Event
-    public void sendCustomerOrderEvent(CustomerOrder customerOrder)
-    {
-        SpecificAvroSerde<CustomerOrder> customerOrderSerde = createSerde();
-        Producer<String, CustomerOrder> kafkaCustomerOrderProducer = new KafkaProducer<>(properties, Serdes.String().serializer(),customerOrderSerde.serializer());
-        ProducerRecord<String, CustomerOrder> customerOrderRecord = new ProducerRecord<>("customer-order", customerOrder.getOrderId().toString(), customerOrder);
-         kafkaCustomerOrderProducer.send(customerOrderRecord);
     }
 
     // Send Greetings Event

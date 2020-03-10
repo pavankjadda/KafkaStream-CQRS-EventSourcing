@@ -63,10 +63,11 @@ public class TestConsumer
     public void consumeCustomerEvent()
     {
         SpecificAvroSerde<Customer> customerSerde = createSerde("http://localhost:8081");
-        StoreBuilder customerStateStore = Stores.keyValueStoreBuilder(Stores.persistentKeyValueStore("customer-store"),Serdes.String(), customerSerde)
+        StoreBuilder<KeyValueStore<String, Customer>> customerStateStore = Stores.keyValueStoreBuilder(Stores.persistentKeyValueStore("customer-store"),Serdes.String(), customerSerde)
                 .withLoggingEnabled(new HashMap<>());
         streamsBuilder.stream("customer", Consumed.with(Serdes.String(), customerSerde)).to("customer-to-ktable-topic",Produced.with(Serdes.String(), customerSerde));
         KTable<String, Customer> customerKTable = streamsBuilder.table("customer-to-ktable-topic", Consumed.with(Serdes.String(), customerSerde),Materialized.as(customerStateStore.name()));
+        System.out.println("customerKTable.queryableStoreName()"+customerKTable.queryableStoreName());
         //customerKTable.foreach(((key, value) -> System.out.println("Customer from Topic: " + value)));
 
         Topology topology = streamsBuilder.build();
@@ -423,7 +424,8 @@ public class TestConsumer
             catch (InvalidStateStoreException ignored)
             {
                 // store not yet ready for querying
-                Thread.sleep(100);
+                Thread.sleep(1000);
+                System.out.println("Sleeping");
             }
         }
     }

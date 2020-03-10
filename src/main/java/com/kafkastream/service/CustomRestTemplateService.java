@@ -1,9 +1,9 @@
 package com.kafkastream.service;
 
-import com.kafkastream.dto.CustomerDTO;
-import com.kafkastream.dto.CustomerOrderDTO;
-import com.kafkastream.dto.GreetingDTO;
-import com.kafkastream.dto.OrderDTO;
+import com.kafkastream.model.Customer;
+import com.kafkastream.model.CustomerOrder;
+import com.kafkastream.model.Greetings;
+import com.kafkastream.model.Order;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
@@ -16,6 +16,7 @@ import java.util.List;
 import static com.kafkastream.constants.KafkaConstants.REST_PROXY_HOST;
 import static com.kafkastream.constants.KafkaConstants.REST_PROXY_PORT;
 
+//Custom RestTemplate Service to fetch data from Jersey REST Proxy API
 @Service
 public class CustomRestTemplateService
 {
@@ -27,32 +28,32 @@ public class CustomRestTemplateService
         this.restTemplate = restTemplate;
     }
 
-    public List<CustomerDTO> getAllCustomers()
+    public List<Customer> getAllCustomers()
     {
-        ResponseEntity<List<CustomerDTO>> response=restTemplate.exchange(REST_PROXY_HOST+":"+REST_PROXY_PORT+"/store/customers",
-                HttpMethod.GET,null, new ParameterizedTypeReference<List<CustomerDTO>>(){});
+        ResponseEntity<List<Customer>> response=restTemplate.exchange(REST_PROXY_HOST+":"+REST_PROXY_PORT+"/store/customers",
+                HttpMethod.GET,null, new ParameterizedTypeReference<List<Customer>>(){});
         return response.getBody();
     }
 
-    public List<OrderDTO> getAllOrders()
+    public List<Order> getAllOrders()
     {
-        ResponseEntity<List<OrderDTO>> response=restTemplate.exchange(REST_PROXY_HOST+":"+REST_PROXY_PORT+"/store/orders",
-                HttpMethod.GET,null, new ParameterizedTypeReference<List<OrderDTO>>(){});
+        ResponseEntity<List<Order>> response=restTemplate.exchange(REST_PROXY_HOST+":"+REST_PROXY_PORT+"/store/orders",
+                HttpMethod.GET,null, new ParameterizedTypeReference<List<Order>>(){});
         return response.getBody();
     }
 
-    public List<GreetingDTO> getAllGreetings()
+    public List<Greetings> getAllGreetings()
     {
-        ResponseEntity<List<GreetingDTO>> response=restTemplate.exchange(REST_PROXY_HOST+":"+REST_PROXY_PORT+"/store/greetings",
-                HttpMethod.GET,null, new ParameterizedTypeReference<List<GreetingDTO>>(){});
+        ResponseEntity<List<Greetings>> response=restTemplate.exchange(REST_PROXY_HOST+":"+REST_PROXY_PORT+"/store/greetings",
+                HttpMethod.GET,null, new ParameterizedTypeReference<List<Greetings>>(){});
         return response.getBody();
     }
 
-    public List<CustomerOrderDTO> getAllCustomersOrders()
+    public List<CustomerOrder> getAllCustomersOrders()
     {
-        ResponseEntity<List<CustomerOrderDTO>> response=restTemplate.exchange(REST_PROXY_HOST+":"+REST_PROXY_PORT+"/store/customer" +
+        ResponseEntity<List<CustomerOrder>> response=restTemplate.exchange(REST_PROXY_HOST+":"+REST_PROXY_PORT+"/store/customer" +
                         "-order/all",
-                HttpMethod.GET,null, new ParameterizedTypeReference<List<CustomerOrderDTO>>(){});
+                HttpMethod.GET,null, new ParameterizedTypeReference<List<CustomerOrder>>(){});
         return response.getBody();
     }
 }
