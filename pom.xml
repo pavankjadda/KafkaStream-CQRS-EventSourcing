@@ -23,7 +23,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>1.8</java.version>
         <spring-cloud.version>Greenwich.SR3</spring-cloud.version>
-        <avro.version>1.9.1</avro.version>
+        <avro.version>1.9.2</avro.version>
         <kafka.version>2.1.0</kafka.version>
         <confluent.version>5.4.0</confluent.version>
         <javax.ws.rs-api.version>2.1.1</javax.ws.rs-api.version>
