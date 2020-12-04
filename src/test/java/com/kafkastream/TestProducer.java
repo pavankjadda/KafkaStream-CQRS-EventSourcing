@@ -14,8 +14,8 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.StreamsBuilder;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Calendar;
@@ -27,7 +27,7 @@ import java.util.TimeZone;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
-public class TestProducer
+class TestProducer
 {
     @Autowired
     private EventsSender eventsSender;
@@ -36,8 +36,8 @@ public class TestProducer
 
     private StreamsBuilder streamsBuilder;
 
-    @Before
-    public void setUp()
+    @BeforeEach
+    void setUp()
     {
         //When configuring the default serdes of StreamConfig
         properties = new Properties();
@@ -52,7 +52,7 @@ public class TestProducer
     }
 
     @Test
-    public void sendCustomer() throws ExecutionException, InterruptedException
+    void sendCustomer() throws ExecutionException, InterruptedException
     {
         // When you want to override serdes explicitly/selectively
         SpecificAvroSerde<Customer> customerSerde = createSerde("http://localhost:8081");
@@ -73,7 +73,7 @@ public class TestProducer
     }
 
     @Test
-    public void sendOrder() throws ExecutionException, InterruptedException
+    void sendOrder() throws ExecutionException, InterruptedException
     {
         Random random = new Random(1);
 
@@ -96,7 +96,7 @@ public class TestProducer
     }
 
     @Test
-    public void sendCustomerAndOrder() throws ExecutionException, InterruptedException
+    void sendCustomerAndOrder() throws ExecutionException, InterruptedException
     {
         // When you want to override serdes explicitly/selectively
         SpecificAvroSerde<Customer> customerSerde = createSerde("http://localhost:8081");

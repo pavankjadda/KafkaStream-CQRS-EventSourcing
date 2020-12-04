@@ -4,7 +4,7 @@ import com.kafkastream.constants.KafkaConstants;
 import com.kafkastream.model.Customer;
 import com.kafkastream.model.Greetings;
 import com.kafkastream.model.Order;
-import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
+import io.confluent.kafka.serializers.AbstractKafkaSchemaSerDeConfig;
 import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde;
 import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerializer;
 import org.apache.avro.specific.SpecificRecord;
@@ -27,7 +27,7 @@ import java.util.concurrent.Future;
 @Service
 public class EventsSender
 {
-    private Properties properties;
+    private final Properties properties;
     private static final Logger logger= LoggerFactory.getLogger(EventsSender.class);
 
     public EventsSender()
@@ -75,7 +75,7 @@ public class EventsSender
     private static <VT extends SpecificRecord> SpecificAvroSerde<VT> createSerde()
     {
         final SpecificAvroSerde<VT> serde = new SpecificAvroSerde<>();
-        final Map<String, String> serdeConfig = Collections.singletonMap(AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, KafkaConstants.SCHEMA_REGISTRY_URL);
+        final Map<String, String> serdeConfig = Collections.singletonMap(AbstractKafkaSchemaSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, KafkaConstants.SCHEMA_REGISTRY_URL);
         serde.configure(serdeConfig, false);
         return serde;
     }

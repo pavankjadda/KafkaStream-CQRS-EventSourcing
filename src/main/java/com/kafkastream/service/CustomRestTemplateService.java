@@ -31,21 +31,27 @@ public class CustomRestTemplateService
     public List<Customer> getAllCustomers()
     {
         ResponseEntity<List<Customer>> response=restTemplate.exchange(REST_PROXY_HOST+":"+REST_PROXY_PORT+"/store/customers",
-                HttpMethod.GET,null, new ParameterizedTypeReference<List<Customer>>(){});
+                HttpMethod.GET,null, new ParameterizedTypeReference<>()
+                {
+                });
         return response.getBody();
     }
 
     public List<Order> getAllOrders()
     {
         ResponseEntity<List<Order>> response=restTemplate.exchange(REST_PROXY_HOST+":"+REST_PROXY_PORT+"/store/orders",
-                HttpMethod.GET,null, new ParameterizedTypeReference<List<Order>>(){});
+                HttpMethod.GET,null, new ParameterizedTypeReference<>()
+                {
+                });
         return response.getBody();
     }
 
     public List<Greetings> getAllGreetings()
     {
         ResponseEntity<List<Greetings>> response=restTemplate.exchange(REST_PROXY_HOST+":"+REST_PROXY_PORT+"/store/greetings",
-                HttpMethod.GET,null, new ParameterizedTypeReference<List<Greetings>>(){});
+                HttpMethod.GET,null, new ParameterizedTypeReference<>()
+                {
+                });
         return response.getBody();
     }
 
@@ -53,7 +59,9 @@ public class CustomRestTemplateService
     {
         ResponseEntity<List<CustomerOrder>> response=restTemplate.exchange(REST_PROXY_HOST+":"+REST_PROXY_PORT+"/store/customer" +
                         "-order/all",
-                HttpMethod.GET,null, new ParameterizedTypeReference<List<CustomerOrder>>(){});
+                HttpMethod.GET,null, new ParameterizedTypeReference<>()
+                {
+                });
         return response.getBody();
     }
 }

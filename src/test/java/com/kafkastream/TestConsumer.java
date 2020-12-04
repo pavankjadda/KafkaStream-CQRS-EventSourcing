@@ -27,9 +27,10 @@ import org.apache.kafka.streams.state.QueryableStoreTypes;
 import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
 import org.apache.kafka.streams.state.StoreBuilder;
 import org.apache.kafka.streams.state.Stores;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -43,7 +44,7 @@ public class TestConsumer
 
     private StreamsBuilder streamsBuilder;
 
-    @Before
+    @BeforeEach
     public void setUp()
     {
         this.properties = new Properties();
@@ -371,7 +372,7 @@ public class TestConsumer
 
     //Not using this test case
     @Test
-    @Ignore
+    @Disabled
     public void queryCustomerStore()
     {
         SpecificAvroSerde<Customer> customerSerde = createSerde("http://localhost:8081");

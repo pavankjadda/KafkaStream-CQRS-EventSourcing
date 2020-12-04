@@ -4,16 +4,16 @@ package com.kafkastream.jersey;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
-public class JettyRESTServer
+class JettyRESTServer
 {
     private Server jettyServer;
 
-    @Before
-    public void setUp()
+    @BeforeAll
+    void setUp()
     {
         ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
         context.setContextPath("/");
@@ -28,7 +28,7 @@ public class JettyRESTServer
     }
 
     @Test
-    public void startServer()
+    void startServer()
     {
         //new JHades().overlappingJarsReport();
         try
@@ -44,8 +44,8 @@ public class JettyRESTServer
 
     }
 
-    @After
-    public void closeJettyServer()
+    @AfterAll
+    void closeJettyServer()
     {
         jettyServer.destroy();
     }
